@@ -6,6 +6,66 @@ output: html_document
 ---
 
 
+Australia has changed in many ways over the last two decades. Rising house prices, country-wide improvements in education, an ageing population, and a decline in religious affiliation, are just a few facets of the country's evolving socio-demographic characteristics[^1]. At the same time, political power has moved back and forth between the two major parties. In the 2007 and 2010 federal elections, the Australian Labor Party (Labor) was victorious, whereas the 2001, 2004, 2013 and 2016 elections were won by the Liberal National coalition (Liberal). The two-party preferred vote, a measure of support between these two parties, fluctuated between 47.3% and 53.5% (in favour of the Liberal party) over this period. This study explores the question of what electoral characteristics relate to party preference, and whether their effects have changed over time.
+
+Previous work on modelling voting outcomes as a function of aggregate socio-demographics have found that relationships do exist, and relatively good models can be fit. @Forrest01 does this using multiple regression of the Liberal and Labor primary vote for polling booths in the Farrer electorate in 1998, @Stimson06, @Stimson09 and @Stimson12 conduct principal component analysis of polling booths in the 2001, 2004 and 2007 elections respectively, also finding that socio-demographic characteristics of polling booths are linked to their two-party preferred vote. @Stimson09 model the polling booth swing vote (change in the two-party preferred vote) in the 2007 election, which has a poor fit. 
+
+Previous work on modelling voting outcomes as a function of aggregate socio-demographics is focused on the aggregate level of polling booths - a finer level of aggregation than electorates. @Forrest01 use multiple regression to find that polling booth socio-demographic covariates explained a lot of variation in the primary vote for both Liberal and Labor parties in the Farrer electorate during the 1998 election. @Stimson09 also apply a multiple regression framework for the swing vote (change in two-party preferred vote) in the 2007 election, but resultant model has a relatively poor fit. Principal component analysis has also been used in @Stimson06, @Stimson09 and @Stimson12 to examine the 2001, 2004 and 2007 elections, respectively.
+
+
+
+
+
+
+, which find that the Labor party was found to appeal to lower income, younger and more multicultural areas, whereas the Liberal party was associated with higher income, older and more mono-cultural areas in the 2001, 2004 and 2007 elections.
+
+Joining aggregate socio-demographics information from the Census with federal election voting data is problematic, as there in an inherent asynchronicity in the two events - a Census occurs every five years, whereas an election usually occurs every three years. The predominant approach in previous studies is to join voting outcomes to the nearest Census, without accounting for any temporal differences (see @DavisStimson98, @Stimson06, @Liao09 and @Stimson09). Furthermore, electoral boundaries change regularly, so spatial discrepencies also arise when matching electoral data. To combat 
+
+
+
+
+
+Previous studies of aggregate socio-demographics characteristics and voting outcomes commonly use a regression framework and typically use polling booths - rather than electorates - as the level of aggregation, as in @DavisStimson98, @Forrest01, @Stimson06, @Liao09 and @Stimson09. Those that use regression to identify significant determinants of party support find that 
+
+@Forrest01 use multiple regression to identify significant determinants of primary vote support in the 1998 Farrer electorate, finding that socio-demographic covariates explained a lot of variation for  Liberal and Labor support. A similar exercise 
+
+@Forrest01 use multiple regression to identify significant determinants of the primary vote for each party in the Farrer electorate during the 1998 election
+
+@Stimson09 model the swing vote in the 2007
+
+
+To obtain data aggregate socio-demographics characteristics are obtained from the Australian Census of Population and Housing and voting data from the Australian Electoral Commission. However, almost all 
+
+and voting outcomes involves joining socio-demographic information from the Australian Census of Population and Housing (Census) with voting data from the Australian Electoral Commission. The predominant approach to use polling booth level data, 
+
+--------
+
+Few existing studies have conducted an analysis of Australian federal elections using socio-demographic information. Amongst these, the predominant approach is to merge data from the most recent Census that occurs prior to the election of interest. This is done using GIS data obtained at the collection district (Census) and polling booth (election) aggregate levels, as in @DavisStimson98, @Forrest01, @Stimson06, @Liao09 and @Stimson09. Collection districts are matched to the nearest polling booth. Our study is focused on electorates, which reflects a greater level of aggregation than polling booths. Therefore, we adopt a different method of matching Census information with electoral voting outcomes, based on the piece-wise approximation method of areal imputation in @Goodchild1993.
+
+From our revivew of the literature, a regression framework using socio-demographics to understand Australian election outcomes has been applied on only two occasions. @Forrest01 use multiple regression to identify significant determinants of the primary vote for each party in the Farrer electorate during the 1998 election, by modelling each party's share of the primary vote as a separate regression, each using ordinary least squares. The adjusted R-squared values obtained from these regressions range from 0.158 to 0.785, suggesting that some parties (including the Labor and Liberal parties) are more predictable than others. They found that age, education and migrant populations were important in relation to support for both Labor and Liberal. @Stimson09 also apply a multiple regression framework to party preference, by modelling the swing vote in the 2007 election. The resultant model has relative poor fit (adjusted R-squared of 0.223), and as such no conclusions about socio-demographic effects were made. Both of these studies use a stepwise procedure to reduce the variable set, and had limited success in providing rich insights into socio-demographic preferences.
+
+Applying a stepwise procedure to a data set with a low number of observations per predictor is problematic [@Steyerberg2009]. In our study, each election is modelled as a separate cross-section containing 63 socio-demographic predictors with only 150 observations. Therefore, instead of stepwise selection, we adopt an information-theoretic approach that uses Akaike weights to determine relative variable importance [@BurnhamAnderson2002], and use this as a criterion for variable selection. Akaike weights are often used in ecological studies (see @Johnson2004 and @Symonds2011).
+
+Another method to differentiate between party preference is to use principal component analysis on the socio-demographic variables, as shown in @Stimson06, @Stimson09 and @Stimson12. Electorates are assigned to a particular party based on their primary vote, and each party is then summarized by its mean z-scores in the directions of the first two principal components. For the 2001, 2004 and 2007 elections, the Labor party was found to appeal to lower income, younger and more multicultural areas, whereas the Liberal party was associated with higher income, older and more mono-cultural areas [@Stimson12]. Whilst we do not assign parties to electorates in this way, we do use principal components to understand and group similar predictor variables together.
+
+Other election-related studies that aimed to understand party preference predominantly modelled individual voter behaviour using survey data (see @Schram92, @Wilson2011 and @Gibson2011).
+
+Seemingly absent from previous Australian studies is the use of a regression framework to examine these socio-political relationships over time. It also appears that no study has attempted any type of statistical analysis of socio-demographics in conjunction with voter behaviour in Australia since 2007. In this thesis, all six elections thus far held in the 21st century are examined. 
+
+
+
+
+
+
+--------
+
+
+To understand
+
+Previous studies of Australian federal elections have shown that socio-demographic characteristics (simply, socio-demographics) are good predictors of party support, at an aggregate level. However, these studies have not ventured beyond the 2007 election. Adding to the existing research, this thesis explores the dynamics of electoral party preference for the six federal elections between 2001 and 2016, using a statistical framework. The two-party preferred vote is the outcome of interest, and is modelled as a function of electoral socio-demographics. An emphasis is placed on understanding how the effects of socio-demographics on voting preferences have changed over time.
+
+
+
 In the last two decades, political power in Australia has moved back and forth between the two major parties, the Australian Labor Party (Labor) and the Liberal National coalition (Liberal). over the same period Australia has also experienced rising house prices, improvements in education and an ageing population, amongst other changes to its national demographic. These simultaneous changes elicit questions about the relationships between socio-demographics and voting behaviour. Previous work in this area predominantly combine socio-demographic information from the nearest Census, and attach it to the election outcomes at an aggregate level. This poses problems due to temporal differences, and also a spatial mismatch - as the boundaries for aggregate areas (Federal electorates, for example) often change.
 
 This paper outlines an approach to imputing Census information that accounts for both spatial and temporal differences. It then follows with an application of modelling the electoral two-party preferred vote over the past six Australian federal elections.
