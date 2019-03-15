@@ -1,0 +1,82 @@
+---
+title: "Some Workings"
+author: "Jeremy Forbes"
+date: "14/03/2019"
+output: html_document
+---
+
+Structure of the article
+
+
+## Introduction
+Motivation:
+- Few existing studies on relationship between aggregate socio-demographics and voting behaviour in Australia.
+- Common approach is to borrow socio-demographic information from the nearest Census - but there's both a spatial and temporal problem with this. Motivates interpolation to obtain Census data for election years.
+- This analysis - Create an easily accessible resource for exploration of Census and election data
+- Gain insights into electoral voting determinants over time
+
+Intro:
+- Data wrangling from raw ABS and AEC structures, navigating their webpages
+- Problem: Asynchronicity with boundaries and time
+- Spatial and temporal imputation
+- Model characteristics of the Australian electorate over time, to see which socio-demographics influence electoral two-party preference
+
+## Data collection
+Consistency of data formats
+- Raw files in excel and all over the place
+- Construct dataframes using tidyverse tools
+Reproducibility
+- Scripts to deal with upcoming elections and Censuses
+- All data can be regenerated for transparecy
+
+## Imputation
+Methodology
+- Not specific to electorates
+- Explain spatial and then temporal
+
+Applied to electorates
+- For our models we use electorates
+- Visualisations of an example using electorates
+- Possible to use finer levels of disaggregation (e.g. SA1). Propose a cascading technique for reduced computation burden (SA4, SA3, SA2, SA1).
+
+## Modelling
+- Join the data, treat at separate cross-sections
+- Address the issue of changing variable scales (rent as example)
+- PCA to group variables together
+- Akaike weights to derive a variable set for models
+- Spatial correlation in response, so model as spatial error model
+
+## Results
+Visualise interesting and significant effects
+- Discuss what this means
+- What changes over time
+Mention what else is significant
+Discuss significance of spatial dependence
+Discuss which are apparently not important
+- Reference articles on what is believed to be important if possible
+
+## Conclusion
+Summarise findings and make broader statement about electorate characteristics
+Discuss the eechidna package and encourage its use
+Further extensions - model polling booths, revise imputation using cascading approach
+
+## Areal interpolation
+
+Following the piecewise approximation method in Goodchild, Anselin and Deichmann (1993), is appropriate for our problem. Publically available Census data is aggregated, of which there are different resolutions available, ranging from SA1 (over 50,000 zones) to electoral divisions (150 zones). The boundaries for these regions change over time. Therefore, we denote the map of electoral divisions at the time of an election to be the target zones $t = 1,...,T$, and the Census map to be the source zones $s = 1,...,S$.
+
+Denote the population of intersection source zone $s$ and target zone $t$ be $P_{s,t}$, population of the source zone $s$ $U_s$, and area of intersection between source zone $s$ and target zone $t$ be denoted $A_{s,t}$. Therefore the estimated population of the intersection is given by:
+$$\hat{P}_{s,t} = U_s*A_{s,t}$$
+
+In order to calculate Census information for the target zone, denote a given Census variable for the target zone $C_t$, and the same Census variable for the source zone $D_s$.
+
+$$\hat{C}_t = \frac{\sum_{s=1}^{S}{D_s*\hat{P}_{s,t}}}{\sum_{s=1}^{S}{\hat{P}_{s,t}}}$$
+
+Estimated Census information is now imputed for the target zones, but these are not appropriate for the target year. Denote year $y$, with a Census falling on $y_1$ and $y_3$, and an election on year $Y=y_2$, and add this subscript to the Census variable estimate, $\hat{C}_{t,y}$. Linear interpolation is then used between Census years to get the final estimate of a Census variable for the target zone in the election year $y_2$.
+
+$$\hat{C}_{t,y_2} = \frac{y_3-y_2}{y_3-y_1}*\hat{C}_{t,y_1} + \frac{y_2-y_1}{y_3-y_1}*\hat{C}_{t,y_3}$$
+
+## Uncertainty in the estimates
+
+Think of a way to get some kind of uncertainty estimate? If not, some kind of sensitivity? Say introduce some random error to the population intersection estimates and see how that manifests. Also what about different time interpolation - using say quadratic distance instead of linear? See how that changes the models/conclusions?
+
+Instead of linear interpolation, could use electorate specific weights based on electoral enrolments as a proxy for population.

@@ -1,0 +1,42 @@
+---
+title: "introduction"
+author: "Jeremy Forbes"
+date: "14/03/2019"
+output: html_document
+---
+
+
+In the last two decades, political power in Australia has moved back and forth between the two major parties, the Australian Labor Party (Labor) and the Liberal National coalition (Liberal). over the same period Australia has also experienced rising house prices, improvements in education and an ageing population, amongst other changes to its national demographic. These simultaneous changes elicit questions about the relationships between socio-demographics and voting behaviour. Previous work in this area predominantly combine socio-demographic information from the nearest Census, and attach it to the election outcomes at an aggregate level. This poses problems due to temporal differences, and also a spatial mismatch - as the boundaries for aggregate areas (Federal electorates, for example) often change.
+
+This paper outlines an approach to imputing Census information that accounts for both spatial and temporal differences. It then follows with an application of modelling the electoral two-party preferred vote over the past six Australian federal elections.
+
+A key motivation in gathering and imputing this Australian data is to make it easily accessible via the `eechidna` R package, which is available on CRAN.
+
+
+
+
+In the 2007 and 2010 federal elections, the Australian Labor Party (Labor) was victorious, whereas the 2001, 2004, 2013 and 2016 elections were won by the Liberal National coalition (Liberal). A measure of support between these two parties is the two-party preferred vote, which has been as high as 53.5% and as low as 47.3% in favour of the Liberal party over the six elections.
+
+Few studies 
+
+The simultaneous changes in characteristics of the Australian population and preference between the two parties lead to our research question: *which socio-demographic characteristics are key determinants of electoral support between the Labor and Liberal parties, and how have their effects changed over time?*
+
+Previous studies of Australian federal elections have shown that socio-demographic characteristics (simply, socio-demographics) are good predictors of party support, at an aggregate level. However, these studies have not ventured beyond the 2007 election. Adding to the existing research, this thesis explores the dynamics of electoral party preference for the six federal elections between 2001 and 2016, using a statistical framework. The two-party preferred vote is the outcome of interest, and is modelled as a function of electoral socio-demographics. An emphasis is placed on understanding how the effects of socio-demographics on voting preferences have changed over time.
+
+The socio-demographic information is obtained from the Australian Census of Population and Housing (Census), a country-wide survey conducted every five years. Federal elections are generally conducted every three years. There are 150 electorates in Australia, with each corresponding to a single seat in the federal House of Representatives. It is electorates that ultimately determine the result of an Australian federal election[^2], which is why electorates are chosen as the level of aggregation for this study. Therefore, the information in this study consists of the electoral two-party preferred vote, and Census data aggregated to Commonwealth Electoral Divisions, which is an approximation of the electoral boundaries.
+
+The two-party preferred vote and the socio-demographic data from the Census possess a temporal component and a spatial component, as both are observed at particular points in time and are aggregate measures for a set of regions in Australia. Censuses and elections often occur in different years, and electoral boundaries change frequently. Therefore, in order to match socio-demographic information from the Census with the electoral two-party preferred vote for each election, a method of spatio-temporal imputation is required. The method used in this study involves estimating an electorate's socio-demographic composition at the time of a Census, using an areal imputation approach, and then linearly interpolating between Census years to approximate the socio-demographics of that electorate, at the time of the election. To adjust for changing variable scales across elections, each socio-demographic variable is centered to have a mean of zero and standardized to have a variance of one, within each election. The resultant cross-sectional data set for each election consists of $n=150$ electorates (observations) and $p=63$ socio-demographic (explanatory) predictors.
+
+Each election is modelled separately with a consistent model specification. This avoids imposing a time-invariant restriction on any regressor, and allows for socio-demographic effects to be compared across elections. In order to obtain the desired model specification, steps are taken to reduce the dimension of the data set, as a large number of predictors $p=63$ and relatively small sample size $n=150$ is problematic. 
+
+The first step in dimension reduction involves grouping similar socio-demographic variables together into *factors*. Principal component analysis of socio-demographic variables is employed to determine which variables should be grouped, by identifying variables that have large loadings in one the first four components. Factors are also centered and standardized. The result is a reduced set of $p=30$ predictors. From this reduced set, all possible five variable linear models are fit for each election, with the two-party preferred vote as the response. These models form a set for which Akaike weights are calculated, providing a measure relative variable importance for that election. Using this information-theoretic technique, the five most important variables are identified for each of the six elections. A superset is formed by taking the union of these important socio-demographics, which results in a set of ten variables.
+
+The final specification consists of regressing the two-party preferred vote on the superset of ten predictors and four two-way interactions. Each election model is estimated separately using ordinary least squares. Insights are then found by visualizing the socio-demographic effects within each election. The estimated main effects are described using partial residual plots, and two-way interactions are illustrated with two-dimensional contour plots.
+
+To guide the reader through each step of the analysis, this thesis is structured as follows. Chapter \@ref(ch:litreview) contains a literature review of Australian federal elections modelled using Census information. The data used in this study and the imputation process are described in Chapter \@ref(ch:Data). The steps involved in choosing a statistical model, reducing the dimension of the data, selection of the most important socio-demographic variables, and the final model specification, are explained in Chapter \@ref(ch:Modelling). Chapter \@ref(ch:Insights) contains the insights from the final estimated models. The conclusion and a discussion of possible extensions are detailed in Chapter \@ref(ch:Conclusion).
+
+A key deliverable of this project is the contribution made to the existing `eechidna`[^3] `R` package. This includes the GIS maps, data from all Censuses and elections, and the imputed socio-demographic profiles of each electorate at the time of each election created during this project. When future elections and Censuses come around, the `eechidna` package and the work in this project will provide a resource for anyone wishing to conduct their own socio-political analyses.
+
+[^1]: Socio-demographics are characteristics of a population, such as the distributions of age, gender, ethnicity, education level and income. 
+[^2]: The party that wins support from a majority of seats in the House of Representatives forms the government.
+[^3]: The name `eechidna` is an acronym for 'Exploring Election and Census Highly Informative Data Nationally for Australia'.
