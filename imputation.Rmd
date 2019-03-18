@@ -1,0 +1,57 @@
+---
+title: "imputation"
+author: "Jeremy Forbes"
+date: "18/03/2019"
+output: html_document
+---
+
+## Imputation
+Methodology
+- Not specific to electorates
+- Explain spatial and then temporal
+
+Applied to electorates
+- For our models we use electorates
+- Visualisations of an example using electorates
+- Possible to use finer levels of disaggregation (e.g. SA1). Propose a cascading technique for reduced computation burden (SA4, SA3, SA2, SA1).
+
+-------------------------------------------------------------------------------------
+
+
+## Differences between Census and electoral data
+
+Between 2001 and 2016 there were six elections and four Censuses (see Figure \@ref(fig:timeline)). Only in 2001 and 2016 did both events occur, and electoral boundaries are also redistributed regularly. Therefore, there are both temporal and spatial differences that need to be accounted for when joining the electoral two-party preferred vote from the four elections between 2004 and 2013 with Census data. For these elections a spatio-temporal imputation method is employed to derive a electoral socio-demographics which uses Census information from both before and after the election of interest. 
+
+```{r timeline, fig.cap="Timeline of Australian elections and Censuses. They do not always occur in the same year.", out.width = "90%", fig.align="center"}
+library(tidyverse)
+timeline <- data.frame(year = c(2001:2016)) %>%
+  mutate(Election = ifelse(year %in% c(2001, 2004, 2007, 2010, 2013, 2016),1,0),
+         Census = ifelse(year %in% c(2001, 2006, 2011, 2016), 1.4, 0)) %>%
+  gather(c(Election,Census), key = event, value = measure) %>%  filter(measure != 0) %>%
+  mutate(year_vis = ifelse(event == "Census", year + 0.1, year))
+
+
+ggplot(timeline, aes(x=year_vis, y=measure)) + geom_point(aes(color=as.factor(event),shape=as.factor(event)),size = 4) + labs(color = "Event", shape = "Event") + geom_hline(yintercept=0, size =1, color = 'grey', show.legend = FALSE) + geom_segment(x=2001,xend=2001, y=1, yend=0, color = '#00BFC4') + geom_segment(x=2004,xend=2004, y=1, yend=0, color = '#00BFC4') + geom_segment(x=2007,xend=2007, y=1, yend=0, color = '#00BFC4') + geom_segment(x=2010,xend=2010, y=1, yend=0, color = '#00BFC4') + geom_segment(x=2013,xend=2013, y=1, yend=0, color = '#00BFC4') + geom_segment(x=2016,xend=2016, y=1, yend=0, color = '#00BFC4') + geom_segment(x=2001.1,xend=2001.1, y=1.4, yend=0, color = '#F8766D') + geom_segment(x=2006.1,xend=2006.1, y=1.4, yend=0, color = '#F8766D') + geom_segment(x=2011.1,xend=2011.1, y=1.4, yend=0, color = '#F8766D') + geom_segment(x=2016.1,xend=2016.1, y=1.4, yend=0, color = '#F8766D') + labs(x="Year") + theme(text=element_text(size=10), axis.text.x=element_text(size=6),axis.text.y=element_blank(), axis.title.y=element_blank(), plot.background=element_blank(), axis.ticks.y = element_blank(), panel.background = element_blank()) + scale_x_discrete(limits = c(2001:2016)) + coord_fixed(ratio = 2)
+```
+
+## Spatio-temporal imputation
+
+To account for spatial differences, the piecewise approximation method in @Goodchild1993 is appropriate for our problem. Consider a map of source zones $s = 1,...,S$, for which socio-demographic information is available, and a set of target zones $t = 1,...,T$ for which information is to be imputed. In this context the map of electoral boundaries at the time of a Census would be the source zones, and the boundaries at the time of the election would be the target zones. Denote the area of intersection between source zone $s$ and target zone $t$ as $A_{s,t}$, the population of the source zone $s$ as $U_s$, and the population of intersection between source zone $s$ and target zone $t$ as $P_{s,t}$.
+
+Using tools from the `rgeos` and `rgdal` `R` packages, compute each $A_{s,t}$ and estimate population of the intersection:
+
+$$\hat{P}_{s,t} = U_s*A_{s,t}$$
+
+In order to calculate socio-demographic information for each of the target zones, a weighted average is taken using the estimated population as weights. Denote a given Census variable for the target zone $C_t$, and the same Census variable for the source zone $D_s$:
+
+$$\hat{C}_t = \frac{\sum_{s=1}^{S}{D_s*\hat{P}_{s,t}}}{\sum_{s=1}^{S}{\hat{P}_{s,t}}}$$
+
+Socio-demographic information is now imputed for the target zones, but these are not appropriate for the target year. Denote year $y$, with a Census falling on $y_1$ and $y_3$, and an election on year $y_2$, and add this subscript to the Census variable estimate, $\hat{C}_{t,y}$. To account for temporal changes, linear interpolation is used between Census years to get the final estimate of a Census variable for the target zone in the election year $y_2$.
+
+$$\hat{C}_{t,y_2} = \frac{y_3-y_2}{y_3-y_1}*\hat{C}_{t,y_1} + \frac{y_2-y_1}{y_3-y_1}*\hat{C}_{t,y_3}$$
+
+## Applied
+
+Publically available Census data is aggregated and there are different resolutions accessible, ranging from SA1 (over 50,000 zones) to electoral divisions (150 zones). Any of these resolutions could be used as source zones. For this study, electoral divisions are used and this imputation method is applied to each of the 2004, 2007, 2010 and 2013 elections. To demonstrate its functionality, consider the example of 2013, where the nearest Censuses were in 2011 and 2016.
+
+
