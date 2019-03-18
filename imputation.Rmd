@@ -2,28 +2,25 @@
 title: "imputation"
 author: "Jeremy Forbes"
 date: "18/03/2019"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
-## Imputation
-Methodology
-- Not specific to electorates
-- Explain spatial and then temporal
-
-Applied to electorates
-- For our models we use electorates
-- Visualizations of an example using electorates
-- Possible to use finer levels of disaggregation (e.g. SA1). Propose a cascading technique for reduced computation burden (SA4, SA3, SA2, SA1).
-
--------------------------------------------------------------------------------------
-
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F)
+library(tidyverse)
+library(eechidna)
+library(ggplot2)
+library(ggthemes)
+library(knitr)
+```
 
 ## Differences between Census and electoral data
 
 Between 2001 and 2016 there were six elections and four Censuses (see Figure \@ref(fig:timeline)). Only in 2001 and 2016 did both events occur, and electoral boundaries are also redistributed regularly. Therefore, there are both temporal and spatial differences that need to be accounted for when joining the electoral two-party preferred vote from the four elections between 2004 and 2013 with Census data. For these elections a spatio-temporal imputation method is employed to derive a electoral socio-demographics which uses Census information from both before and after the election of interest. 
 
-```{r timeline, messages = F, echo = F, fig.cap="Timeline of Australian elections and Censuses. They do not always occur in the same year.", out.width = "90%", fig.align="center"}
-library(tidyverse)
+```{r timeline, message = F, echo = F, fig.cap="Timeline of Australian elections and Censuses. They do not always occur in the same year.", out.width = "90%", fig.align="center"}
 timeline <- data.frame(year = c(2001:2016)) %>%
   mutate(Election = ifelse(year %in% c(2001, 2004, 2007, 2010, 2013, 2016),1,0),
          Census = ifelse(year %in% c(2001, 2006, 2011, 2016), 1.4, 0)) %>%
@@ -57,9 +54,6 @@ $$\hat{C}_{t,y_2} = \frac{y_3-y_2}{y_3-y_1}*\hat{C}_{t,y_1} + \frac{y_2-y_1}{y_3
 Publically available Census data is aggregated and there are different resolutions accessible, ranging from SA1 (over 50,000 zones) to electoral divisions (150 zones). Any of these resolutions could be used as source zones. For this study, electoral divisions are used and this imputation method is applied to each of the 2004, 2007, 2010 and 2013 elections. To demonstrate its functionality, consider the imputation of the socio-demographic variable $AusCitizen$ for the electorate of Hume in New South Wales (NSW), at the time of the 2013 federal election. Figure \@ref(fig:hume13) shows this region amongst other NSW electorates.
 
 ```{r hume13, fig.cap = "Some of the electoral boundaries in NSW for 2013, with the electoral boundary for Hume, shown in purple."}
-library(eechidna)
-library(ggplot2)
-library(ggthemes)
 hume_area13 <- nat_map13 %>% 
   filter(state %in% c("ACT","NSW"), long < 154)
 
@@ -89,21 +83,20 @@ ggplot(data=hume_area16) +
 
 There are many electorates in 2016 that intersect with the purple region (Hume boundary for 2013), these include the divisions of Riverina, Eden-Monaro and Hume, along with smaller intersecting areas with Fenner, Calare, Gilmore and Whitlam. To impute Census information for this purple region, calculate the percentage of each 2016 electorate that intersects with the purple region, which is then used to estimate intersection populations $\hat{P}_{s,t} = \frac{U_s*A_{s,t}}{\sum_{t=1}^T A_{s,t}}$.
 
-Electorate (2016) | Percentage | Population in Electorate | Estimated Population Allocated to Purple Region [$\hat{P}_{s,t}$]
-------------------|------------|--------------------------|------------------------------------------------
-Hume              | 96.54%     | 150643                   | 145427
-Riverina          | 25.11%     | 155793                   | 39117
-Eden-Monaro       | 11.09%     | 147532                   | 16358
-Canberra          | 0.28%      | 196037                   | 548
-Fenner            | 0.23%      | 202955                   | 474
-Whitlam           | 0.06%      | 152280                   | 92
-Gilmore           | 0.06%      | 150436                   | 86
-Calare            | 0.01%      | 161298                   | 21
+Electorate (2016) | Percentage | Population in Electorate | Estimated Population Allocated to Purple Region: $\hat{P}_{s,t}$
+---------------------|------------|--------------------------|------------------------------------------------
+HUME              | 96.54%     | 150643                   | 145427
+RIVERINA          | 25.11%     | 155793                   | 39117
+EDEN-MONARO       | 11.09%     | 147532                   | 16358
+CANBERRA          | 0.28%      | 196037                   | 548
+FENNER            | 0.23%      | 202955                   | 474
+WHITLAM           | 0.06%      | 152280                   | 92
+GILMORE           | 0.06%      | 150436                   | 86
+CALARE            | 0.01%      | 161298                   | 21
 
 The socio-demographic of interest is $AusCitizen$, which is the proportion of people in the region who are Australian citizens.
 
 ```{r eval = F, include = F}
-library(knitr)
 auscitizen_ex <- abs2016 %>% 
   filter(DivisionNm %in% c("HUME", "RIVERINA", "EDEN-MONARO", "CANBERRA", "FENNER", "WHITLAM", "GILMORE", "CALARE")) %>%
   select(DivisionNm, AusCitizen) %>% 
@@ -117,16 +110,16 @@ auscitizen_ex %>%
 weighted.mean(x = auscitizen_ex$AusCitizen, w = auscitizen_ex$`Estimated Population Allocated to Purple Region`)
 ```
 
-|DivisionNm  | AusCitizen (%): $D_s$| Estimated Population Allocated to Purple Region: $\hat{P}_{s,t}$|
-|------------|---------------|------------------------------------------------|
-|HUME        |          90.02|                                          145427|
-|RIVERINA    |          89.11|                                           39117|
-|EDEN-MONARO |          88.00|                                           16358|
-|CANBERRA    |          85.48|                                             548|
-|FENNER      |          83.64|                                             474|
-|WHITLAM     |          89.52|                                              92|
-|GILMORE     |          89.03|                                              86|
-|CALARE      |          87.56|                                              21|
+|DivisionNm      | AusCitizen (%): $D_s$| Estimated Population Allocated to Purple Region: $\hat{P}_{s,t}$|
+|----------------|----------------------|------------------------------------------------|
+|HUME            |                 90.02|                                          145427|
+|RIVERINA        |                 89.11|                                           39117|
+|EDEN-MONARO     |                 88.00|                                           16358|
+|CANBERRA        |                 85.48|                                             548|
+|FENNER          |                 83.64|                                             474|
+|WHITLAM         |                 89.52|                                              92|
+|GILMORE         |                 89.03|                                              86|
+|CALARE          |                 87.56|                                              21|
 
 Then taking a weighted average of $AusCitizen$ using the estimated population as weights yields $\hat{C}_{Hume,2016} = 89.65 \%$. Repeating this process using the 2011 Census and electoral boundaries yields $\hat{C}_{Hume,2011} = 91.00 \%$
 
