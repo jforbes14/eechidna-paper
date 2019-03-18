@@ -1,0 +1,34 @@
+---
+title: "data-collection"
+author: "Jeremy Forbes"
+date: "18/03/2019"
+output: html_document
+---
+
+1. Where the data is sourced from
+
+2. Converting the Census raw counts into variables
+- Using the same variable definitions as in @Stimson09 
+- Tidyverse tools
+- Lack of coherence in ABS structures
+
+--------------------------------------------------------------------------------
+
+Data description and collection
+
+--------------------------------------------------------------------------------
+
+## Voting data
+
+The voting outcome of interest is the electoral two-party preferred vote, which is provided by the Australian Electoral Commission (AEC) for the 2001, 2004, 2007, 2010, 2013 and 2016 elections. The AEC divide Australia into 150 regions called electorates, with each corresponding to a single seat in the House of Representatives. Voting is compulsory in Australia, and each voter assigns a numbered preference to each available candidate in their electorate. The two-party preferred vote is determined by a tally of these preferences where, by convention, only the ranks of the Labor and Liberal candidates are considered. This is recorded as a percentage preference in favour of the Liberal party.
+
+## Census data
+
+Socio-demographic variables are derived from the Census of Population and Housing (Census), which is a survey of every household in Australia, recording information such as age, gender, ethnicity, education level and income. There have been four Censuses in the 21st century, being that in 2001, 2006, 2011 and 2016. The Australian Bureau of Statistics (ABS) conducts the Census and publishes aggregated information. The ABS approximation of electorates at the time of the Census is chosen. From this aggregate information, *63* socio-demographic variables are computed for each of the electorates. These variables follow the definitions used in @Stimson09. 
+
+## Downloading and wrangling
+
+Raw data is sourced online from the .csv and .xlsx files from the AEC and ABS websites. The format of these files change over the years, meaning that significant time and effort is required to extract the appropriate electoral information. All data wrangling is done using `R`, predominantly using the tools from the `dplyr` and `readxl` packages, providing fast consistent tools for data manipulation and functions to import .xlsx files (respectively). The 2001 and 2006 Census data is formatted such that each electorate has a separate document, making it difficult to use the `dplyr` tools. Instead, cells had to be manually selected from each individual files. This work is entirely reproducible, and all scripts can be found in the github repository for the `eechidna` `R` package. These scripts also provide a resource to help wrangle data for future Censuses and elections.
+
+
+
