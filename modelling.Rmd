@@ -20,9 +20,9 @@ knitr::opts_chunk$set(echo = TRUE)
 
 With socio-demographic information now available for each electorate, each election is joined to the data  corresponding with its two-party preferred vote. Socio-demographic variables within each election year are standardized to have mean zero and variance one, to adjust for changing variable scales. For example, inflation-adjusted median rental prices increased across almost all electorates, with median rent of 200 dollars per week placing an electorate in the 90th percentile in 2001, but only the 30th percentile in 2016. The response, the two-party preferred vote in favour of the Liberal party (denoted $Y$), lies in the interval $(0,100)$, where $Y = 70$ would represent a 70% preference for Liberal, 30% for Labor. Since the observed values of $Y$ are never very close to 0 or 100 (minimum $24.05 \%$ and maximum $74.90 \%$), there is no need to impose the constraint of $Y \in [0,100]$.
 
-An identical model specification is used across the six elections, with each election modelled separately. This allows for the socio-demographic effects to be estimated separately for each year, allowing for interpretation of temporal changes in these effects. This is prefereable over a single longitudinal model because it avoids any concerns of undue bias stemming from an incorrectly imposed time-varying restriction on any variable. Without such restrictions, a pooled cross-sectional model does not yield any distinct advantage over separate models. The panel approach is avoided because of how frequently electoral boundaries change, so any fixed or random effects models would be inappropriate. 
+An identical model specification is used across the six elections, with each election modelled separately. This allows for the socio-demographic effects to be estimated separately for each year, allowing for interpretation of temporal changes in these effects. This is preferable over a single longitudinal model because it avoids any concerns of undue bias stemming from an incorrectly imposed time-varying restriction on any variable. Without such restrictions, a pooled cross-sectional model does not yield any distinct advantage over separate models. The panel approach is avoided because of how frequently electoral boundaries change, so any fixed or random effects models would be inappropriate. 
 
-For each election a spatial error model [@Anselin99] is to be estimated, as electorates have a spatial structure and it is reasonable to expect errors to have spatial dependence. This is a common approach for modelling aggregate spatial units [@Anselin2002]. Spatial weights are calculated by allowing each electorate to be equally correlated with any electorate that shares any part of its boundary. A moran's I test of the two-party preferred vote finds overwhelming evidence significant spatial autocorrelation for each election ($p \le 7\cdot10^{-15}$). 
+For each election a spatial error model [@Anselin99] is to be estimated, as electorates have a spatial structure and it is reasonable to expect errors to have spatial dependence. This is a common approach for modelling aggregate spatial units [@Anselin2002]. Spatial weights are calculated by allowing each electorate to be equally correlated with any electorate that shares any part of its boundary. A Moran's I test of the two-party preferred vote finds overwhelming evidence significant spatial autocorrelation for each election ($p \le 7\cdot10^{-15}$). 
 
 Let $\rho$ be the parameter governing the extent of spatial correlation, $\boldsymbol \varepsilon$ be a spherical error term, ${\bf W}$ be a matrix of spatial weights (containing information about the neighbouring regions), $\bf X$ is a matrix of socio-demographic covariates and $\boldsymbol \beta$ is a vector of regression coefficients.
 
@@ -32,7 +32,7 @@ $${\bf y} = {\bf X} {\boldsymbol \beta} + ({\bf I}_n-\rho {\bf W})^{-1}{\boldsym
 Where $\varepsilon \sim N(0, \sigma^2)$. Estimation is done via maximum likelihood (using the `spdep` `R` package [@spdep]).
 
 ## Dimension reduction
-With only $N = 150$ observations (electorates) in each election and $p = 63$ socio-demographic variables in each cross-section, any model using all variables would face serious problems with multi-collinearity and over-fitting, likely leading to erroneous conclusions regarding variable significance. Therefore a form of dimension reduction is adopted that involves a two-stage approach that results in the identification of a reduced predictor set, for which models are fit. 
+With only $N = 150$ observations (electorates) in each election and $p = 59$ socio-demographic variables in each cross-section, any model using all variables would face serious problems with multi-collinearity and over-fitting, likely leading to erroneous conclusions regarding variable significance. Therefore a form of dimension reduction is adopted that involves a two-stage approach that results in the identification of a reduced predictor set, for which models are fit. 
 
 The first step[^2] is to combine socio-demographic variables that represent similar information into "factors" using principal component analysis (PCA). The scree plots of the principal components for each election all level off after four components, and the loadings of these four components are similar across the elections. Principal components are then computed on the combined set of socio-demographics across all six elections. A factor is created by combining several variables all have large loadings in a particular component and when there is an intuitive reason as to why these variables could represent common information. A loading with magnitude greater than 0.15 is considered large. After computing these sums, each factor is again standardized to have mean zero and variance one, within each election. 
 
@@ -42,93 +42,34 @@ This process reduces the predictor set to $p = 30$. However, it is still relativ
 
 [^2]: A preliminary step involved removing all age variables aside from median age.
 
+## Selecting a superset
+
+The second stage of the data reduction process involves the selection of a superset of predictors that captures the five *most important* variables from each election. To determine the five most important variables for each election, Akaike weights are used to measure relative variable importance [@BurnhamAnderson2002]. This method is commonly used in ecological studies and is fundamentally based on the Akaike information criterion (AIC) [@Akaike73]. Akaike weights are produced using a method of scoring each model relative to a collection of models $M$ using AIC.
+
+Let $\Delta_m = AIC_m - AIC_{min}$ denote the difference in AIC between models $m$ and that with minimum AIC in the model set $M$ for $m = 1,2,...,R$. The Akaike weights $w_m$ for model $m$ is calculated as
+
+$$w_m = \frac {\exp(-\frac{1}{2}\Delta_m)} {\sum_{r=1} ^R \exp(-\frac{1}{2}\Delta_r)},$$
+for $m = 1,...,R$.
+
+Akaike weights represent the posterior probability that model $m$ is the best model in the set, without imposing any beliefs a priori, as $w_m \in (0,1)$ and $w_m$ sum to 1.
+
+For each variable $j \in 1, ..., J$, the sum of the Akaike weights is computed over all models that include that variable, and denote this sum by $s_j$. That is, let
+
+$$s_j = \sum_{m=1}^{R} w_m \cdot \text{I}(\text{variable } j \text{ used in model } m),$$
+where $I(A)$ denotes the indicator function for A.
+
+Variables are ordered according to $s_j$, which may be used as a measure of variable importance [@BurnhamAnderson2002]. The variable with largest $s_j$ is deemed to be the most important in the set for the purpose of modelling the response variable.
+
+For each election, the model set $M$ used, for which Akaike weights are constructed, is the set of all possible five variable linear models. This involves fitting $R = {32 \choose 5} = 201,376$ models for each election, with five representing a compromise between an undue computational burden and capturing sufficient information. The five most important variables are selected from each election, and used to construct a variable superset obtained by taking the union of these six subsets. In doing so, a variable that appears to be important in a particular election (though it may be potentially unimportant in the others) is captured, along with those that are important in multiple elections. This superset contains the chosen predictors to be used in all of the final election models. Five variables are chosen from each election to ensure that this superset is not too large. The resultant superset contains twelve variables.
+
+Before finalizing the common regression model to be fitted for each election year, two-way interactions are added using an iterative procedure. First, for each election, a model is fit using the superset of predictors as main effects only. Then all models with a single two-way interaction are computed, and the interaction tested using a likelihood-ratio test (1% significance level). The number of elections for which a given interaction is significant is tallied, and the interaction that is most frequently significant is selected to remain in the model. This process is repeated until no interaction is significant in more than one election.
+
+Now that model specification has been determined, the final models are fit using the superset of 12 main effects and the four two-way interactions. The equation, estimated separately for each year, is as follows:
+
+$\small{LNP_i = \beta_0 + \beta_1*\text{Extractive}_i + \beta_2*\text{Born_SE_Europe}_i + \beta_3*\text{ManagerAdminClericalSales}_i + \beta_4*\text{DeFacto}_i + \beta_5*\text{DiffAddress}_i + \beta_6*\text{Married}_i + \beta_7*\text{Born_UK}_i + \beta_8*\text{MedianAge}_i + \beta_9*\text{OneParent_House}_i + \beta_{10}*\text{OtherLanguageHome}_i + \beta_{11}*\text{Transformative}_i + \beta_{12}*\text{Unemployment}_i + \beta_{13}*\Big(\text{Extractive}_i*\text{OtherLanguageHome}_i\Big) + \beta_{14}*\Big(\text{DeFacto}_i*\text{OtherLanguageHome}_i\Big) + \beta_{15}*\Big(\text{Extractive}_i*\text{ManagerAdminClericalSales}_i\Big) + \beta_{16}*\Big(\text{MedianAge}_i*\text{OneParent_House}_i\Big) + \u_i}$
+
+where ${\bf u} = ({\bf I_n} - \rho \cdot W) \cdot {\boldsymbol \varepsilon}$ and $\varepsilon_i \overset{iid}\sim N(0,\sigma^2)$.
+
+Table *XXX* details the estimated model and their standard errors for each of the six elections. These are interpreted in the following section.
 
 
-
-
-
-
-
-
-----------------------------------------------------------------------------------------
-
-
-
-
-
-Electorates One might suspect an underlying spatial dependence between electorates in their voting behaviour. This is  ggregate spatial units are commonly modelled with an ecological regression, which in this study takes the form  [@Anselin2002]. Electoral voting behaviour  assume the form of the spatial error model 
-
-The spatial weight matrix $\bf W$ is therefore specified such that $W_{i,j} = 0$ if electorate $i$ does not share a border with electorate $j$, and $W_{i,j} = \frac{1}{N_i}$ if electorates $i$ and $j$ do share a border, where $N_i$ is the number of electorates that $i$ shares a border with. 
-
-
-Talk about spatial dependence in the structure and decide on SEM.
-
-Address problem of relatively small N large p. PCA for factors. Akaike weights for most important variables.
-
-Interactions. Final model specification.
-
-
-
-
-
-. As there are only $N = 150$ electorates in each election, the dimension of the cross-sections are reduced by grouping some variables together into factors. This is informed by principal component analysis. 
-
-As there are $N=150$ electorates in each election, but *60*
-
-
-
-An identical model specification is used across the six elections, with each election modelled separately. This enables the interpretation of temporal changes of the socio-demographic effects, as the same covariates are used in each election. The response, the two-party preferred vote, lies in the interval $(0,100)$, with $TPP = 70$ representing a 70% preference for Liberal, 30% for Labor. Since the observed values of $TPP$ are never very close to 0 or 100 (minimum $24.05 \%$ and maximum $74.90 \%$), there is no need to impose the constraint of $TPP \in [0,100]$. Furthermore, significant spatial autocorrelation in the response is found using a moran test for each election. Neighbours (and therefore spatial weights) are assigned based on whether electorates share a border (1) or do not (0). 
-
-```{r}
-# p values for moran test
-```
-
-A spatial error model (SEM) is fit to account for the spatial dependence, which is more efficient than OLS estimates. Before any variable selection, since there are only $N = 150$ electorates in each election and over *60* covariates available, the dimension of each cross-sections is reduced by grouping some variables together into factors. This is informed by principal component analysis. 
-
-
-- Need to see if partial residuals are even relevant for spatial error model. If not, an alternative significance measure should be used. Errors are not spherical so doesn't make sense to use lm on partial residuals. Ask Rob perhaps?
-- Perhaps test is SEM is even better than LM? If not, then go with LM. No harm done.
-
-
-
-
-
-
-
-As there are only $N = 150$ electorates in each election, the dimension of the cross-sections are reduced by grouping some variables together into factors, before select
-
-
-
-An identical model specification is used across the six elections, with each election modelled separately. This enables the interpretation of temporal changes of the socio-demographic effects, as the same covariates are used in each election. As there are only $N = 150$ electorates in each election, the dimension of the cross-sections are reduced by grouping some variables together into factors. This is informed by principal component analysis. 
-
-As many of the socio-demographic variables represent similar information (for example, median personal income and median household income) many of the socio-demographic variables are grouped together into factors - informed by principal component analysis. This reduces the 
-
-Before selecting what model to use, or which covariates to include, many of the socio-demographic variables are grouped together into factors - informed by principal component analysis. This reduces the 
-
-
-
-The response, the two-party preferred vote, lies in the interval $(0,100)$, with $TPP = 70$ representing a 70% preference for Liberal, 30% for Labor. Since the observed values of $TPP$ are never very close to 0 or 100 (minimum $24.05 \%$ and maximum $74.90 \%$), there is no need to impose the constraint of $TPP \in [0,100]$. and so linear regression models are estimated using ordinary least squares.
-
-Therefore, for a given election year, we assume $TPP \sim N(X \beta, \sigma^2)$, where $TPP$ is an $n \times 1$ vector containing $n=150$ two-party preferred votes, $X$ is an ($n \times p$) matrix of socio-demographic predictors, $\beta$ is a ($p \times 1$) vector of coefficients to be estimated. By assumption, the regression errors are taken to be independent and identically normally distributed with mean $0$ and variance $\sigma^2$. The estimation is done separately for each election.
-
-
-
-
-
-
-Another option would is to combine these cross-sections into a single pooled cross-section with 900 observations, allowing for the construction of a longitudinal model. However, this would require placing some restrictions on which variables are time varying, which is unfavourable in this context. Alternatively it is possible to construct a panel data set for a particular set of electoral boundaries across all elections. This way we could potentially capture any unobserved individual heterogeneity using either fixed or random effects, but since electoral boundaries change, to construct panel data further spatial imputation would be required to generate socio-demographic profiles for each election with a common set of boundaries. Additionally, the two-party preferred vote would have to be imputed for these same boundaries, for all elections, which would introduce greater uncertainty. Finally, the same issues of choosing time-varying effects will arise in the panel data context as for the pooled cross-section.
-
-
-Alternative without concern for undue bias stemming from an incorrectly imposed restriction on any variable.
-
-Socio-demographic variables for each electorate have now been calculated and matched with the two-party preferred vote, for all six elections. In this chapter, we consider how to best answer the research question; *Which socio-demographics are the key determinants of support between the Labor and Liberal parties, and how have their effects changed over time?* This involves discussing an appropriate statistical model, reducing the dimension of the data by grouping similar variables together, selecting the most important predictors and adding interaction terms. Each of these four steps are described in subsections below, followed by the estimated models. 
-
-
-
-On this basis, modelling each election as a separate cross-section seems to us as the most appropriate statistical model to pursue. By using identical model specification, effects may be compared across six different elections, enabling the interpretation of temporal changes without concern for undue bias stemming from an incorrectly imposed restriction on any variable.
-
-### Response variable - two-party preferred vote
-
-The two-party preferred vote is a measure of preference between only the two major parties (Labor and Liberal), and is oriented in favour of the Liberal party, sitting in the interval $(0,100)$. For example, $TPP = 70$ represents a 70% preference for Liberal, 30% for Labor. Since the observed values of $TPP$ are never very close to 0 or 100 (minimum $24.05 \%$ and maximum $74.90 \%$), there is no need to impose the constraint of $TPP \in [0,100]$ and so linear regression models are estimated using ordinary least squares.
-
-Therefore, for a given election year, we assume $TPP \sim N(X \beta, \sigma^2)$, where $TPP$ is an $n \times 1$ vector containing $n=150$ two-party preferred votes, $X$ is an ($n \times p$) matrix of socio-demographic predictors, $\beta$ is a ($p \times 1$) vector of coefficients to be estimated. By assumption, the regression errors are taken to be independent and identically normally distributed with mean $0$ and variance $\sigma^2$. The estimation is done separately for each election.
