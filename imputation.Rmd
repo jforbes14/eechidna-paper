@@ -16,9 +16,13 @@ library(ggthemes)
 library(knitr)
 ```
 
+# Joining Census and election data
+
+
+
 ## Differences between Census and electoral data
 
-Between 2001 and 2016 there were six elections and four Censuses (see Figure \@ref(fig:timeline)). Only in 2001 and 2016 did both events occur, and electoral boundaries are also redistributed regularly. Therefore, there are both temporal and spatial differences that need to be accounted for when joining the electoral two-party preferred vote from the four elections between 2004 and 2013 with Census data. For these elections a spatio-temporal imputation method is employed to derive a electoral socio-demographics which uses Census information from both before and after the election of interest. 
+Between 2001 and 2016 there were six elections and four Censuses (see Figure \@ref(fig:timeline)). Electoral boundaries are redistributed regularly by the AEC, meaning that only in the years where both a Census and election occur will the boundaries match - the case for the 2001 and 2016 election. Therefore, for the four elections between 2004 and 2013, both temporal and spatial differences in electorates need to be accounted for when joining the electoral two-party preferred vote with Census data. For these elections a spatio-temporal imputation method is employed to obtain electoral socio-demographics. This method uses Census information from both before and after the election of interest.
 
 ```{r timeline, message = F, echo = F, fig.cap="Timeline of Australian elections and Censuses. They do not always occur in the same year.", out.width = "90%", fig.align="center"}
 timeline <- data.frame(year = c(2001:2016)) %>%
@@ -33,7 +37,7 @@ ggplot(timeline, aes(x=year_vis, y=measure)) + geom_point(aes(color=as.factor(ev
 
 ## Spatio-temporal imputation
 
-To account for spatial differences, the piece-wise approximation method in @Goodchild1993 is appropriate for our problem. Consider a map of source zones $s = 1,...,S$, for which socio-demographic information is available, and a set of target zones $t = 1,...,T$ for which information is to be imputed. In this context the map of electoral boundaries at the time of a Census would be the source zones, and the boundaries at the time of the election would be the target zones. Denote the area of intersection between source zone $s$ and target zone $t$ as $A_{s,t}$, the population of the source zone $s$ as $U_s$, and the population of intersection between source zone $s$ and target zone $t$ as $P_{s,t}$.
+To account for spatial differences, the piece-wise approximation method in @Goodchild1993 is adopted. Consider a map of source zones $s = 1,...,S$, for which socio-demographic information is available, and a set of target zones $t = 1,...,T$ for which information is to be imputed. In this context the map of electoral boundaries at the time of a Census would be the source zones, and the boundaries at the time of the election would be the target zones. Denote the area of intersection between source zone $s$ and target zone $t$ as $A_{s,t}$, the population of the source zone $s$ as $U_s$, and the population of intersection between source zone $s$ and target zone $t$ as $P_{s,t}$.
 
 Compute each $A_{s,t}$ and estimate population of the intersection:
 
@@ -43,15 +47,17 @@ This assumes that populations are uniformly distributed within each source zone.
 In order to calculate socio-demographic information for each of the target zones, a weighted average is taken using the estimated population as weights. Denote a given Census variable for the target zone $C_t$, and the same Census variable for the source zone $D_s$:
 
 $$\hat{C}_t = \frac{\sum_{s=1}^{S}{D_s*\hat{P}_{s,t}}}{\sum_{s=1}^{S}{\hat{P}_{s,t}}}$$
-This assumes that each individual in the source zones assume the aggregate characteristics of the zone.
+This assumes that each individual in a source zone assumes the aggregate characteristics of the zone.
 
-Socio-demographic information is now imputed for the target zones, but these are not appropriate for the target year. Denote year $y$, with a Census falling on $y_1$ and $y_3$, and an election on year $y_2$, and add this subscript to the Census variable estimate, $\hat{C}_{t,y}$. To account for temporal changes, linear interpolation is used between Census years to get the final estimate of a Census variable for the target zone in the election year $y_2$. This assumes that population evolves in a linear manner over time.
+Applying this to each of the target zones addresses the spatial component, as it imputes the required socio-demographic for the desired electoral boundaries. However these are applicable at the time of the Census (source year) and are not yet appropriate for the election (target year). 
+
+Denote year $y$, with a Census falling on $y_1$ and $y_3$, and an election on year $y_2$, and add this subscript to the Census variable estimate, $\hat{C}_{t,y}$. To account for temporal changes, linear interpolation is used between Census years to get the final estimate of a Census variable for the target zone in the election year $y_2$. This assumes that population evolves in a linear manner over time.
 
 $$\hat{C}_{t,y_2} = \frac{y_3-y_2}{y_3-y_1}*\hat{C}_{t,y_1} + \frac{y_2-y_1}{y_3-y_1}*\hat{C}_{t,y_3}$$
 
 ## Applied
 
-Publically available Census data is aggregated and there are different resolutions accessible, ranging from SA1 (over 50,000 zones) to electoral divisions (150 zones). Any of these resolutions could be used as source zones. For this study, electoral divisions are used and this imputation method is applied to each of the 2004, 2007, 2010 and 2013 elections. To demonstrate its functionality, consider the imputation of the socio-demographic variable $AusCitizen$ for the electorate of Hume in New South Wales (NSW), at the time of the 2013 federal election. Figure \@ref(fig:hume13) shows this region amongst other NSW electorates.
+Publically available Census data is aggregated and there are different resolutions accessible, ranging from SA1 (over 50,000 zones) to electoral divisions (150 zones). Any of these resolutions could be used as source zones. For this study, electoral divisions are used and this imputation method is applied to each of the 2004, 2007, 2010 and 2013 elections. To demonstrate its functionality, consider the imputation of socio-demographic variables for the electorate of Hume in New South Wales (NSW), at the time of the 2013 federal election. Figure \@ref(fig:hume13) shows this region amongst other NSW electorates.
 
 ```{r hume13, fig.cap = "Some of the electoral boundaries in NSW for 2013, with the electoral boundary for Hume, shown in purple."}
 hume_area13 <- nat_map13 %>% 
@@ -94,7 +100,7 @@ WHITLAM           | 0.06%      | 152280                   | 92
 GILMORE           | 0.06%      | 150436                   | 86
 CALARE            | 0.01%      | 161298                   | 21
 
-The socio-demographic of interest is $AusCitizen$, which is the proportion of people in the region who are Australian citizens.
+Now consider the socio-demographic $AusCitizen$ - the proportion of people in the region who are Australian citizens.
 
 ```{r eval = F, include = F}
 auscitizen_ex <- abs2016 %>% 
