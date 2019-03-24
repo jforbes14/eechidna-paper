@@ -1,0 +1,14 @@
+--- 
+title: "Spatial modelling of the electoral two-party preferred vote in Australia. A study of federal elections between 2001 and 2016 via the `eechidna` `R` package."
+author: "Jeremy Forbes, Di Cook & Rob Hyndman"
+date: "`r Sys.Date()`"
+site: bookdown::bookdown_site
+output: bookdown::gitbook
+documentclass: book
+classoption: openany
+bibliography: [book.bib, packages.bib]
+biblio-style: apalike
+link-citations: yes
+github-repo: rstudio/bookdown-demo
+description: "This is an incomplete draft of a paper to submitted to ANZJS."
+---

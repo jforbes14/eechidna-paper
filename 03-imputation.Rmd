@@ -1,26 +1,6 @@
----
-title: "imputation"
-author: "Jeremy Forbes"
-date: "18/03/2019"
-output:
-  pdf_document: default
-  html_document: default
----
+# Joining Census and election data {#imputation}
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = F)
-library(tidyverse)
-library(eechidna)
-library(ggplot2)
-library(ggthemes)
-library(knitr)
-```
-
-# Joining Census and election data
-
-
-
-## Differences between Census and electoral data
+## Differences between Census and election data
 
 Between 2001 and 2016 there were six elections and four Censuses (see Figure \@ref(fig:timeline)). Electoral boundaries are redistributed regularly by the AEC, meaning that only in the years where both a Census and election occur will the boundaries match - the case for the 2001 and 2016 election. Therefore, for the four elections between 2004 and 2013, both temporal and spatial differences in electorates need to be accounted for when joining the electoral two-party preferred vote with Census data. For these elections a spatio-temporal imputation method is employed to obtain electoral socio-demographics. This method uses Census information from both before and after the election of interest.
 
@@ -57,9 +37,9 @@ $$\hat{C}_{t,y_2} = \frac{y_3-y_2}{y_3-y_1}*\hat{C}_{t,y_1} + \frac{y_2-y_1}{y_3
 
 ## Applied
 
-Publically available Census data is aggregated and there are different resolutions accessible, ranging from SA1 (over 50,000 zones) to electoral divisions (150 zones). Any of these resolutions could be used as source zones. For this study, electoral divisions are used and this imputation method is applied to each of the 2004, 2007, 2010 and 2013 elections. To demonstrate its functionality, consider the imputation of socio-demographic variables for the electorate of Hume in New South Wales (NSW), at the time of the 2013 federal election. Figure \@ref(fig:hume13) shows this region amongst other NSW electorates.
+Publically available Census data is aggregated and there are different resolutions accessible, ranging from SA1 (over 50,000 zones) to electoral divisions (150 zones). For this study electoral divisions are used as source zones, and this imputation method is applied for each of the 2004, 2007, 2010 and 2013 elections. To demonstrate its functionality, consider the imputation of socio-demographic variables for the electorate of Hume in New South Wales (NSW), at the time of the 2013 federal election. Figure \@ref(fig:hume13) shows this region amongst other NSW electorates.
 
-```{r hume13, fig.cap = "Some of the electoral boundaries in NSW for 2013, with the electoral boundary for Hume, shown in purple."}
+```{r hume13, fig.cap = "Some of the electoral boundaries in NSW for 2013, with the electoral boundary for Hume, shown in purple.", out.height="30%"}
 hume_area13 <- nat_map13 %>% 
   filter(state %in% c("ACT","NSW"), long < 154)
 
@@ -70,9 +50,9 @@ ggplot(data=hume_area13) +
   theme_map() + coord_equal()
 ```
 
-The Censuses neighbouring the 2013 election are those in 2011 and 2016, and the Hume boundary is changed, as seen by plotting the Hume boundary (purple) in the 2013 election over the divisions in 2016.
+The Censuses neighbouring the 2013 election are those in 2011 and 2016, and the Hume boundary is changed, as seen by plotting the Hume boundary (purple) in the 2013 election over the divisions in 2016 (see Figure \@ref(fig:hume16)).
 
-```{r hume16, fig.cap = "Census division boundaries in NSW for 2016, with the 2013 electoral boundary for Hume, shown in purple. The purple region is not contained within a single Census division."}
+```{r hume16, fig.cap = "Census division boundaries in NSW for 2016, with the 2013 electoral boundary for Hume, shown in purple. The purple region is not contained within a single Census division.", out.height="30%"}
 hume_area16 <- nat_map16 %>% 
   filter(state %in% c("ACT","NSW"), long < 154) %>% 
   mutate(year = "2016") %>% 
@@ -87,7 +67,7 @@ ggplot(data=hume_area16) +
   theme_map() + coord_equal() + guides(alpha = F, color = F)
 ```
 
-There are many electorates in 2016 that intersect with the purple region (Hume boundary for 2013), these include the divisions of Riverina, Eden-Monaro and Hume, along with smaller intersecting areas with Fenner, Calare, Gilmore and Whitlam. To impute Census information for this purple region, calculate the percentage of each 2016 electorate that intersects with the purple region, which is then used to estimate intersection populations $\hat{P}_{s,t} = \frac{U_s*A_{s,t}}{\sum_{t=1}^T A_{s,t}}$.
+There are many electorates in 2016 that intersect with the purple region (Hume boundary for 2013), these include the divisions of Riverina, Eden-Monaro and Hume, along with smaller intersecting areas with Fenner, Calare, Gilmore and Whitlam. To impute Census information for this purple region, calculate the percentage of each 2016 electorate that intersects with the purple region, which is then used to estimate intersection populations $\hat{P}_{s,t}$.
 
 Electorate (2016) | Percentage | Population in Electorate | Estimated Population Allocated to Purple Region: $\hat{P}_{s,t}$
 ---------------------|------------|--------------------------|------------------------------------------------
@@ -117,15 +97,15 @@ weighted.mean(x = auscitizen_ex$AusCitizen, w = auscitizen_ex$`Estimated Populat
 ```
 
 |DivisionNm      | AusCitizen (%): $D_s$| Estimated Population Allocated to Purple Region: $\hat{P}_{s,t}$|
-|----------------|----------------------|------------------------------------------------|
-|HUME            |                 90.02|                                          145427|
-|RIVERINA        |                 89.11|                                           39117|
-|EDEN-MONARO     |                 88.00|                                           16358|
-|CANBERRA        |                 85.48|                                             548|
-|FENNER          |                 83.64|                                             474|
-|WHITLAM         |                 89.52|                                              92|
-|GILMORE         |                 89.03|                                              86|
-|CALARE          |                 87.56|                                              21|
+|----------------|-------------------|------------------------------------------------|
+|HUME            |              90.02|                                          145427|
+|RIVERINA        |              89.11|                                           39117|
+|EDEN-MONARO     |              88.00|                                           16358|
+|CANBERRA        |              85.48|                                             548|
+|FENNER          |              83.64|                                             474|
+|WHITLAM         |              89.52|                                              92|
+|GILMORE         |              89.03|                                              86|
+|CALARE          |              87.56|                                              21|
 
 Then taking a weighted average of $AusCitizen$ using the estimated population as weights yields $\hat{C}_{Hume,2016} = 89.65 \%$. Repeating this process using the 2011 Census and electoral boundaries yields $\hat{C}_{Hume,2011} = 91.00 \%$
 
@@ -137,6 +117,4 @@ Finally, linearly interpolate between 2011 and 2016 to arrive at the 2013 estima
 \end{eqnarray*}
 
 This is done for each of the socio-demographic variables, and repeated each of the 2013 electorates.
-
-
 

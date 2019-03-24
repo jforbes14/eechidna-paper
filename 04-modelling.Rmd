@@ -1,0 +1,42 @@
+# Modelling {#modelling}
+
+## Data pre-processing
+With socio-demographic information now available for each electorate, each election is joined to the data  corresponding with its two-party preferred vote. Socio-demographic variables within each election year are standardized to have mean zero and variance one, to adjust for changing variable scales. For example, inflation-adjusted median rental prices increased across almost all electorates, with median rent of 200 dollars per week placing an electorate in the 90th percentile in 2001, but only the 30th percentile in 2016.
+
+### Dimension reduction
+With only $N = 150$ observations (electorates) in each election and $p = 65$ socio-demographic variables in each cross-section, any model using all variables would face serious problems with multi-collinearity and over-fitting, likely leading to erroneous conclusions regarding variable significance. Therefore a form of dimension reduction is adopted before models are fit. 
+
+Socio-demographic variables[^2] that represent similar information are combined into "factors" using principal component analysis (PCA). The scree plots of the principal components for each election all level off after four components, and the loadings of these four components are similar across the elections. Principal components are then computed on the combined set of socio-demographics across all six elections. A factor is created by combining several variables all have large loadings in a particular component and when there is an intuitive reason as to why these variables could represent common information. A loading with magnitude greater than 0.15 is considered large. After computing these sums, each factor is again standardized to have mean zero and variance one, within each election. 
+
+Consider the `Incomes` factor as an illustration. Independent of principal components, we may suspect that median personal income, median household income and median family income are providing similar information about the financial wellbeing of an electorate. Their loadings in the first principal component are large (0.20, 0.21 and 0.22 respectively), which provides the evidence needed to combine these variables into a single factor, which is called `Incomes`.
+
+This process reduces the predictor set to $p = 30$.
+
+[^2]: A preliminary step involved removing all age bands, because age is represented by median age, and to remove variables relating to particular denominations of Christianity.
+
+## Model framework
+An identical model specification is used across the six elections, with each election modelled separately. This allows for the socio-demographic effects to be estimated separately for each year, allowing for interpretation of temporal changes in these effects. This is preferable over a single longitudinal model because it avoids any concerns of undue bias stemming from an incorrectly imposed time-varying restriction on any variable. Without such restrictions, a pooled cross-sectional model does not yield any distinct advantage over separate cross-sections. The panel approach is avoided because of how frequently electoral boundaries change, meaning that electorates that have the same name across elections are not guaranteed to represent the same geographical region. Therefore any fixed or random effects models would be difficult to estimate without implementing consistent boundaries, which would requiring further imputation. 
+
+For each cross-section, let the response variable be the two-party preferred vote in favour of the Liberal party, denoted $Y$, with $Y = 70$ representing a 70% preference for Liberal, 30% for Labor. Although $Y$ lies in the interval $(0,100)$, observed values are never very close to 0 or 100 (minimum $24.05 \%$ and maximum $74.90 \%$), so there is no need to impose the constraint of $Y \in [0,100]$. Furthermore, the response is found to be spatially correlated in each election (Moran's I test, $p \le 7\cdot10^{-15}$). This is expected, as electorates are aggregate spatial units, and hence the spatial structure of the data must modelled appropriately. 
+
+The spatial error model [@Anselin88] is chosen because captures spatial heterogeneity by incorporating a spatially structured random effect vector [@LeSage2009]. In this context, the random effect can be thought of as capturing the unobserved political climate in each electorate, where the climate is correlated with the climate in neighbouring electorates. This functions under the assumption that the climate is independent of electoral socio-demographics, and that an electorate is equally correlated with any electorate that shares a part of its boundary. Spatial weights are calculated in accordance with these assumptions. The spatial error model is specified as follows:
+
+Let $\rho$ be spatial autoregressive coefficient, $\boldsymbol v$ be a spherical error term, ${\boldsymbol W}$ be a matrix of spatial weights (containing information about the neighbouring regions), $\boldsymbol X$ be a matrix of socio-demographic covariates, $\boldsymbol \beta$ be a vector of regression coefficients and $\boldsymbol a$ be a spatially structured random effect vector.
+
+$${\boldsymbol y} = {\boldsymbol X} {\boldsymbol \beta} + {\boldsymbol a}$$
+and
+
+$${\boldsymbol a} = \rho {\boldsymbol W} {\boldsymbol a} + {\boldsymbol v}$$
+where 
+
+$${\boldsymbol v} \sim N({\boldsymbol 0}, \sigma^2 {\boldsymbol I_n})$$.
+
+so it can be written
+
+$${\boldsymbol y} = {\boldsymbol X} {\boldsymbol \beta} + ({\boldsymbol I}_n-\rho {\boldsymbol W})^{-1}{\boldsymbol v}$$
+
+Estimation is done using generalized least squares (using the `spdep` `R` package [@spdep]).
+
+Table 4.1 details the resultant estimated model coefficients and their estimated standard errors for each of the six elections. These are interpreted in the next section.
+
+*insert table here*

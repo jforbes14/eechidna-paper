@@ -1,0 +1,147 @@
+---
+title: "results"
+author: "Jeremy Forbes"
+date: "19/03/2019"
+output: html_document
+---
+
+```{r}
+library(spdep)
+library(tidyverse)
+load("/Users/Jeremy/Documents/R/eechidna-modelling/data/model_df.rda")
+load("/Users/Jeremy/Documents/R/eechidna-modelling/data/sp_weights_16.rda")
+load("/Users/Jeremy/Documents/R/eechidna-modelling/data/sp_weights_13.rda")
+load("/Users/Jeremy/Documents/R/eechidna-modelling/data/sp_weights_10.rda")
+load("/Users/Jeremy/Documents/R/eechidna-modelling/data/sp_weights_07.rda")
+load("/Users/Jeremy/Documents/R/eechidna-modelling/data/sp_weights_04.rda")
+load("/Users/Jeremy/Documents/R/eechidna-modelling/data/sp_weights_01.rda")
+
+fmod16 <- errorsarlm(LNP_Percent ~ ., 
+  data=(model_df %>% filter(year == "2016") %>% dplyr::select(-c(year, DivisionNm))),
+  sp_weights_16, etype="error", method="eigen", interval=c(-1,0.999))
+
+fmod13 <- errorsarlm(LNP_Percent ~ ., 
+  data=(model_df %>% filter(year == "2013") %>% dplyr::select(-c(year, DivisionNm))),
+  sp_weights_13, etype="error", method="eigen", interval=c(-1,0.999))
+
+fmod10 <- errorsarlm(LNP_Percent ~ ., 
+  data=(model_df %>% filter(year == "2010") %>% dplyr::select(-c(year, DivisionNm))),
+  sp_weights_10, etype="error", method="eigen", interval=c(-1,0.999))
+
+fmod07 <- errorsarlm(LNP_Percent ~ ., 
+  data=(model_df %>% filter(year == "2007") %>% dplyr::select(-c(year, DivisionNm))),
+  sp_weights_07, etype="error", method="eigen", interval=c(-1,0.999))
+
+fmod04 <- errorsarlm(LNP_Percent ~ ., 
+  data=(model_df %>% filter(year == "2004") %>% dplyr::select(-c(year, DivisionNm))),
+  sp_weights_04, etype="error", method="eigen", interval=c(-1,0.999))
+
+fmod01 <- errorsarlm(LNP_Percent ~ ., 
+  data=(model_df %>% filter(year == "2001") %>% dplyr::select(-c(year, DivisionNm))),
+  sp_weights_01, etype="error", method="eigen", interval=c(-1,0.999))
+
+# Coefficients and confidence bands
+coef_df <- bind_rows(
+  data.frame(variable = fmod16$coefficients %>% names, estimate = fmod16$coefficients %>% unname, se = fmod16$rest.se %>% unname, p = summary(fmod16)$Coef[,4] %>% unname, year = 2016),
+  data.frame(variable = fmod13$coefficients %>% names, estimate = fmod13$coefficients %>% unname, se = fmod13$rest.se %>% unname, p = summary(fmod13)$Coef[,4] %>% unname, year = 2013),
+  data.frame(variable = fmod10$coefficients %>% names, estimate = fmod10$coefficients %>% unname, se = fmod10$rest.se %>% unname, p = summary(fmod10)$Coef[,4] %>% unname, year = 2010),
+  data.frame(variable = fmod07$coefficients %>% names, estimate = fmod07$coefficients %>% unname, se = fmod07$rest.se %>% unname, p = summary(fmod07)$Coef[,4] %>% unname, year = 2007),
+  data.frame(variable = fmod04$coefficients %>% names, estimate = fmod04$coefficients %>% unname, se = fmod04$rest.se %>% unname, p = summary(fmod04)$Coef[,4] %>% unname, year = 2004),
+  data.frame(variable = fmod01$coefficients %>% names, estimate = fmod01$coefficients %>% unname, se = fmod01$rest.se %>% unname, p = summary(fmod01)$Coef[,4] %>% unname, year = 2001)
+)
+```
+
+## Results
+
+```{r}
+#stargazer::stargazer(fmod16)
+```
+
+### Spatial correlation
+
+The spatial autoregressive coefficient represents the extent to which an electorate is affected by the surrounding political climate. In the 2001, 2013 and 2016 elections $\rho$ is positive and significant, indicating that electoral voting outcomes were influenced by attitudes of neighbouring electorates, in the sense that two-party preference. However, in the 2004, 2007 and 2010 elections, $\rho$ is not significantly different from zero, meaning that neighbours did not influence the two-party preferred vote over and above the effect of electoral socio-demographics.
+
+```{r}
+coef_df %>% 
+  filter(variable != "(Intercept)") %>% 
+  mutate(upper95 = estimate + 1.96*se, lower95 = estimate - 1.96*se) %>% 
+  ggplot() +
+  geom_point(aes(x = year, y = estimate, col = factor(p < 0.05)), size = 2) +
+  geom_linerange(aes(x = year, ymin = lower95, ymax = upper95, col = factor(p < 0.05)), size = 1.5) + 
+  geom_hline(aes(yintercept = 0), alpha = 0.5, size = 1) + 
+  facet_wrap(~variable, scales = "free") +
+  scale_color_manual(values = c("grey50", "black")) +
+  guides(col = F) +
+  theme(axis.text = element_text(size = 8), axis.text.x = element_text(angle = 60, hjust=1)) +
+  scale_x_continuous(breaks = c(2001, 2004, 2007, 2010, 2013, 2016))
+```
+
+
+### Persistent effects
+Defacto - Labor
+DiffAddress - Liberal
+Extractive - Liberal
+Indigenous - Liberal
+Admin - Liberal
+
+```{r, include = F}
+coef_df %>% 
+  filter(variable %in% c("DeFacto", "DiffAddress", "Extractive", "Indigenous", "ManagerAdminClericalSales")) %>% 
+  mutate(upper95 = estimate + 1.96*se, lower95 = estimate - 1.96*se) %>% 
+  ggplot() +
+  geom_point(aes(x = year, y = estimate), size = 3) +
+  geom_linerange(aes(x = year, ymin = lower95, ymax = upper95), size = 1.5) + 
+  geom_hline(aes(yintercept = 0), alpha = 0.5, size = 1) + 
+  facet_wrap(~variable) +
+  scale_color_manual(values = c("grey50", "black"))
+```
+
+
+### Changing effects
+Unemployment - Labor then none
+FamilyHouseSize - Labor 2004-2010
+Incomes - Liberal in 2016
+MedianAge - Liberal 2004 and 2016
+
+```{r, include = F}
+coef_df %>% 
+  filter(variable %in% c("Unemployment", "FamHouseSize", "Incomes", "MedianAge")) %>% 
+  mutate(upper95 = estimate + 1.96*se, lower95 = estimate - 1.96*se) %>% 
+  ggplot() +
+  geom_point(aes(x = year, y = estimate, col = factor(p < 0.05)), size = 3) +
+  geom_linerange(aes(x = year, ymin = lower95, ymax = upper95, col = factor(p < 0.05)), size = 1.5) + 
+  geom_hline(aes(yintercept = 0), alpha = 0.5, size = 1) + 
+  facet_wrap(~variable) +
+  scale_color_manual(values = c("grey50", "black")) +
+  guides(col = F)
+```
+
+### Alternative: discuss each election individually/over time
+
+Over the six elections, it is apparent that five socio-demographic characterstics have been strongly associated with support for one of the parties in all elections, whilst others are influential in some, and others not at all. The liberal party appeals to XXX. Labor party XXX. In 2001, ....
+
+
+### Diagnostics
+Goodness of fit?
+
+Residuals: GLS residuals should be normal (QQ-plot)
+- fmod16$residuals
+
+Outliers:
+-- Leverage: Hat values (X)
+-- Influence: Cook's distance
+
+#### Electorates that are very different to their neighbours
+- Residuals vs weighted neighbours residuals
+- Socio-demographics that are quite different?
+
+
+
+$${\bf r_j} = {\bf \hat{u}} + \hat\beta_j{\boldsymbol X_j}$$
+where
+
+$${\bf \hat{u}} = ({\bf I_n}-\hat\rho \cdot {\bf W}) {\bf  \hat v}$$
+
+where 
+
+$${\bf  \hat v} \sim N({\bf 0}, \sigma^2 \cdot {\bf I_n}) $$
