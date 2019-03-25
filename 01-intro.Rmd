@@ -1,7 +1,7 @@
 # Introduction {#intro}
 
 ```{r setup, include=FALSE, message=FALSE}
-knitr::opts_chunk$set(echo = F, fig.pos = 'h', fig.align = 'center')
+knitr::opts_chunk$set(echo = F, fig.pos = 'h', fig.align = 'center', cache = T)
 library(tidyverse)
 library(eechidna)
 library(ggplot2)
