@@ -1,0 +1,797 @@
+--- 
+title: "Spatial modelling of the electoral two-party preferred vote in Australia. A study of federal elections between 2001 and 2016 via the `eechidna` `R` package."
+author: "Jeremy Forbes, Di Cook & Rob Hyndman"
+date: "`r Sys.Date()`"
+site: bookdown::bookdown_site
+output: bookdown::gitbook
+documentclass: book
+classoption: openany
+bibliography: [book.bib, packages.bib]
+biblio-style: apalike
+link-citations: yes
+github-repo: rstudio/bookdown-demo
+description: "This is an incomplete draft of a paper to submitted to ANZJS."
+---
+
+<!--chapter:end:index.Rmd-->
+
+# Introduction {#intro}
+
+```{r setup, include=FALSE, message=FALSE}
+knitr::opts_chunk$set(echo = F, fig.pos = 'h', fig.align = 'center', cache = T, message = F)
+library(tidyverse)
+library(eechidna)
+library(ggplot2)
+library(ggthemes)
+library(knitr)
+library(nlme)
+library(rgeos)
+library(spdep)
+
+# Data
+data(tpp01)
+data(tpp04)
+data(tpp07)
+data(tpp10)
+data(tpp13)
+data(tpp16)
+data(abs2001)
+data(abs2004)
+data(abs2007)
+data(abs2010)
+data(abs2013)
+data(abs2016)
+```
+
+```{r wrangle, include = F, message = F}
+# Function to standardize variables
+standardise_vars <- function(df) {
+  hold <- df
+  num_cols <- sapply(df, class) == 'numeric'
+  df[, num_cols] <- lapply(df[, num_cols], scale)
+  names(df) <- names(hold)
+  df$LNP_Percent <- hold$LNP_Percent
+  return(df)
+}
+
+# Combine and standardize
+my_df <- bind_rows(
+  left_join(tpp01, standardise_vars(abs2001) %>% dplyr::select(-c(UniqueID, Area, ends_with("NS"), Population)), by = c("DivisionNm", "StateAb"="State")) %>% mutate(year = "2001"),
+  left_join(tpp04, standardise_vars(abs2004) %>% dplyr::select(-UniqueID), by = c("DivisionNm")) %>% mutate(year = "2004"),
+  left_join(tpp07, standardise_vars(abs2007) %>% dplyr::select(-UniqueID), by = c("DivisionNm")) %>% mutate(year = "2007"),
+  left_join(tpp10, standardise_vars(abs2010) %>% dplyr::select(-UniqueID), by = c("DivisionNm")) %>% mutate(year = "2010"),
+  left_join(tpp13, standardise_vars(abs2013) %>% dplyr::select(-UniqueID), by = c("DivisionNm")) %>% mutate(year = "2013"),
+  left_join(tpp16, standardise_vars(abs2016) %>% dplyr::select(-c(UniqueID, Area, ends_with("NS"), Population)), by = c("DivisionNm", "StateAb"="State")) %>% mutate(year = "2016")
+) %>% 
+  mutate(year = factor(year)) %>% 
+  dplyr::select(-c(starts_with("Age"), StateAb, LNP_Votes, ALP_Votes, ALP_Percent, TotalVotes,
+    Swing, InternetUse, InternetAccess, EnglishOnly, Other_NonChrist, OtherChrist, Volunteer, EmuneratedElsewhere, UniqueID, Catholic, Anglican))
+
+# Create final df for modelling
+
+factors_df <- my_df %>% 
+  mutate(Education = BachelorAbv + HighSchool + Professional + Finance - Laborer - Tradesperson - DipCert,
+    FamHouseSize = FamilyRatio + AverageHouseholdSize + Couple_WChild_House - Couple_NoChild_House -
+      SP_House,
+    PropertyOwned = Owned + Mortgage - Renting - PublicHousing,
+    RentLoanPrice = MedianRent + MedianLoanPay,
+    Incomes = MedianFamilyIncome + MedianHouseholdIncome + MedianPersonalIncome,
+    Unemployment = Unemployed - LFParticipation) %>% 
+  dplyr::select(-c(BachelorAbv, HighSchool, Professional, Finance, Laborer, Tradesperson, DipCert, FamilyRatio,
+    AverageHouseholdSize, Couple_WChild_House, Couple_NoChild_House, SP_House, Owned, Mortgage, Renting,
+    PublicHousing, MedianFamilyIncome, MedianHouseholdIncome, MedianPersonalIncome, MedianRent, 
+    MedianLoanPay, Unemployed, LFParticipation))
+
+# Now standardize factors
+
+small_df <- bind_rows(
+  factors_df %>% filter(year == "2001") %>% standardise_vars(),
+  factors_df %>% filter(year == "2004") %>% standardise_vars(),
+  factors_df %>% filter(year == "2007") %>% standardise_vars(),
+  factors_df %>% filter(year == "2010") %>% standardise_vars(),
+  factors_df %>% filter(year == "2013") %>% standardise_vars(),
+  factors_df %>% filter(year == "2016") %>% standardise_vars()
+)
+
+# Order electorates in alphabetical order to match spatial matrix
+model_df <- small_df %>% 
+  arrange(year, DivisionNm) %>% 
+  dplyr::select(order(colnames(.)))
+```
+
+```{r spatialweights, eval = F}
+# Compute spatial weights matrix
+sp_weights_matrix <- function(sF) {
+
+dist_matrix <- function(shapefile) {
+  dist_mat <- matrix(NA, nrow = 150, ncol = 150)
+  rownames(dist_mat) <- sort(shapefile$elect_div)
+  colnames(dist_mat) <- sort(shapefile$elect_div)
+  
+  for (i in 1:(nrow(dist_mat)-1)) {
+    rname = rownames(dist_mat)[i]
+    row_poly = shapefile %>% subset(elect_div == rname)
+    
+    for (j in (i+1):ncol(dist_mat)) {
+      
+      cname = rownames(dist_mat)[j]
+      col_poly = shapefile %>% subset(elect_div == cname)
+      dist = gDistance(row_poly, col_poly)
+      dist_mat[i,j] = dist
+      
+    }
+    print(i)
+  }
+  
+  # Now copy to lower triange
+  for (i in 2:nrow(dist_mat)) {
+    for (j in 1:(i-1)) {
+      dist_mat[i,j] = dist_mat[j,i]
+    }
+  }
+  
+  # Check it is symmetric
+  if(!isSymmetric(dist_mat)) {
+    print("Warning! Matrix is not symmetric. Error has occured.")
+  }
+  
+  return(dist_mat)
+}
+
+my_dist_mat <- dist_matrix(sF)
+
+# S matrix
+
+s_mat <- function(dist_mat) {
+  s_mat <- dist_mat
+  
+  for (i in 1:nrow(dist_mat)) {
+    for (j in 1:nrow(dist_mat)) {
+      a = dist_mat[i,j]
+      
+      if (is.na(a)) {
+        b = 0
+      } else {
+        b = ifelse(a == 0, 1, 0)
+      }
+      
+      s_mat[i,j] = b
+      
+    }
+  }
+  
+  return(s_mat)
+}
+
+my_smat <- s_mat(my_dist_mat)
+
+# Turn into W matrix
+
+w_mat <- function(s_mat) {
+  
+  w_mat <- s_mat
+  rsums = rowSums(s_mat)
+  
+  for (i in 1:nrow(s_mat)) {
+    w_mat[i,] <- s_mat[i,]/rsums[i]
+  }
+  
+  return(w_mat)
+}
+
+my_wmat <- w_mat(my_smat)
+
+# Turn into listw
+
+my_listw <- mat2listw(my_wmat)
+
+return(my_listw)
+
+}
+
+# Get spatial weights
+sF_16 <- sF_download(2016)
+sF_13 <- sF_download(2013)
+sF_10 <- sF_download(2010)
+sF_07 <- sF_download(2007)
+sF_04 <- sF_download(2004)
+sF_01 <- sF_download(2001)
+
+sp_weights_16 <- sp_weights_matrix(sF_16)
+sp_weights_13 <- sp_weights_matrix(sF_13)
+sp_weights_10 <- sp_weights_matrix(sF_10)
+sp_weights_07 <- sp_weights_matrix(sF_07)
+sp_weights_04 <- sp_weights_matrix(sF_04)
+sp_weights_01 <- sp_weights_matrix(sF_01)
+```
+
+```{r FGLS, include = F}
+# Instead of running spatial weights
+load("/Users/Jeremy/Documents/R/eechidna-modelling/data/sp_weights_01.rda")
+load("/Users/Jeremy/Documents/R/eechidna-modelling/data/sp_weights_04.rda")
+load("/Users/Jeremy/Documents/R/eechidna-modelling/data/sp_weights_07.rda")
+load("/Users/Jeremy/Documents/R/eechidna-modelling/data/sp_weights_10.rda")
+load("/Users/Jeremy/Documents/R/eechidna-modelling/data/sp_weights_13.rda")
+load("/Users/Jeremy/Documents/R/eechidna-modelling/data/sp_weights_16.rda")
+
+
+# Function for FGLS
+my_fgls <- function(my_formula, my_data, sp_weights) {
+  # Spatial weights matrix
+  w_mat <- listw2mat(sp_weights)
+  
+  # Get OLS residuals
+  ols_model <- lm(my_formula, my_data)
+  my_res <- ols_model$residuals
+  
+  # Solve for rho
+  res_model <- lm(my_res ~ w_mat%*%my_res)
+  rho <- res_model$coefficients[2]
+  rho_df <- data.frame(estimate = rho, se = summary(res_model)$coefficients[2,2], p = summary(res_model)$coefficients[2,4])
+  
+  # Transform data for GLS
+  trans_mat <- diag(nrow(my_data)) - rho*w_mat
+  gls_data <- data.frame(LNP_Percent = trans_mat %*% my_data$LNP_Percent,
+    Intercept = trans_mat %*% rep(1,nrow(my_data))) %>% 
+    bind_cols(as.data.frame(trans_mat %*% as.matrix(my_data %>% select(-LNP_Percent))))
+  
+  # GLS model
+  my_formula <- formula(paste0(my_formula,  " - 1"))
+  gls_model <- gls(my_formula, gls_data)
+  
+  # Call to function with stargazer
+  gls_model$call$model <- formula(paste0("LNP_Percent ~ ", paste0(names(gls_data)[-1], collapse = " + ")))
+  
+  # Rho and data
+  gls_model$rho_df <- rho_df
+  gls_model$gls_data <- gls_data
+  gls_model$my_data <- my_data
+  
+  return(gls_model)
+}
+
+## Run full models for each year
+full_formula = "LNP_Percent ~ ."
+
+# 2016
+glsmod16 <- my_fgls(full_formula, 
+  my_data = model_df %>% filter(year == "2016") %>% select(-c(DivisionNm, year)),
+  sp_weights = sp_weights_16)
+
+# 2013
+glsmod13 <- my_fgls(full_formula, 
+  my_data = model_df %>% filter(year == "2013") %>% select(-c(DivisionNm, year)),
+  sp_weights = sp_weights_13)
+
+# 2010
+glsmod10 <- my_fgls(full_formula, 
+  my_data = model_df %>% filter(year == "2010") %>% select(-c(DivisionNm, year)),
+  sp_weights = sp_weights_10)
+
+# 2007
+glsmod07 <- my_fgls(full_formula, 
+  my_data = model_df %>% filter(year == "2007") %>% select(-c(DivisionNm, year)),
+  sp_weights = sp_weights_07)
+
+# 2004
+glsmod04 <- my_fgls(full_formula, 
+  my_data = model_df %>% filter(year == "2004") %>% select(-c(DivisionNm, year)),
+  sp_weights = sp_weights_04)
+
+# 2001
+glsmod01 <- my_fgls(full_formula, 
+  my_data = model_df %>% filter(year == "2001") %>% select(-c(DivisionNm, year)),
+  sp_weights = sp_weights_01)
+
+## Visualise coefficients and significance
+
+coef_df <- bind_rows(
+  data.frame(variable = glsmod16$coefficients %>% names, estimate = glsmod16$coefficients %>% unname, se = summary(glsmod16)$tTable[, "Std.Error"] %>% unname, p = summary(glsmod16)$tTable[, "p-value"] %>% unname, year = 2016),
+  data.frame(variable = glsmod13$coefficients %>% names, estimate = glsmod13$coefficients %>% unname, se = summary(glsmod13)$tTable[, "Std.Error"] %>% unname, p = summary(glsmod13)$tTable[, "p-value"] %>% unname, year = 2013),
+  data.frame(variable = glsmod10$coefficients %>% names, estimate = glsmod10$coefficients %>% unname, se = summary(glsmod10)$tTable[, "Std.Error"] %>% unname, p = summary(glsmod10)$tTable[, "p-value"] %>% unname, year = 2010),
+  data.frame(variable = glsmod07$coefficients %>% names, estimate = glsmod07$coefficients %>% unname, se = summary(glsmod07)$tTable[, "Std.Error"] %>% unname, p = summary(glsmod07)$tTable[, "p-value"] %>% unname, year = 2007),
+  data.frame(variable = glsmod04$coefficients %>% names, estimate = glsmod04$coefficients %>% unname, se = summary(glsmod04)$tTable[, "Std.Error"] %>% unname, p = summary(glsmod04)$tTable[, "p-value"] %>% unname, year = 2004),
+  data.frame(variable = glsmod01$coefficients %>% names, estimate = glsmod01$coefficients %>% unname, se = summary(glsmod01)$tTable[, "Std.Error"] %>% unname, p = summary(glsmod01)$tTable[, "p-value"] %>% unname, year = 2001)
+)
+```
+
+Australia has changed in many ways over the last two decades. Rising house prices, country-wide improvements in education, an ageing population, and a decline in religious affiliation, are just a few facets of the country's evolving socio-demographic characteristics. At the same time, political power has moved back and forth between the two major parties. In the 2007 and 2010 federal elections, the Australian Labor Party (Labor) was victorious, whereas the 2001, 2004, 2013 and 2016 elections were won by the Liberal National coalition (Liberal). The two-party preferred vote, a measure of support between these two parties, fluctuated between 47.3% and 53.5% (in favour of the Liberal party) over this period. This study explores how electoral characteristics relate to two-party preference, and whether their effects have changed over time. Electoral socio-demographics are derived from the Census, and vote counts are obtained from federal elections.
+
+Joining these two data sources is problematic as there in an inherent asynchronicity in the two events. A Census is conducted by the Australian Bureau of Statistics (ABS) every five years, whereas a federal election (conducted by the Australian Electoral Commission (AEC)) usually occurs every three years. The first problem addressed is that of obtaining appropriate Census data for the 2004, 2007, 2010 and 2013 elections - election years in which a Census does not occur. The predominant approach in previous studies is to join voting outcomes to the nearest Census, without accounting for any temporal differences (see @DavisStimson98, @Stimson06, @Liao09 and @Stimson09). Furthermore, electoral boundaries change regularly, so spatial discrepancies also arise when matching electoral data. To obtain appropriate Census data for these four elections, electoral socio-demographics are imputed using a spatio-temporal imputation that combines areal interpolation [@Goodchild1993] and linear time-interpolation. The process of collecting and wrangling the raw data is outlined in section \@ref(data), and the imputation process is detailed in section \@ref(imputation). All data and associated documentation relating to this procedure are available in the `eechidna` `R` package [@eechidna], providing a resource for future analysis.
+
+Previous work on modelling Australian federal elections have found that aggregate socio-demographics are relatively good predictors of voting outcomes. @Forrest01 does this using multiple regression of the Liberal and Labor primary vote for polling booths in the Farrer electorate in 1998. @Stimson06, @Stimson09 and @Stimson12 use principal component analysis of polling booths in the 2001, 2004 and 2007 elections respectively, also finding that socio-demographic characteristics of polling booths are linked to their two-party preferred vote. On the contrary, @Stimson09 models the polling booth swing vote (change in the two-party preferred vote) in the 2007 election, finding that little of swing vote can be explained by Census data. Instead of analyzing a single election in isolation, this paper employs a consistent model framework across six elections so that temporal changes in the effects of socio-demographics can be observed, where each federal elections is modelled with a cross-sectional data set. The use of a regression framework to examine these socio-political relationships over time is seemingly absent from previous Australian studies. It also appears that no study has attempted any type of statistical analysis of socio-demographics in conjunction with voter behaviour in Australia since 2007, making this paper distinctly different from those previous.
+
+The cross-sectional data set for each election consists of the two-party preferred vote (response variable), and socio-demographic variables (explanatory variables) that characterise each electorate. To obtain these cross-sections, socio-demographic variables are first standardized, and then principal components are used to group variables into "factors". To account for the inherent spatial structure of the data, a spatial error model is fit for each election. These steps are discussed in section \@ref(modelling). In section \@ref(results) inference is conducted on the models to see which effects are significant, how effects change over time and which electorates have abnormal voting behaviour. 
+
+<!--chapter:end:01-intro.Rmd-->
+
+# Data collection {#data}
+
+## Voting data
+
+The voting outcome of interest is the electoral two-party preferred vote, which is provided by the Australian Electoral Commission (AEC) for the 2001, 2004, 2007, 2010, 2013 and 2016 elections via the AEC Tally Room. The AEC divide Australia into 150 regions called electorates, with each corresponding to a single seat in the House of Representatives. Voting is compulsory in Australia, and each voter assigns a numbered preference to each available candidate in their electorate. The two-party preferred vote is determined by a tally of these preferences where, by convention, only the ranks of the Labor and Liberal candidates are considered. This is recorded as a percentage preference in favour of the Liberal party. 
+
+## Census data
+
+Socio-demographic variables are derived from the Census of Population and Housing (Census), which is a survey of every household in Australia, recording information such as age, gender, ethnicity, education level and income. There have been four Censuses in the 21st century, being that in 2001, 2006, 2011 and 2016. The Australian Bureau of Statistics (ABS) conducts the Census and publishes aggregated information. The ABS approximation of electorates at the time of the Census is chosen. From this aggregate information, 67 socio-demographic variables are computed for each of the electorates.
+
+## Downloading and wrangling
+
+Raw data is sourced online from the AEC and ABS websites in .csv and .xlsx files. The format of these files change over the years, making extracting the appropriate information a big task. The functions available in the `dplyr` [@dplyr] and `readxl` [@readxl] `R` packages are very useful, as they provide fast consistent tools for data manipulation and functions to import .xlsx files (respectively). The 2001 and 2006 Census data are however published in a format where each electorate has a separate document, making it difficult to use the `dplyr` tools and instead cells have to be selected from each individual file to construct the desired variables. All scripts required for the data wrangling process can be found in the github repository for the `eechidna` `R` package [@eechidna], along with the raw data. The `eechidna` package makes this study entirely reproducible and provides a resource to help wrangle data for future Censuses and elections, when they become available.
+
+
+<!--chapter:end:02-data-collection.Rmd-->
+
+# Joining Census and election data {#imputation}
+
+## Differences between Census and election data
+
+Between 2001 and 2016 there were six elections and four Censuses (see Figure \@ref(fig:timeline)). Electoral boundaries are redistributed regularly by the AEC, meaning that only in the years where both a Census and election occur will the boundaries match - the case for the 2001 and 2016 election. Therefore, for the four elections between 2004 and 2013, both temporal and spatial differences in electorates need to be accounted for when joining the electoral two-party preferred vote with Census data. For these elections a spatio-temporal imputation method is employed to obtain electoral socio-demographics. This method uses Census information from both before and after the election of interest.
+
+```{r timeline, message = F, echo = F, fig.cap="Timeline of Australian elections and Censuses. They do not always occur in the same year.", out.width = "90%", fig.align="center"}
+timeline <- data.frame(year = c(2001:2016)) %>%
+  mutate(Election = ifelse(year %in% c(2001, 2004, 2007, 2010, 2013, 2016),1,0),
+         Census = ifelse(year %in% c(2001, 2006, 2011, 2016), 1.4, 0)) %>%
+  gather(c(Election,Census), key = event, value = measure) %>%  filter(measure != 0) %>%
+  mutate(year_vis = ifelse(event == "Census", year + 0.1, year))
+
+
+ggplot(timeline, aes(x=year_vis, y=measure)) + geom_point(aes(color=as.factor(event),shape=as.factor(event)),size = 4) + labs(color = "Event", shape = "Event") + geom_hline(yintercept=0, size =1, color = 'grey', show.legend = FALSE) + geom_segment(x=2001,xend=2001, y=1, yend=0, color = '#00BFC4') + geom_segment(x=2004,xend=2004, y=1, yend=0, color = '#00BFC4') + geom_segment(x=2007,xend=2007, y=1, yend=0, color = '#00BFC4') + geom_segment(x=2010,xend=2010, y=1, yend=0, color = '#00BFC4') + geom_segment(x=2013,xend=2013, y=1, yend=0, color = '#00BFC4') + geom_segment(x=2016,xend=2016, y=1, yend=0, color = '#00BFC4') + geom_segment(x=2001.1,xend=2001.1, y=1.4, yend=0, color = '#F8766D') + geom_segment(x=2006.1,xend=2006.1, y=1.4, yend=0, color = '#F8766D') + geom_segment(x=2011.1,xend=2011.1, y=1.4, yend=0, color = '#F8766D') + geom_segment(x=2016.1,xend=2016.1, y=1.4, yend=0, color = '#F8766D') + labs(x="Year") + theme(text=element_text(size=10), axis.text.x=element_text(size=6),axis.text.y=element_blank(), axis.title.y=element_blank(), plot.background=element_blank(), axis.ticks.y = element_blank(), panel.background = element_blank()) + scale_x_discrete(limits = c(2001:2016)) + coord_fixed(ratio = 2)
+```
+
+## Spatio-temporal imputation
+
+To account for spatial differences, the piece-wise approximation method in @Goodchild1993 is adopted. Consider a map of source zones $s = 1,...,S$, for which socio-demographic information is available, and a set of target zones $t = 1,...,T$ for which information is to be imputed. In this context the map of electoral boundaries at the time of a Census would be the source zones, and the boundaries at the time of the election would be the target zones. Denote the area of intersection between source zone $s$ and target zone $t$ as $A_{s,t}$, the population of the source zone $s$ as $U_s$, and the population of intersection between source zone $s$ and target zone $t$ as $P_{s,t}$.
+
+Compute each $A_{s,t}$ and estimate population of the intersection:
+
+$$\hat{P}_{s,t} = \frac{U_s*A_{s,t}}{\sum_{t=1}^T A_{s,t}}$$
+This assumes that populations are uniformly distributed within each source zone.
+
+In order to calculate socio-demographic information for each of the target zones, a weighted average is taken using the estimated population as weights. Denote a given Census variable for the target zone $C_t$, and the same Census variable for the source zone $D_s$:
+
+$$\hat{C}_t = \frac{\sum_{s=1}^{S}{D_s*\hat{P}_{s,t}}}{\sum_{s=1}^{S}{\hat{P}_{s,t}}}$$
+This assumes that each individual in a source zone assumes the aggregate characteristics of the zone.
+
+Applying this to each of the target zones addresses the spatial component, as it imputes the required socio-demographic for the desired electoral boundaries. However these are applicable at the time of the Census (source year) and are not yet appropriate for the election (target year). 
+
+Denote year $y$, with a Census falling on $y_1$ and $y_3$, and an election on year $y_2$, and add this subscript to the Census variable estimate, $\hat{C}_{t,y}$. To account for temporal changes, linear interpolation is used between Census years to get the final estimate of a Census variable for the target zone in the election year $y_2$. This assumes that population evolves in a linear manner over time.
+
+$$\hat{C}_{t,y_2} = \frac{y_3-y_2}{y_3-y_1}*\hat{C}_{t,y_1} + \frac{y_2-y_1}{y_3-y_1}*\hat{C}_{t,y_3}$$
+
+## Applied
+
+Publically available Census data is aggregated and there are different resolutions accessible, ranging from SA1 (over 50,000 zones) to electoral divisions (150 zones). For this study electoral divisions are used as source zones, and this imputation method is applied for each of the 2004, 2007, 2010 and 2013 elections. To demonstrate its functionality, consider the imputation of socio-demographic variables for the electorate of Hume in New South Wales (NSW), at the time of the 2013 federal election. Figure \@ref(fig:hume13) shows this region amongst other NSW electorates.
+
+```{r hume13, fig.cap = "Some of the electoral boundaries in NSW for 2013, with the electoral boundary for Hume, shown in purple.", out.height="30%"}
+hume_area13 <- nat_map13 %>% 
+  filter(state %in% c("ACT","NSW"), long < 154)
+
+ggplot(data=hume_area13) +
+  geom_polygon(aes(x=long, y=lat, group=group, fill = elect_div == "HUME"),
+               colour="grey50", alpha = 0.4) +
+  scale_fill_manual(name="Boundary", values=c("white", "purple"), labels = c("Other 2013 Electorates", "Hume 2013")) +
+  theme_map() + coord_equal()
+```
+
+The Censuses neighbouring the 2013 election are those in 2011 and 2016, and the Hume boundary is changed, as seen by plotting the Hume boundary (purple) in the 2013 election over the divisions in 2016 (see Figure \@ref(fig:hume16)).
+
+```{r hume16, fig.cap = "Census division boundaries in NSW for 2016, with the 2013 electoral boundary for Hume, shown in purple. The purple region is not contained within a single Census division.", out.height="30%"}
+hume_area16 <- nat_map16 %>% 
+  filter(state %in% c("ACT","NSW"), long < 154) %>% 
+  mutate(year = "2016") %>% 
+  bind_rows(hume_area13 %>% filter(elect_div == "HUME") %>% mutate(year = "2013"))
+
+ggplot(data=hume_area16) +
+  geom_polygon(aes(x=long, y=lat, group=group, fill = year == "2013", 
+    alpha = year == "2013", colour=year == "2013")) +
+  scale_fill_manual(name="Boundary", values=c("grey95", "purple"), labels = c("2016 Electorates", "Hume 2013")) +
+  scale_alpha_manual(values=c(0, 0.4)) +
+  scale_color_manual(values=c("grey50", NA)) +
+  theme_map() + coord_equal() + guides(alpha = F, color = F)
+```
+
+There are many electorates in 2016 that intersect with the purple region (Hume boundary for 2013), these include the divisions of Riverina, Eden-Monaro and Hume, along with smaller intersecting areas with Fenner, Calare, Gilmore and Whitlam. To impute Census information for this purple region, calculate the percentage of each 2016 electorate that intersects with the purple region, which is then used to estimate intersection populations $\hat{P}_{s,t}$.
+
+Electorate (2016) | Percentage | Population in Electorate | Estimated Population Allocated to Purple Region: $\hat{P}_{s,t}$
+---------------------|------------|--------------------------|------------------------------------------------
+HUME              | 96.54%     | 150643                   | 145427
+RIVERINA          | 25.11%     | 155793                   | 39117
+EDEN-MONARO       | 11.09%     | 147532                   | 16358
+CANBERRA          | 0.28%      | 196037                   | 548
+FENNER            | 0.23%      | 202955                   | 474
+WHITLAM           | 0.06%      | 152280                   | 92
+GILMORE           | 0.06%      | 150436                   | 86
+CALARE            | 0.01%      | 161298                   | 21
+
+Now consider the socio-demographic $AusCitizen$ - the proportion of people in the region who are Australian citizens.
+
+```{r eval = F, include = F}
+auscitizen_ex <- abs2016 %>% 
+  filter(DivisionNm %in% c("HUME", "RIVERINA", "EDEN-MONARO", "CANBERRA", "FENNER", "WHITLAM", "GILMORE", "CALARE")) %>%
+  select(DivisionNm, AusCitizen) %>% 
+  mutate(`Estimated Population Allocated to Purple Region` = c(21, 548, 16358, 474, 86, 145427, 39117, 92),
+    AusCitizen = round(AusCitizen, 2)) %>% 
+  arrange(-`Estimated Population Allocated to Purple Region`)
+
+auscitizen_ex %>% 
+  kable()
+
+weighted.mean(x = auscitizen_ex$AusCitizen, w = auscitizen_ex$`Estimated Population Allocated to Purple Region`)
+```
+
+|DivisionNm      | AusCitizen (%): $D_s$| Estimated Population Allocated to Purple Region: $\hat{P}_{s,t}$|
+|----------------|-------------------|------------------------------------------------|
+|HUME            |              90.02|                                          145427|
+|RIVERINA        |              89.11|                                           39117|
+|EDEN-MONARO     |              88.00|                                           16358|
+|CANBERRA        |              85.48|                                             548|
+|FENNER          |              83.64|                                             474|
+|WHITLAM         |              89.52|                                              92|
+|GILMORE         |              89.03|                                              86|
+|CALARE          |              87.56|                                              21|
+
+Then taking a weighted average of $AusCitizen$ using the estimated population as weights yields $\hat{C}_{Hume,2016} = 89.65 \%$. Repeating this process using the 2011 Census and electoral boundaries yields $\hat{C}_{Hume,2011} = 91.00 \%$
+
+Finally, linearly interpolate between 2011 and 2016 to arrive at the 2013 estimate:
+\begin{eqnarray*}
+\hat{C}_{Hume,2013} & = &\frac{3}{5} \cdot \hat{C}_{Hume,2011} + \frac{2}{5} \cdot \hat{C}_{Hume,2016} \\ 
+& = & \frac{3}{5} \cdot 91.00 \% + \frac{2}{5} \cdot 89.65 \% \\ 
+& = & 90.46 \%
+\end{eqnarray*}
+
+This is done for each of the socio-demographic variables, and repeated each of the 2013 electorates.
+
+
+<!--chapter:end:03-imputation.Rmd-->
+
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+# Modelling {#modelling}
+
+## Data pre-processing
+With socio-demographic information now available for each electorate, each election is joined to the data  corresponding with its two-party preferred vote. Socio-demographic variables within each election year are standardized to have mean zero and variance one, to adjust for changing variable scales. For example, inflation-adjusted median rental prices increased across almost all electorates, with median rent of 200 dollars per week placing an electorate in the 90th percentile in 2001, but only the 30th percentile in 2016.
+
+### Dimension reduction
+With only $N = 150$ observations (electorates) in each election and $p = 65$ socio-demographic variables in each cross-section, any model using all variables would face serious problems with multi-collinearity and over-fitting, likely leading to erroneous conclusions regarding variable significance. Therefore a form of dimension reduction is adopted before models are fit. 
+
+Socio-demographic variables[^2] that represent similar information are combined into "factors" using principal component analysis (PCA). The scree plots of the principal components for each election all level off after four components, and the loadings of these four components are similar across the elections. Principal components are then computed on the combined set of socio-demographics across all six elections. A factor is created by combining several variables all have large loadings in a particular component and when there is an intuitive reason as to why these variables could represent common information. A loading with magnitude greater than 0.15 is considered large. After computing these sums, each factor is again standardized to have mean zero and variance one, within each election. 
+
+Consider the `Incomes` factor as an illustration. Independent of principal components, we may suspect that median personal income, median household income and median family income are providing similar information about the financial wellbeing of an electorate. Their loadings in the first principal component are large (0.20, 0.21 and 0.22 respectively), which provides the evidence needed to combine these variables into a single factor, which is called `Incomes`.
+
+This process reduces the predictor set to $p = 30$.
+
+[^2]: A preliminary step involved removing all age bands, because age is represented by median age, and to remove variables relating to particular denominations of Christianity.
+
+## Model framework
+An identical model specification is used across the six elections, with each election modelled separately. This allows for the socio-demographic effects to be estimated separately for each year, allowing for interpretation of temporal changes in these effects. This is preferable over a single longitudinal model because it avoids any concerns of undue bias stemming from an incorrectly imposed time-varying restriction on any variable. Without such restrictions, a pooled cross-sectional model does not yield any distinct advantage over separate cross-sections. The panel approach is avoided because of how frequently electoral boundaries change, meaning that electorates that have the same name across elections are not guaranteed to represent the same geographical region. Therefore any fixed or random effects models would be difficult to estimate without implementing consistent boundaries, which would requiring further imputation. 
+
+For each cross-section, let the response variable be the two-party preferred vote in favour of the Liberal party, denoted $Y$, with $Y = 70$ representing a 70% preference for Liberal, 30% for Labor. Although $Y$ lies in the interval $(0,100)$, observed values are never very close to 0 or 100 (minimum $24.05 \%$ and maximum $74.90 \%$), so there is no need to impose the constraint of $Y \in [0,100]$. Furthermore, the response is found to be spatially correlated in each election (Moran's I test, $p \le 7\cdot10^{-15}$). This is expected, as electorates are aggregate spatial units, and hence the spatial structure of the data must modelled appropriately. 
+
+The spatial error model [@Anselin88] is chosen because captures spatial heterogeneity by incorporating a spatially structured random effect vector [@LeSage2009]. In this context, the random effect can be thought of as capturing the unobserved political climate in each electorate, where the climate is correlated with the climate in neighbouring electorates. This functions under the assumption that the climate is independent of electoral socio-demographics, and that an electorate is equally correlated with any electorate that shares a part of its boundary. Spatial weights are calculated in accordance with these assumptions. The spatial error model is specified as follows:
+
+Let $\rho$ be spatial autoregressive coefficient, $\boldsymbol v$ be a spherical error term, ${\boldsymbol W}$ be a matrix of spatial weights (containing information about the neighbouring regions), $\boldsymbol X$ be a matrix of socio-demographic covariates, $\boldsymbol \beta$ be a vector of regression coefficients and $\boldsymbol a$ be a spatially structured random effect vector.
+
+$${\boldsymbol y} = {\boldsymbol X} {\boldsymbol \beta} + {\boldsymbol a}$$
+and
+
+$${\boldsymbol a} = \rho {\boldsymbol W} {\boldsymbol a} + {\boldsymbol v}$$
+where 
+
+$${\boldsymbol v} \sim N({\boldsymbol 0}, \sigma^2 {\boldsymbol I_n})$$.
+
+so it can be written
+
+$${\boldsymbol y} = {\boldsymbol X} {\boldsymbol \beta} + ({\boldsymbol I}_n-\rho {\boldsymbol W})^{-1}{\boldsymbol v}$$
+
+Estimation is done using feasible generalized least squares.
+
+Table 4.1 details the resultant estimated model coefficients and their estimated standard errors for each of the six elections. These are interpreted in the next section.
+
+```{r printmodels, eval = F}
+# Add rho and make adjustments to this
+stargazer::stargazer(glsmod16, glsmod13, glsmod10, glsmod07, glsmod04, glsmod01, header = FALSE, 
+  column.sep.width = "1pt", 
+  title = "Estimated model for each of the six elections.",
+  dep.var.labels = "Two-party preferred vote in favor of the Liberal party", 
+  font.size = "scriptsize", digits = 2, 
+  column.labels = c("2001", "2004", "2007", "2010", "2013", "2016"),
+  notes = c("Estimated coefficients for variable named in column one shown for", "election year indicated by column heading, with estimated standard", "deviation for each coefficient shown below in parenthesis. Overall", "summary measures for each regression equation are provided in the", "bottom panel."),
+  notes.align = "l")
+```
+
+\begin{table}[!htbp] \centering 
+  \caption{Estimated model for each of the six elections.} 
+  \label{} 
+\tiny 
+\begin{tabular}{@{\extracolsep{1pt}}lcccccc} 
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+ & \multicolumn{6}{c}{\textit{Dependent variable:}} \\ 
+\cline{2-7} 
+\\[-1.8ex] & \multicolumn{6}{c}{Two-party preferred vote in favor of the Liberal party} \\ 
+ & 2001 & 2004 & 2007 & 2010 & 2013 & 2016 \\ 
+\\[-1.8ex] & (1) & (2) & (3) & (4) & (5) & (6)\\ 
+\hline \\[-1.8ex] 
+ $\rho$ & 0.48$^{***}$ & 0.29$^{*}$ & 0.15 & $-$0.04 & 0.15 & 0.44$^{***}$ \\ 
+  & (0.16) & (0.16) & (0.17) & (0.19) & (0.17) & (0.15) \\ 
+  & & & & & & \\ 
+ AusCitizen & $-$1.53 & $-$0.87 & 1.00 & 0.67 & $-$2.83 & $-$2.77 \\ 
+  & (2.95) & (2.90) & (2.93) & (2.57) & (2.63) & (2.51) \\ 
+  & & & & & & \\ 
+ Born\_Asia & $-$2.13 & $-$2.56 & $-$7.58$^{***}$ & $-$1.37 & 0.74 & 2.63 \\ 
+  & (2.20) & (2.58) & (2.68) & (1.96) & (2.55) & (3.03) \\ 
+  & & & & & & \\ 
+ Born\_MidEast & $-$0.82 & 1.70 & 1.79 & 2.92$^{*}$ & 3.22$^{*}$ & 1.92 \\ 
+  & (1.56) & (1.54) & (1.54) & (1.51) & (1.78) & (1.53) \\ 
+  & & & & & & \\ 
+ Born\_SE\_Europe & $-$1.63 & $-$1.25 & $-$1.72 & $-$0.20 & 0.04 & 1.02 \\ 
+  & (0.99) & (1.15) & (1.34) & (1.17) & (2.05) & (2.34) \\ 
+  & & & & & & \\ 
+ Born\_UK & $-$1.37 & $-$0.35 & $-$0.29 & 0.29 & $-$0.87 & $-$0.49 \\ 
+  & (0.98) & (1.00) & (1.05) & (0.80) & (0.90) & (1.04) \\ 
+  & & & & & & \\ 
+ BornElsewhere & 1.74 & 4.04 & 9.78$^{**}$ & 5.01 & $-$0.51 & $-$1.08 \\ 
+  & (4.52) & (4.46) & (4.47) & (3.59) & (3.67) & (3.40) \\ 
+  & & & & & & \\ 
+ Buddhism & 1.51 & 1.09 & 2.41$^{*}$ & 0.90 & 2.84$^{*}$ & 1.50 \\ 
+  & (1.24) & (1.25) & (1.40) & (1.25) & (1.61) & (1.94) \\ 
+  & & & & & & \\ 
+ Christianity & 5.17$^{**}$ & 3.08 & $-$0.60 & $-$1.93 & 3.44 & 0.53 \\ 
+  & (2.52) & (2.79) & (3.44) & (3.45) & (4.19) & (4.58) \\ 
+  & & & & & & \\ 
+ CurrentlyStudying & $-$0.09 & 1.73 & 3.28$^{***}$ & 4.03$^{***}$ & 1.69 & $-$1.14 \\ 
+  & (1.13) & (1.17) & (1.21) & (1.12) & (1.09) & (1.01) \\ 
+  & & & & & & \\ 
+ DeFacto & $-$11.02$^{***}$ & $-$9.73$^{***}$ & $-$8.60$^{***}$ & $-$6.55$^{***}$ & $-$5.04$^{**}$ & $-$6.42$^{***}$ \\ 
+  & (2.55) & (2.62) & (2.57) & (1.90) & (2.00) & (1.69) \\ 
+  & & & & & & \\ 
+ DiffAddress & 6.93$^{***}$ & 5.02$^{***}$ & 4.72$^{***}$ & 3.40$^{***}$ & 4.63$^{***}$ & 3.86$^{***}$ \\ 
+  & (1.50) & (1.71) & (1.60) & (0.88) & (1.03) & (0.95) \\ 
+  & & & & & & \\ 
+ Distributive & 1.65 & 2.76$^{**}$ & 2.88$^{**}$ & 2.25$^{**}$ & 2.75$^{**}$ & 1.67 \\ 
+  & (1.17) & (1.25) & (1.30) & (1.02) & (1.13) & (1.08) \\ 
+  & & & & & & \\ 
+ Education & $-$3.04 & $-$0.90 & $-$1.82 & $-$0.77 & 1.94 & 0.62 \\ 
+  & (2.99) & (3.04) & (3.35) & (2.89) & (2.86) & (2.23) \\ 
+  & & & & & & \\ 
+ Extractive & 6.81$^{***}$ & 6.09$^{***}$ & 6.97$^{***}$ & 5.81$^{***}$ & 5.31$^{***}$ & 4.69$^{***}$ \\ 
+  & (1.31) & (1.42) & (1.48) & (1.16) & (1.23) & (1.36) \\ 
+  & & & & & & \\ 
+ FamHouseSize & $-$4.35 & $-$6.16$^{*}$ & $-$8.22$^{**}$ & $-$9.67$^{***}$ & $-$5.11$^{*}$ & $-$2.94 \\ 
+  & (2.86) & (3.15) & (3.28) & (2.66) & (2.78) & (2.27) \\ 
+  & & & & & & \\ 
+ Incomes & 8.46$^{***}$ & 4.19 & 2.73 & 4.36$^{*}$ & 2.95 & 2.99$^{*}$ \\ 
+  & (2.57) & (2.68) & (3.06) & (2.56) & (2.60) & (1.76) \\ 
+  & & & & & & \\ 
+ Indigenous & 4.47$^{***}$ & 6.12$^{***}$ & 5.90$^{***}$ & 6.81$^{***}$ & 5.62$^{***}$ & 3.97$^{***}$ \\ 
+  & (1.38) & (1.49) & (1.49) & (1.17) & (1.35) & (1.26) \\ 
+  & & & & & & \\ 
+ Islam & 2.64 & 1.20 & $-$1.04 & $-$1.21 & 0.61 & 0.15 \\ 
+  & (1.72) & (1.71) & (1.94) & (1.80) & (2.00) & (2.03) \\ 
+  & & & & & & \\ 
+ Judaism & 1.96$^{***}$ & 1.60$^{*}$ & 0.46 & 0.01 & 1.74 & 1.02 \\ 
+  & (0.71) & (0.85) & (1.05) & (1.00) & (1.26) & (1.38) \\ 
+  & & & & & & \\ 
+ ManagerAdminClericalSales & 4.62$^{***}$ & 3.99$^{***}$ & 4.32$^{***}$ & 5.21$^{***}$ & 3.28$^{***}$ & 2.10$^{***}$ \\ 
+  & (1.03) & (0.99) & (1.00) & (0.78) & (0.85) & (0.70) \\ 
+  & & & & & & \\ 
+ Married & $-$1.39 & 1.46 & 5.07$^{*}$ & 5.06$^{*}$ & 5.50$^{**}$ & 2.27 \\ 
+  & (2.64) & (2.71) & (2.91) & (2.59) & (2.79) & (2.26) \\ 
+  & & & & & & \\ 
+ MedianAge & 2.94$^{*}$ & 2.28 & 2.08 & 1.86 & 3.73$^{**}$ & 1.54 \\ 
+  & (1.63) & (1.88) & (2.08) & (1.65) & (1.55) & (1.30) \\ 
+  & & & & & & \\ 
+ NoReligion & 5.76$^{**}$ & 3.53 & 0.25 & $-$0.31 & 3.43 & 1.06 \\ 
+  & (2.59) & (2.58) & (2.98) & (2.90) & (3.45) & (3.85) \\ 
+  & & & & & & \\ 
+ OneParent\_House & $-$0.85 & 0.11 & 0.22 & 1.66 & 1.37 & $-$1.00 \\ 
+  & (1.39) & (1.46) & (1.61) & (1.38) & (1.49) & (1.34) \\ 
+  & & & & & & \\ 
+ OtherLanguageHome & 1.27 & $-$4.69 & $-$4.37 & $-$6.02 & $-$6.76 & $-$10.40$^{**}$ \\ 
+  & (4.95) & (5.50) & (5.70) & (4.44) & (5.61) & (4.97) \\ 
+  & & & & & & \\ 
+ PropertyOwned & 1.76 & 0.68 & $-$1.17 & 0.78 & $-$0.92 & $-$0.76 \\ 
+  & (1.38) & (1.43) & (1.49) & (1.09) & (1.21) & (1.19) \\ 
+  & & & & & & \\ 
+ RentLoanPrice & $-$0.70 & 1.01 & 2.12 & $-$0.54 & $-$1.54 & $-$0.31 \\ 
+  & (2.02) & (1.96) & (1.96) & (1.48) & (1.68) & (1.50) \\ 
+  & & & & & & \\ 
+ SocialServ & 2.90$^{***}$ & 0.94 & 1.91 & 1.77 & 1.89 & 2.42$^{*}$ \\ 
+  & (1.10) & (1.22) & (1.35) & (1.14) & (1.27) & (1.27) \\ 
+  & & & & & & \\ 
+ Transformative & 4.75$^{***}$ & 3.74$^{**}$ & 3.28$^{*}$ & 5.20$^{***}$ & 5.74$^{***}$ & 2.99$^{**}$ \\ 
+  & (1.41) & (1.57) & (1.74) & (1.47) & (1.59) & (1.41) \\ 
+  & & & & & & \\ 
+ Unemployment & 0.36 & $-$1.22 & $-$2.42 & $-$2.88$^{**}$ & $-$5.09$^{***}$ & $-$3.00$^{**}$ \\ 
+  & (1.42) & (1.54) & (1.73) & (1.41) & (1.51) & (1.28) \\ 
+  & & & & & & \\ 
+ Constant & 50.45$^{***}$ & 53.48$^{***}$ & 49.92$^{***}$ & 47.32$^{***}$ & 52.63$^{***}$ & 50.78$^{***}$ \\ 
+  & (0.74) & (0.56) & (0.51) & (0.35) & (0.45) & (0.67) \\ 
+  & & & & & & \\ 
+\hline \\[-1.8ex] 
+Observations & 150 & 150 & 150 & 150 & 150 & 150 \\ 
+Log Likelihood & $-$399.52 & $-$405.41 & $-$418.08 & $-$398.73 & $-$403.34 & $-$398.33 \\ 
+Akaike Inf. Crit. & 863.03 & 874.83 & 900.16 & 861.46 & 870.68 & 860.67 \\ 
+Bayesian Inf. Crit. & 951.96 & 963.76 & 989.10 & 950.40 & 959.61 & 949.60 \\ 
+\hline 
+\hline \\[-1.8ex] 
+\textit{Note:}  & \multicolumn{6}{l}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
+ & \multicolumn{6}{l}{Estimated coefficients for variable named in column one shown for} \\ 
+ & \multicolumn{6}{l}{election year indicated by column heading, with estimated standard} \\ 
+ & \multicolumn{6}{l}{deviation for each coefficient shown below in parenthesis. Overall} \\ 
+ & \multicolumn{6}{l}{summary measures for each regression equation are provided in the} \\ 
+ & \multicolumn{6}{l}{bottom panel.} \\ 
+\end{tabular} 
+\end{table} 
+
+<!--chapter:end:04-modelling.Rmd-->
+
+# Results
+```{r rhovis}
+rho_df <- bind_rows(glsmod16$rho_df %>% mutate(year = "2016"), 
+  glsmod13$rho_df %>% mutate(year = "2013"),
+  glsmod10$rho_df %>% mutate(year = "2010"), 
+  glsmod07$rho_df %>% mutate(year = "2007"),
+  glsmod04$rho_df %>% mutate(year = "2004"), 
+  glsmod01$rho_df %>% mutate(year = "2001")) %>% 
+  mutate(upper95 = estimate + 1.96*se, lower95 = estimate - 1.96*se)
+
+rho_df %>% ggplot() + 
+  geom_point(aes(x = year, y = estimate, col = factor(p < 0.05)), size = 3) +
+  geom_linerange(aes(x = year, ymin = lower95, ymax = upper95, col = factor(p < 0.05)), size = 1.5) + 
+  geom_hline(aes(yintercept = 0), alpha = 0.5, size = 1) +
+  scale_color_manual(values = c("grey50", "black")) +
+  guides(col = F)
+```
+
+The spatial autoregressive coefficient $\rho$ is significant in only the 2001 and 2016 elections, meaning that in these years an electorate's political climate was affected by the attitudes of it's neighbours. Conversely, in the other four elections, it appears that after accounting for electoral socio-demographics, there is no spatial effect, meaning electorates effectively acted independently.
+
+To investigate the socio-demographics that have a strong effect on the two-party preferred vote, partial residual plots are used. These show the direction, size and significance of an estimated effect, as the slope of the prediction line matches the estimated coefficient, and the shaded region represents a 95% confidence band. Typically the Labor party campaigns on more progressive policies, which often include tax reform that adversely affects higher income earners, and more generous social assistance programs. Although topical in the lead up to an election, incomes only significantly affected electoral two-party preference in 2016 (see Figure \@ref(fig:plotincomes)), with higher income areas associated with support for the Liberal party. In the prior elections, the estimated effect is still positive, albeit insignificant. Unemployment on the other hand, was influential in 2001, 2004 and 2007 elections(Figure \@ref(fig:plotunemploy)), with electorates with higher unemployment favouring Labor. This effect has become weaker over time, with unemployment having an estimated effect of virtually zero in 2016.
+
+```{r myvisreg, include = F}
+# Function to produce visreg style conditional plots
+my_visreg <- function(my_model, sp_weights, varname, 
+  nolabs = FALSE, xlimits = NULL, ylimits = NULL, year = "") {
+  
+  # Extract fitted parameters
+  rho <- my_model$rho_df$estimate
+  sigma <- sqrt(sum(my_model$residuals^2)/(my_model$dims$N-my_model$dims$p))
+  
+  # Spatial weights
+  w_mat <- listw2mat(sp_weights)
+  
+  # Q - where u = Qe, Q = (I - pW)^-1
+  q_mat <- solve(diag(my_model$dims$N) - rho*w_mat)
+  
+  # Omega - QQ'
+  omega_mat <- q_mat%*%t(q_mat)
+  
+  # X
+  x_mat <- my_model$my_data %>% 
+    dplyr::select(-LNP_Percent) %>% 
+    mutate(Intercept = 1) %>% 
+    dplyr::select(Intercept, everything()) %>% 
+    as.matrix()
+  
+  # Beta
+  beta_mat <- my_model$coefficients
+  
+  # T value
+  t = qt(0.975, nrow(my_model$gls_data)-ncol(my_model$gls_data))
+  
+  # Lambda matrix (FGLS)
+  x <- round(seq(min(x_mat[, varname]), max(x_mat[, varname]), 0.025), 3)
+  lambda_mat <- data.frame(matrix(0, nrow = length(x), ncol = ncol(x_mat)))
+  names(lambda_mat) <- dimnames(x_mat)[[2]]
+  lambda_mat[, varname] <- x
+  lambda_mat$Intercept <- 1
+  lambda_mat <- as.matrix(lambda_mat)
+  
+  # Confidence interval
+  plot_df <- data.frame(variable = x, fitted = lambda_mat%*%beta_mat, variance = 0)
+  
+  for (i in 1:nrow(lambda_mat)) {
+    lambda <- lambda_mat[i, ]
+    plot_df$variance[i] = sigma^2 * t(lambda) %*% 
+      solve(t(x_mat) %*% solve(omega_mat) %*% x_mat) %*% 
+      lambda
+  }
+  
+  plot_df <- plot_df %>% 
+    mutate(upper95 = fitted + t*sqrt(variance), lower95 = fitted - t*sqrt(variance))
+  
+  # Partial residuals
+  points_df <- data.frame(
+    variable = my_model$my_data[, varname] %>% unname,
+    part_res = (my_model$my_data$LNP_Percent - x_mat%*%my_model$coefficients) + my_model$coefficients[varname]*x_mat[, varname] + my_model$coefficients[1]
+  )
+  
+  # Plot
+  myplot <- ggplot(data = plot_df) + 
+    geom_ribbon(aes(x = variable, ymin = lower95, ymax = upper95), fill = "grey80") + 
+    geom_point(aes(x = variable, y = part_res), data = points_df, size = 0.75, col = "grey50") + 
+    geom_line(aes(x = variable, y = fitted), col = "blue", size = 1) +
+    #geom_hline(aes(yintercept = min(upper95)), col = "red") +
+    #geom_hline(aes(yintercept = max(lower95)), col = "blue") +
+    theme_bw() + 
+    labs(x = varname, y = "Response") + 
+    ggtitle(year) +
+    theme(plot.title = element_text(face = "bold", size = 10, hjust = 0.5))
+  
+  if (nolabs == TRUE) {
+    myplot <- myplot + labs(x = "", y = "")
+  }
+  
+  if (!is.null(xlimits) & !is.null(ylimits)) {
+    myplot <- myplot + coord_cartesian(xlim = xlimits, ylim = ylimits)
+  }
+  
+  return(myplot)
+}
+
+# Grid visreg
+library(gridExtra)
+library(grid)
+grid_visreg <- function(varname, xvar_title, xlimits, ylimits) {
+  p16 <- my_visreg(glsmod16, sp_weights_16, varname = varname, nolabs = T, year = "2016", xlimits, ylimits)
+  p13 <- my_visreg(glsmod13, sp_weights_13, varname = varname, nolabs = T, year = "2013", xlimits, ylimits)
+  p10 <- my_visreg(glsmod10, sp_weights_10, varname = varname, nolabs = T, year = "2010", xlimits, ylimits)
+  p07 <- my_visreg(glsmod07, sp_weights_07, varname = varname, nolabs = T, year = "2007", xlimits, ylimits)
+  p04 <- my_visreg(glsmod04, sp_weights_04, varname = varname, nolabs = T, year = "2004", xlimits, ylimits)
+  p01 <- my_visreg(glsmod01, sp_weights_01, varname = varname, nolabs = T, year = "2001", xlimits, ylimits)
+  
+  plots <- grid.arrange(p01, p04, p07, p10, p13, p16, nrow = 2, 
+    left = textGrob("Two-party preferred vote (%)", gp = gpar(cex = 0.8), rot = 90), 
+    bottom = textGrob(xvar_title, gp = gpar(cex = 0.8)))
+  
+  return(plots)
+}
+
+```
+
+```{r plotincomes, fig.cap = "Effect of Incomes"}
+p <- grid_visreg("Incomes", xvar_title = "Incomes", xlimits = c(-1.5, 3.6), ylimits = c(30, 95))
+```
+
+```{r plotunemploy, fig.cap = "Effect of Unemployment"}
+p <- grid_visreg("Unemployment", xvar_title = "Unemployment", xlimits = c(-2.1, 3.4), ylimits = c(33, 70))
+```
+
+
+
+
+
+
+
+
+This section summarises the main findings made about the relationships between socio-demographic chracteristics and voting behaviour. 
+
+```{r}
+coef_df %>% 
+  filter(variable != "Intercept") %>% 
+  mutate(upper95 = estimate + 1.96*se, lower95 = estimate - 1.96*se) %>% 
+  ggplot() +
+  geom_point(aes(x = year, y = estimate, col = factor(p < 0.05)), size = 2) +
+  geom_linerange(aes(x = year, ymin = lower95, ymax = upper95, col = factor(p < 0.05)), size = 1) + 
+  geom_hline(aes(yintercept = 0), alpha = 0.5, size = 1) + 
+  facet_wrap(~variable, scales = "free", ncol = 5) +
+  scale_color_manual(values = c("grey50", "black")) + 
+  theme(axis.text = element_text(size = 6), strip.text = element_text(size = 6)) +
+  labs(x = "", y = "Year") +
+  scale_x_continuous(breaks = c(2001, 2004, 2007, 2010, 2013, 2016)) +
+  guides(col = F)
+```
+
+
+<!--chapter:end:05-results.Rmd-->
+
+`r if (knitr:::is_html_output()) '
+# References {-}
+'`
+
+<!--chapter:end:06-references.Rmd-->
+
