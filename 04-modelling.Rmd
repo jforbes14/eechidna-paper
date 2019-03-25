@@ -1,3 +1,8 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
 # Modelling {#modelling}
 
 ## Data pre-processing
@@ -41,80 +46,20 @@ Table 4.1 details the resultant estimated model coefficients and their estimated
 
 ```{r printmodels, eval = F}
 # Add rho and make adjustments to this
-temp_fgls <- function(my_formula, my_data, sp_weights) {
-  # Spatial weights matrix
-  w_mat <- listw2mat(sp_weights)
-  
-  # Get OLS residuals
-  ols_model <- lm(my_formula, my_data)
-  my_res <- ols_model$residuals
-  
-  # Solve for rho
-  res_model <- lm(my_res ~ w_mat%*%my_res)
-  rho <- res_model$coefficients[2]
-  rho_df <- data.frame(estimate = rho, se = summary(res_model)$coefficients[2,2], p = summary(res_model)$coefficients[2,4])
-  
-  # Transform data for GLS
-  trans_mat <- diag(nrow(my_data)) - rho*w_mat
-  gls_data <- data.frame(LNP_Percent = trans_mat %*% my_data$LNP_Percent,
-    Intercept = trans_mat %*% rep(1,nrow(my_data))) %>% 
-    bind_cols(as.data.frame(trans_mat %*% as.matrix(my_data %>% select(-LNP_Percent))))
-  
-  # GLS model
-  my_formula <- formula(paste0(my_formula,  " - 1"))
-  gls_model <- gls(my_formula, gls_data)
-  
-  return(gls_model)
-}
-
-# Models
-full_formula = "LNP_Percent ~ ."
-
-# 2016
-glsmod16 <- temp_fgls(full_formula, 
-  my_data = model_df %>% filter(year == "2016") %>% select(-c(DivisionNm, year)),
-  sp_weights = sp_weights_16)
-
-# 2013
-glsmod13 <- temp_fgls(full_formula, 
-  my_data = model_df %>% filter(year == "2013") %>% select(-c(DivisionNm, year)),
-  sp_weights = sp_weights_13)
-
-# 2010
-glsmod10 <- temp_fgls(full_formula, 
-  my_data = model_df %>% filter(year == "2010") %>% select(-c(DivisionNm, year)),
-  sp_weights = sp_weights_10)
-
-# 2007
-glsmod07 <- temp_fgls(full_formula, 
-  my_data = model_df %>% filter(year == "2007") %>% select(-c(DivisionNm, year)),
-  sp_weights = sp_weights_07)
-
-# 2004
-glsmod04 <- temp_fgls(full_formula, 
-  my_data = model_df %>% filter(year == "2004") %>% select(-c(DivisionNm, year)),
-  sp_weights = sp_weights_04)
-
-# 2001
-glsmod01 <- temp_fgls(full_formula, 
-  my_data = model_df %>% filter(year == "2001") %>% select(-c(DivisionNm, year)),
-  sp_weights = sp_weights_01)
-
-# Stargazer
 stargazer::stargazer(glsmod16, glsmod13, glsmod10, glsmod07, glsmod04, glsmod01, header = FALSE, 
   column.sep.width = "1pt", 
-  title = "Estimated model using the final set of predictor variables for each of the six elections.",
+  title = "Estimated model for each of the six elections.",
   dep.var.labels = "Two-party preferred vote in favor of the Liberal party", 
-  font.size = "scriptsize", df = FALSE, digits = 2, 
+  font.size = "scriptsize", digits = 2, 
   column.labels = c("2001", "2004", "2007", "2010", "2013", "2016"),
   notes = c("Estimated coefficients for variable named in column one shown for", "election year indicated by column heading, with estimated standard", "deviation for each coefficient shown below in parenthesis. Overall", "summary measures for each regression equation are provided in the", "bottom panel."),
   notes.align = "l")
 ```
 
 \begin{table}[!htbp] \centering 
-  \caption{Estimated model using the final set of predictor variables for each of the six elections.} 
+  \caption{Estimated model for each of the six elections.} 
   \label{} 
-\scriptsize 
+\tiny 
 \begin{tabular}{@{\extracolsep{1pt}}lcccccc} 
 \\[-1.8ex]\hline 
 \hline \\[-1.8ex] 
@@ -163,8 +108,17 @@ stargazer::stargazer(glsmod16, glsmod13, glsmod10, glsmod07, glsmod04, glsmod01,
  Distributive & 1.65 & 2.76$^{**}$ & 2.88$^{**}$ & 2.25$^{**}$ & 2.75$^{**}$ & 1.67 \\ 
   & (1.17) & (1.25) & (1.30) & (1.02) & (1.13) & (1.08) \\ 
   & & & & & & \\ 
+ Education & $-$3.04 & $-$0.90 & $-$1.82 & $-$0.77 & 1.94 & 0.62 \\ 
+  & (2.99) & (3.04) & (3.35) & (2.89) & (2.86) & (2.23) \\ 
+  & & & & & & \\ 
  Extractive & 6.81$^{***}$ & 6.09$^{***}$ & 6.97$^{***}$ & 5.81$^{***}$ & 5.31$^{***}$ & 4.69$^{***}$ \\ 
   & (1.31) & (1.42) & (1.48) & (1.16) & (1.23) & (1.36) \\ 
+  & & & & & & \\ 
+ FamHouseSize & $-$4.35 & $-$6.16$^{*}$ & $-$8.22$^{**}$ & $-$9.67$^{***}$ & $-$5.11$^{*}$ & $-$2.94 \\ 
+  & (2.86) & (3.15) & (3.28) & (2.66) & (2.78) & (2.27) \\ 
+  & & & & & & \\ 
+ Incomes & 8.46$^{***}$ & 4.19 & 2.73 & 4.36$^{*}$ & 2.95 & 2.99$^{*}$ \\ 
+  & (2.57) & (2.68) & (3.06) & (2.56) & (2.60) & (1.76) \\ 
   & & & & & & \\ 
  Indigenous & 4.47$^{***}$ & 6.12$^{***}$ & 5.90$^{***}$ & 6.81$^{***}$ & 5.62$^{***}$ & 3.97$^{***}$ \\ 
   & (1.38) & (1.49) & (1.49) & (1.17) & (1.35) & (1.26) \\ 
@@ -193,26 +147,17 @@ stargazer::stargazer(glsmod16, glsmod13, glsmod10, glsmod07, glsmod04, glsmod01,
  OtherLanguageHome & 1.27 & $-$4.69 & $-$4.37 & $-$6.02 & $-$6.76 & $-$10.40$^{**}$ \\ 
   & (4.95) & (5.50) & (5.70) & (4.44) & (5.61) & (4.97) \\ 
   & & & & & & \\ 
- SocialServ & 2.90$^{***}$ & 0.94 & 1.91 & 1.77 & 1.89 & 2.42$^{*}$ \\ 
-  & (1.10) & (1.22) & (1.35) & (1.14) & (1.27) & (1.27) \\ 
-  & & & & & & \\ 
- Transformative & 4.75$^{***}$ & 3.74$^{**}$ & 3.28$^{*}$ & 5.20$^{***}$ & 5.74$^{***}$ & 2.99$^{**}$ \\ 
-  & (1.41) & (1.57) & (1.74) & (1.47) & (1.59) & (1.41) \\ 
-  & & & & & & \\ 
- Education & $-$3.04 & $-$0.90 & $-$1.82 & $-$0.77 & 1.94 & 0.62 \\ 
-  & (2.99) & (3.04) & (3.35) & (2.89) & (2.86) & (2.23) \\ 
-  & & & & & & \\ 
- FamHouseSize & $-$4.35 & $-$6.16$^{*}$ & $-$8.22$^{**}$ & $-$9.67$^{***}$ & $-$5.11$^{*}$ & $-$2.94 \\ 
-  & (2.86) & (3.15) & (3.28) & (2.66) & (2.78) & (2.27) \\ 
-  & & & & & & \\ 
  PropertyOwned & 1.76 & 0.68 & $-$1.17 & 0.78 & $-$0.92 & $-$0.76 \\ 
   & (1.38) & (1.43) & (1.49) & (1.09) & (1.21) & (1.19) \\ 
   & & & & & & \\ 
  RentLoanPrice & $-$0.70 & 1.01 & 2.12 & $-$0.54 & $-$1.54 & $-$0.31 \\ 
   & (2.02) & (1.96) & (1.96) & (1.48) & (1.68) & (1.50) \\ 
   & & & & & & \\ 
- Incomes & 8.46$^{***}$ & 4.19 & 2.73 & 4.36$^{*}$ & 2.95 & 2.99$^{*}$ \\ 
-  & (2.57) & (2.68) & (3.06) & (2.56) & (2.60) & (1.76) \\ 
+ SocialServ & 2.90$^{***}$ & 0.94 & 1.91 & 1.77 & 1.89 & 2.42$^{*}$ \\ 
+  & (1.10) & (1.22) & (1.35) & (1.14) & (1.27) & (1.27) \\ 
+  & & & & & & \\ 
+ Transformative & 4.75$^{***}$ & 3.74$^{**}$ & 3.28$^{*}$ & 5.20$^{***}$ & 5.74$^{***}$ & 2.99$^{**}$ \\ 
+  & (1.41) & (1.57) & (1.74) & (1.47) & (1.59) & (1.41) \\ 
   & & & & & & \\ 
  Unemployment & 0.36 & $-$1.22 & $-$2.42 & $-$2.88$^{**}$ & $-$5.09$^{***}$ & $-$3.00$^{**}$ \\ 
   & (1.42) & (1.54) & (1.73) & (1.41) & (1.51) & (1.28) \\ 
@@ -232,6 +177,6 @@ Bayesian Inf. Crit. & 951.96 & 963.76 & 989.10 & 950.40 & 959.61 & 949.60 \\
  & \multicolumn{6}{l}{election year indicated by column heading, with estimated standard} \\ 
  & \multicolumn{6}{l}{deviation for each coefficient shown below in parenthesis. Overall} \\ 
  & \multicolumn{6}{l}{summary measures for each regression equation are provided in the} \\ 
- & \multicolumn{6}{l}{bottom panel.} \\
+ & \multicolumn{6}{l}{bottom panel.} \\ 
 \end{tabular} 
 \end{table} 
