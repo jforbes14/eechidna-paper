@@ -1,12 +1,275 @@
 # Introduction {#intro}
 
-```{r setup, include=FALSE}
+```{r setup, include=FALSE, message=FALSE}
 knitr::opts_chunk$set(echo = F, fig.pos = 'h', fig.align = 'center')
 library(tidyverse)
 library(eechidna)
 library(ggplot2)
 library(ggthemes)
 library(knitr)
+library(nlme)
+library(rgeos)
+library(spdep)
+
+# Data
+data(tpp01)
+data(tpp04)
+data(tpp07)
+data(tpp10)
+data(tpp13)
+data(tpp16)
+data(abs2001)
+data(abs2004)
+data(abs2007)
+data(abs2010)
+data(abs2013)
+data(abs2016)
+```
+
+```{r wrangle, include = F, message = F}
+# Function to standardize variables
+standardise_vars <- function(df) {
+  hold <- df
+  num_cols <- sapply(df, class) == 'numeric'
+  df[, num_cols] <- lapply(df[, num_cols], scale)
+  names(df) <- names(hold)
+  df$LNP_Percent <- hold$LNP_Percent
+  return(df)
+}
+
+# Combine and standardize
+my_df <- bind_rows(
+  left_join(tpp01, standardise_vars(abs2001) %>% dplyr::select(-c(UniqueID, Area, ends_with("NS"), Population)), by = c("DivisionNm", "StateAb"="State")) %>% mutate(year = "2001"),
+  left_join(tpp04, standardise_vars(abs2004) %>% dplyr::select(-UniqueID), by = c("DivisionNm")) %>% mutate(year = "2004"),
+  left_join(tpp07, standardise_vars(abs2007) %>% dplyr::select(-UniqueID), by = c("DivisionNm")) %>% mutate(year = "2007"),
+  left_join(tpp10, standardise_vars(abs2010) %>% dplyr::select(-UniqueID), by = c("DivisionNm")) %>% mutate(year = "2010"),
+  left_join(tpp13, standardise_vars(abs2013) %>% dplyr::select(-UniqueID), by = c("DivisionNm")) %>% mutate(year = "2013"),
+  left_join(tpp16, standardise_vars(abs2016) %>% dplyr::select(-c(UniqueID, Area, ends_with("NS"), Population)), by = c("DivisionNm", "StateAb"="State")) %>% mutate(year = "2016")
+) %>% 
+  mutate(year = factor(year)) %>% 
+  dplyr::select(-c(starts_with("Age"), StateAb, LNP_Votes, ALP_Votes, ALP_Percent, TotalVotes,
+    Swing, InternetUse, InternetAccess, EnglishOnly, Other_NonChrist, OtherChrist, Volunteer, EmuneratedElsewhere, UniqueID, Catholic, Anglican))
+
+# Create final df for modelling
+
+factors_df <- my_df %>% 
+  mutate(Education = BachelorAbv + HighSchool + Professional + Finance - Laborer - Tradesperson - DipCert,
+    FamHouseSize = FamilyRatio + AverageHouseholdSize + Couple_WChild_House - Couple_NoChild_House -
+      SP_House,
+    PropertyOwned = Owned + Mortgage - Renting - PublicHousing,
+    RentLoanPrice = MedianRent + MedianLoanPay,
+    Incomes = MedianFamilyIncome + MedianHouseholdIncome + MedianPersonalIncome,
+    Unemployment = Unemployed - LFParticipation) %>% 
+  dplyr::select(-c(BachelorAbv, HighSchool, Professional, Finance, Laborer, Tradesperson, DipCert, FamilyRatio,
+    AverageHouseholdSize, Couple_WChild_House, Couple_NoChild_House, SP_House, Owned, Mortgage, Renting,
+    PublicHousing, MedianFamilyIncome, MedianHouseholdIncome, MedianPersonalIncome, MedianRent, 
+    MedianLoanPay, Unemployed, LFParticipation)) 
+
+# Now standardize factors
+
+small_df <- bind_rows(
+  factors_df %>% filter(year == "2001") %>% standardise_vars(),
+  factors_df %>% filter(year == "2004") %>% standardise_vars(),
+  factors_df %>% filter(year == "2007") %>% standardise_vars(),
+  factors_df %>% filter(year == "2010") %>% standardise_vars(),
+  factors_df %>% filter(year == "2013") %>% standardise_vars(),
+  factors_df %>% filter(year == "2016") %>% standardise_vars()
+)
+
+# Order electorates in alphabetical order to match spatial matrix
+model_df <- small_df %>% 
+  arrange(year, DivisionNm)
+```
+
+```{r spatialweights, eval = F}
+# Compute spatial weights matrix
+sp_weights_matrix <- function(sF) {
+
+dist_matrix <- function(shapefile) {
+  dist_mat <- matrix(NA, nrow = 150, ncol = 150)
+  rownames(dist_mat) <- sort(shapefile$elect_div)
+  colnames(dist_mat) <- sort(shapefile$elect_div)
+  
+  for (i in 1:(nrow(dist_mat)-1)) {
+    rname = rownames(dist_mat)[i]
+    row_poly = shapefile %>% subset(elect_div == rname)
+    
+    for (j in (i+1):ncol(dist_mat)) {
+      
+      cname = rownames(dist_mat)[j]
+      col_poly = shapefile %>% subset(elect_div == cname)
+      dist = gDistance(row_poly, col_poly)
+      dist_mat[i,j] = dist
+      
+    }
+    print(i)
+  }
+  
+  # Now copy to lower triange
+  for (i in 2:nrow(dist_mat)) {
+    for (j in 1:(i-1)) {
+      dist_mat[i,j] = dist_mat[j,i]
+    }
+  }
+  
+  # Check it is symmetric
+  if(!isSymmetric(dist_mat)) {
+    print("Warning! Matrix is not symmetric. Error has occured.")
+  }
+  
+  return(dist_mat)
+}
+
+my_dist_mat <- dist_matrix(sF)
+
+# S matrix
+
+s_mat <- function(dist_mat) {
+  s_mat <- dist_mat
+  
+  for (i in 1:nrow(dist_mat)) {
+    for (j in 1:nrow(dist_mat)) {
+      a = dist_mat[i,j]
+      
+      if (is.na(a)) {
+        b = 0
+      } else {
+        b = ifelse(a == 0, 1, 0)
+      }
+      
+      s_mat[i,j] = b
+      
+    }
+  }
+  
+  return(s_mat)
+}
+
+my_smat <- s_mat(my_dist_mat)
+
+# Turn into W matrix
+
+w_mat <- function(s_mat) {
+  
+  w_mat <- s_mat
+  rsums = rowSums(s_mat)
+  
+  for (i in 1:nrow(s_mat)) {
+    w_mat[i,] <- s_mat[i,]/rsums[i]
+  }
+  
+  return(w_mat)
+}
+
+my_wmat <- w_mat(my_smat)
+
+# Turn into listw
+
+my_listw <- mat2listw(my_wmat)
+
+return(my_listw)
+
+}
+
+# Get spatial weights
+sF_16 <- sF_download(2016)
+sF_13 <- sF_download(2013)
+sF_10 <- sF_download(2010)
+sF_07 <- sF_download(2007)
+sF_04 <- sF_download(2004)
+sF_01 <- sF_download(2001)
+
+sp_weights_16 <- sp_weights_matrix(sF_16)
+sp_weights_13 <- sp_weights_matrix(sF_13)
+sp_weights_10 <- sp_weights_matrix(sF_10)
+sp_weights_07 <- sp_weights_matrix(sF_07)
+sp_weights_04 <- sp_weights_matrix(sF_04)
+sp_weights_01 <- sp_weights_matrix(sF_01)
+```
+
+```{r FGLS, include = F}
+# Instead of running spatial weights
+load("/Users/Jeremy/Documents/R/eechidna-modelling/data/sp_weights_01.rda")
+load("/Users/Jeremy/Documents/R/eechidna-modelling/data/sp_weights_04.rda")
+load("/Users/Jeremy/Documents/R/eechidna-modelling/data/sp_weights_07.rda")
+load("/Users/Jeremy/Documents/R/eechidna-modelling/data/sp_weights_10.rda")
+load("/Users/Jeremy/Documents/R/eechidna-modelling/data/sp_weights_13.rda")
+load("/Users/Jeremy/Documents/R/eechidna-modelling/data/sp_weights_16.rda")
+
+
+# Function for FGLS
+my_fgls <- function(my_formula, my_data, sp_weights) {
+  # Spatial weights matrix
+  w_mat <- listw2mat(sp_weights)
+  
+  # Get OLS residuals
+  ols_model <- lm(my_formula, my_data)
+  my_res <- ols_model$residuals
+  
+  # Solve for rho
+  res_model <- lm(my_res ~ w_mat%*%my_res)
+  rho <- res_model$coefficients[2]
+  rho_df <- data.frame(estimate = rho, se = summary(res_model)$coefficients[2,2], p = summary(res_model)$coefficients[2,4])
+  
+  # Transform data for GLS
+  trans_mat <- diag(nrow(my_data)) - rho*w_mat
+  gls_data <- data.frame(LNP_Percent = trans_mat %*% my_data$LNP_Percent,
+    Intercept = trans_mat %*% rep(1,nrow(my_data))) %>% 
+    bind_cols(as.data.frame(trans_mat %*% as.matrix(my_data %>% select(-LNP_Percent))))
+  
+  # GLS model
+  my_formula <- formula(paste0(my_formula,  " - 1"))
+  gls_model <- gls(my_formula, gls_data)
+  gls_model$rho_df <- rho_df
+  gls_model$gls_data <- gls_data
+  gls_model$my_data <- my_data
+  
+  return(gls_model)
+}
+
+## Run full models for each year
+full_formula = "LNP_Percent ~ ."
+
+# 2016
+glsmod16 <- my_fgls(full_formula, 
+  my_data = model_df %>% filter(year == "2016") %>% select(-c(DivisionNm, year)),
+  sp_weights = sp_weights_16)
+
+# 2013
+glsmod13 <- my_fgls(full_formula, 
+  my_data = model_df %>% filter(year == "2013") %>% select(-c(DivisionNm, year)),
+  sp_weights = sp_weights_13)
+
+# 2010
+glsmod10 <- my_fgls(full_formula, 
+  my_data = model_df %>% filter(year == "2010") %>% select(-c(DivisionNm, year)),
+  sp_weights = sp_weights_10)
+
+# 2007
+glsmod07 <- my_fgls(full_formula, 
+  my_data = model_df %>% filter(year == "2007") %>% select(-c(DivisionNm, year)),
+  sp_weights = sp_weights_07)
+
+# 2004
+glsmod04 <- my_fgls(full_formula, 
+  my_data = model_df %>% filter(year == "2004") %>% select(-c(DivisionNm, year)),
+  sp_weights = sp_weights_04)
+
+# 2001
+glsmod01 <- my_fgls(full_formula, 
+  my_data = model_df %>% filter(year == "2001") %>% select(-c(DivisionNm, year)),
+  sp_weights = sp_weights_01)
+
+## Visualise coefficients and significance
+
+coef_df <- bind_rows(
+  data.frame(variable = glsmod16$coefficients %>% names, estimate = glsmod16$coefficients %>% unname, se = summary(glsmod16)$tTable[, "Std.Error"] %>% unname, p = summary(glsmod16)$tTable[, "p-value"] %>% unname, year = 2016),
+  data.frame(variable = glsmod13$coefficients %>% names, estimate = glsmod13$coefficients %>% unname, se = summary(glsmod13)$tTable[, "Std.Error"] %>% unname, p = summary(glsmod13)$tTable[, "p-value"] %>% unname, year = 2013),
+  data.frame(variable = glsmod10$coefficients %>% names, estimate = glsmod10$coefficients %>% unname, se = summary(glsmod10)$tTable[, "Std.Error"] %>% unname, p = summary(glsmod10)$tTable[, "p-value"] %>% unname, year = 2010),
+  data.frame(variable = glsmod07$coefficients %>% names, estimate = glsmod07$coefficients %>% unname, se = summary(glsmod07)$tTable[, "Std.Error"] %>% unname, p = summary(glsmod07)$tTable[, "p-value"] %>% unname, year = 2007),
+  data.frame(variable = glsmod04$coefficients %>% names, estimate = glsmod04$coefficients %>% unname, se = summary(glsmod04)$tTable[, "Std.Error"] %>% unname, p = summary(glsmod04)$tTable[, "p-value"] %>% unname, year = 2004),
+  data.frame(variable = glsmod01$coefficients %>% names, estimate = glsmod01$coefficients %>% unname, se = summary(glsmod01)$tTable[, "Std.Error"] %>% unname, p = summary(glsmod01)$tTable[, "p-value"] %>% unname, year = 2001)
+)
 ```
 
 Australia has changed in many ways over the last two decades. Rising house prices, country-wide improvements in education, an ageing population, and a decline in religious affiliation, are just a few facets of the country's evolving socio-demographic characteristics. At the same time, political power has moved back and forth between the two major parties. In the 2007 and 2010 federal elections, the Australian Labor Party (Labor) was victorious, whereas the 2001, 2004, 2013 and 2016 elections were won by the Liberal National coalition (Liberal). The two-party preferred vote, a measure of support between these two parties, fluctuated between 47.3% and 53.5% (in favour of the Liberal party) over this period. This study explores how electoral characteristics relate to two-party preference, and whether their effects have changed over time. Electoral socio-demographics are derived from the Census, and vote counts are obtained from federal elections.
