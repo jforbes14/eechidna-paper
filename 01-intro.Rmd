@@ -1,7 +1,7 @@
 # Introduction {#intro}
 
 ```{r setup, include=FALSE, message=FALSE}
-knitr::opts_chunk$set(echo = F, fig.pos = 'h', fig.align = 'center', cache = T)
+knitr::opts_chunk$set(echo = F, fig.pos = 'h', fig.align = 'center', cache = T, message = F)
 library(tidyverse)
 library(eechidna)
 library(ggplot2)
@@ -63,7 +63,7 @@ factors_df <- my_df %>%
   dplyr::select(-c(BachelorAbv, HighSchool, Professional, Finance, Laborer, Tradesperson, DipCert, FamilyRatio,
     AverageHouseholdSize, Couple_WChild_House, Couple_NoChild_House, SP_House, Owned, Mortgage, Renting,
     PublicHousing, MedianFamilyIncome, MedianHouseholdIncome, MedianPersonalIncome, MedianRent, 
-    MedianLoanPay, Unemployed, LFParticipation)) 
+    MedianLoanPay, Unemployed, LFParticipation))
 
 # Now standardize factors
 
@@ -78,7 +78,8 @@ small_df <- bind_rows(
 
 # Order electorates in alphabetical order to match spatial matrix
 model_df <- small_df %>% 
-  arrange(year, DivisionNm)
+  arrange(year, DivisionNm) %>% 
+  dplyr::select(order(colnames(.)))
 ```
 
 ```{r spatialweights, eval = F}
@@ -220,6 +221,11 @@ my_fgls <- function(my_formula, my_data, sp_weights) {
   # GLS model
   my_formula <- formula(paste0(my_formula,  " - 1"))
   gls_model <- gls(my_formula, gls_data)
+  
+  # Call to function with stargazer
+  gls_model$call$model <- formula(paste0("LNP_Percent ~ ", paste0(names(gls_data)[-1], collapse = " + ")))
+  
+  # Rho and data
   gls_model$rho_df <- rho_df
   gls_model$gls_data <- gls_data
   gls_model$my_data <- my_data
