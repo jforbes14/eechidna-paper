@@ -1,2 +1,156 @@
 # Results
+```{r rhovis}
+rho_df <- bind_rows(glsmod16$rho_df %>% mutate(year = "2016"), 
+  glsmod13$rho_df %>% mutate(year = "2013"),
+  glsmod10$rho_df %>% mutate(year = "2010"), 
+  glsmod07$rho_df %>% mutate(year = "2007"),
+  glsmod04$rho_df %>% mutate(year = "2004"), 
+  glsmod01$rho_df %>% mutate(year = "2001")) %>% 
+  mutate(upper95 = estimate + 1.96*se, lower95 = estimate - 1.96*se)
+
+rho_df %>% ggplot() + 
+  geom_point(aes(x = year, y = estimate, col = factor(p < 0.05)), size = 3) +
+  geom_linerange(aes(x = year, ymin = lower95, ymax = upper95, col = factor(p < 0.05)), size = 1.5) + 
+  geom_hline(aes(yintercept = 0), alpha = 0.5, size = 1) +
+  scale_color_manual(values = c("grey50", "black")) +
+  guides(col = F)
+```
+
+The spatial autoregressive coefficient $\rho$ is significant in only the 2001 and 2016 elections, meaning that in these years an electorate's political climate was affected by the attitudes of it's neighbours. Conversely, in the other four elections, it appears that after accounting for electoral socio-demographics, there is no spatial effect, meaning electorates effectively acted independently.
+
+To investigate the socio-demographics that have a strong effect on the two-party preferred vote, partial residual plots are used. These show the direction, size and significance of an estimated effect, as the slope of the prediction line matches the estimated coefficient, and the shaded region represents a 95% confidence band. Typically the Labor party campaigns on more progressive policies, which often include tax reform that adversely affects higher income earners, and more generous social assistance programs. Although topical in the lead up to an election, incomes only significantly affected electoral two-party preference in 2016 (see Figure \@ref(fig:plotincomes)), with higher income areas associated with support for the Liberal party. In the prior elections, the estimated effect is still positive, albeit insignificant. Unemployment on the other hand, was influential in 2001, 2004 and 2007 elections(Figure \@ref(fig:plotunemploy)), with electorates with higher unemployment favouring Labor. This effect has become weaker over time, with unemployment having an estimated effect of virtually zero in 2016.
+
+```{r myvisreg, include = F}
+# Function to produce visreg style conditional plots
+my_visreg <- function(my_model, sp_weights, varname, 
+  nolabs = FALSE, xlimits = NULL, ylimits = NULL, year = "") {
+  
+  # Extract fitted parameters
+  rho <- my_model$rho_df$estimate
+  sigma <- sqrt(sum(my_model$residuals^2)/(my_model$dims$N-my_model$dims$p))
+  
+  # Spatial weights
+  w_mat <- listw2mat(sp_weights)
+  
+  # Q - where u = Qe, Q = (I - pW)^-1
+  q_mat <- solve(diag(my_model$dims$N) - rho*w_mat)
+  
+  # Omega - QQ'
+  omega_mat <- q_mat%*%t(q_mat)
+  
+  # X
+  x_mat <- my_model$my_data %>% 
+    dplyr::select(-LNP_Percent) %>% 
+    mutate(Intercept = 1) %>% 
+    dplyr::select(Intercept, everything()) %>% 
+    as.matrix()
+  
+  # Beta
+  beta_mat <- my_model$coefficients
+  
+  # T value
+  t = qt(0.975, nrow(my_model$gls_data)-ncol(my_model$gls_data))
+  
+  # Lambda matrix (FGLS)
+  x <- round(seq(min(x_mat[, varname]), max(x_mat[, varname]), 0.025), 3)
+  lambda_mat <- data.frame(matrix(0, nrow = length(x), ncol = ncol(x_mat)))
+  names(lambda_mat) <- dimnames(x_mat)[[2]]
+  lambda_mat[, varname] <- x
+  lambda_mat$Intercept <- 1
+  lambda_mat <- as.matrix(lambda_mat)
+  
+  # Confidence interval
+  plot_df <- data.frame(variable = x, fitted = lambda_mat%*%beta_mat, variance = 0)
+  
+  for (i in 1:nrow(lambda_mat)) {
+    lambda <- lambda_mat[i, ]
+    plot_df$variance[i] = sigma^2 * t(lambda) %*% 
+      solve(t(x_mat) %*% solve(omega_mat) %*% x_mat) %*% 
+      lambda
+  }
+  
+  plot_df <- plot_df %>% 
+    mutate(upper95 = fitted + t*sqrt(variance), lower95 = fitted - t*sqrt(variance))
+  
+  # Partial residuals
+  points_df <- data.frame(
+    variable = my_model$my_data[, varname] %>% unname,
+    part_res = (my_model$my_data$LNP_Percent - x_mat%*%my_model$coefficients) + my_model$coefficients[varname]*x_mat[, varname] + my_model$coefficients[1]
+  )
+  
+  # Plot
+  myplot <- ggplot(data = plot_df) + 
+    geom_ribbon(aes(x = variable, ymin = lower95, ymax = upper95), fill = "grey80") + 
+    geom_point(aes(x = variable, y = part_res), data = points_df, size = 0.75, col = "grey50") + 
+    geom_line(aes(x = variable, y = fitted), col = "blue", size = 1) +
+    #geom_hline(aes(yintercept = min(upper95)), col = "red") +
+    #geom_hline(aes(yintercept = max(lower95)), col = "blue") +
+    theme_bw() + 
+    labs(x = varname, y = "Response") + 
+    ggtitle(year) +
+    theme(plot.title = element_text(face = "bold", size = 10, hjust = 0.5))
+  
+  if (nolabs == TRUE) {
+    myplot <- myplot + labs(x = "", y = "")
+  }
+  
+  if (!is.null(xlimits) & !is.null(ylimits)) {
+    myplot <- myplot + coord_cartesian(xlim = xlimits, ylim = ylimits)
+  }
+  
+  return(myplot)
+}
+
+# Grid visreg
+library(gridExtra)
+library(grid)
+grid_visreg <- function(varname, xvar_title, xlimits, ylimits) {
+  p16 <- my_visreg(glsmod16, sp_weights_16, varname = varname, nolabs = T, year = "2016", xlimits, ylimits)
+  p13 <- my_visreg(glsmod13, sp_weights_13, varname = varname, nolabs = T, year = "2013", xlimits, ylimits)
+  p10 <- my_visreg(glsmod10, sp_weights_10, varname = varname, nolabs = T, year = "2010", xlimits, ylimits)
+  p07 <- my_visreg(glsmod07, sp_weights_07, varname = varname, nolabs = T, year = "2007", xlimits, ylimits)
+  p04 <- my_visreg(glsmod04, sp_weights_04, varname = varname, nolabs = T, year = "2004", xlimits, ylimits)
+  p01 <- my_visreg(glsmod01, sp_weights_01, varname = varname, nolabs = T, year = "2001", xlimits, ylimits)
+  
+  plots <- grid.arrange(p01, p04, p07, p10, p13, p16, nrow = 2, 
+    left = textGrob("Two-party preferred vote (%)", gp = gpar(cex = 0.8), rot = 90), 
+    bottom = textGrob(xvar_title, gp = gpar(cex = 0.8)))
+  
+  return(plots)
+}
+
+```
+
+```{r plotincomes, fig.cap = "Effect of Incomes"}
+p <- grid_visreg("Incomes", xvar_title = "Incomes", xlimits = c(-1.5, 3.6), ylimits = c(30, 95))
+```
+
+```{r plotunemploy, fig.cap = "Effect of Unemployment"}
+p <- grid_visreg("Unemployment", xvar_title = "Unemployment", xlimits = c(-2.1, 3.4), ylimits = c(28, 68))
+```
+
+
+
+
+
+
+
+
+This section summarises the main findings made about the relationships between socio-demographic chracteristics and voting behaviour. 
+
+```{r}
+coef_df %>% 
+  filter(variable != "Intercept") %>% 
+  mutate(upper95 = estimate + 1.96*se, lower95 = estimate - 1.96*se) %>% 
+  ggplot() +
+  geom_point(aes(x = year, y = estimate, col = factor(p < 0.05)), size = 2) +
+  geom_linerange(aes(x = year, ymin = lower95, ymax = upper95, col = factor(p < 0.05)), size = 1) + 
+  geom_hline(aes(yintercept = 0), alpha = 0.5, size = 1) + 
+  facet_wrap(~variable, scales = "free", ncol = 5) +
+  scale_color_manual(values = c("grey50", "black")) + 
+  theme(axis.text = element_text(size = 6), strip.text = element_text(size = 6)) +
+  labs(x = "", y = "Year") +
+  scale_x_continuous(breaks = c(2001, 2004, 2007, 2010, 2013, 2016)) +
+  guides(col = F)
+```
 
