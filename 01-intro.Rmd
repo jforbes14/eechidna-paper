@@ -10,6 +10,8 @@ library(knitr)
 library(nlme)
 library(rgeos)
 library(spdep)
+library(gridExtra)
+library(grid)
 
 # Data
 data(tpp01)
@@ -200,11 +202,14 @@ load("/Users/Jeremy/Documents/R/eechidna-modelling/data/sp_weights_16.rda")
 
 # Function for FGLS
 my_fgls <- function(my_formula, my_data, sp_weights) {
+  # DivisionNm
+  model_data <- my_data %>% dplyr::select(-c(DivisionNm, year))
+  
   # Spatial weights matrix
   w_mat <- listw2mat(sp_weights)
   
   # Get OLS residuals
-  ols_model <- lm(my_formula, my_data)
+  ols_model <- lm(my_formula, model_data)
   my_res <- ols_model$residuals
   
   # Solve for rho
@@ -213,10 +218,10 @@ my_fgls <- function(my_formula, my_data, sp_weights) {
   rho_df <- data.frame(estimate = rho, se = summary(res_model)$coefficients[2,2], p = summary(res_model)$coefficients[2,4])
   
   # Transform data for GLS
-  trans_mat <- diag(nrow(my_data)) - rho*w_mat
-  gls_data <- data.frame(LNP_Percent = trans_mat %*% my_data$LNP_Percent,
-    Intercept = trans_mat %*% rep(1,nrow(my_data))) %>% 
-    bind_cols(as.data.frame(trans_mat %*% as.matrix(my_data %>% select(-LNP_Percent))))
+  trans_mat <- diag(nrow(model_data)) - rho*w_mat
+  gls_data <- data.frame(LNP_Percent = trans_mat %*% model_data$LNP_Percent,
+    Intercept = trans_mat %*% rep(1,nrow(model_data))) %>% 
+    bind_cols(as.data.frame(trans_mat %*% as.matrix(model_data %>% dplyr::select(-LNP_Percent))))
   
   # GLS model
   my_formula <- formula(paste0(my_formula,  " - 1"))
@@ -229,6 +234,7 @@ my_fgls <- function(my_formula, my_data, sp_weights) {
   gls_model$rho_df <- rho_df
   gls_model$gls_data <- gls_data
   gls_model$my_data <- my_data
+  gls_model$actual_residuals <- solve(trans_mat)%*%gls_model$residuals
   
   return(gls_model)
 }
@@ -238,32 +244,32 @@ full_formula = "LNP_Percent ~ ."
 
 # 2016
 glsmod16 <- my_fgls(full_formula, 
-  my_data = model_df %>% filter(year == "2016") %>% select(-c(DivisionNm, year)),
+  my_data = model_df %>% filter(year == "2016"),
   sp_weights = sp_weights_16)
 
 # 2013
 glsmod13 <- my_fgls(full_formula, 
-  my_data = model_df %>% filter(year == "2013") %>% select(-c(DivisionNm, year)),
+  my_data = model_df %>% filter(year == "2013"),
   sp_weights = sp_weights_13)
 
 # 2010
 glsmod10 <- my_fgls(full_formula, 
-  my_data = model_df %>% filter(year == "2010") %>% select(-c(DivisionNm, year)),
+  my_data = model_df %>% filter(year == "2010"),
   sp_weights = sp_weights_10)
 
 # 2007
 glsmod07 <- my_fgls(full_formula, 
-  my_data = model_df %>% filter(year == "2007") %>% select(-c(DivisionNm, year)),
+  my_data = model_df %>% filter(year == "2007"),
   sp_weights = sp_weights_07)
 
 # 2004
 glsmod04 <- my_fgls(full_formula, 
-  my_data = model_df %>% filter(year == "2004") %>% select(-c(DivisionNm, year)),
+  my_data = model_df %>% filter(year == "2004"),
   sp_weights = sp_weights_04)
 
 # 2001
 glsmod01 <- my_fgls(full_formula, 
-  my_data = model_df %>% filter(year == "2001") %>% select(-c(DivisionNm, year)),
+  my_data = model_df %>% filter(year == "2001"),
   sp_weights = sp_weights_01)
 
 ## Visualise coefficients and significance
