@@ -109,35 +109,29 @@
 
 Australia has changed in many ways over the last two decades. Rising house prices, country-wide improvements in education, an ageing population, and a decline in religious affiliation, are just a few facets of the country's evolving socio-demographic characteristics. At the same time, political power has moved back and forth between the two major parties. In the 2007 and 2010 federal elections, the Australian Labor Party (Labor) was victorious, whereas the 2001, 2004, 2013 and 2016 elections were won by the Liberal National coalition (Liberal). The two-party preferred vote, a measure of support between these two parties, fluctuated between 47.3\% and 53.5\% (in favour of the Liberal party) over this period. This study explores how electoral characteristics relate to two-party preference, and whether their effects have changed over time. Electoral socio-demographics are derived from the Census, and vote counts are obtained from federal elections.
 
-Joining these two data sources is problematic as there in an inherent asynchronicity in the two events. A Census is conducted by the Australian Bureau of Statistics (ABS) every five years, whereas a federal election (conducted by the Australian Electoral Commission (AEC)) usually occurs every three years. The first problem addressed is that of obtaining appropriate Census data for the 2004, 2007, 2010 and 2013 elections - election years in which a Census does not occur. The predominant approach in previous studies is to join voting outcomes to the nearest Census, without accounting for any temporal differences (see \citet{DavisStimson98}, \citet{Stimson06}, \citet{Liao09} and \citet{Stimson09}). Furthermore, electoral boundaries change regularly, so spatial discrepancies also arise when matching electoral data. To obtain appropriate Census data for these four elections, electoral socio-demographics are imputed using a spatio-temporal imputation that combines areal interpolation \citep{Goodchild1993} and linear time-interpolation. The process of collecting and wrangling the raw data is outlined in section \ref{data}, and the imputation process is detailed in section \ref{imputation}. All data and associated documentation relating to this procedure are available in the \texttt{eechidna} \texttt{R} package \citep{eechidna}, providing a resource for future analysis.
+Joining these two data sources is problematic as there in an inherent asynchronicity in the two events. A Census is conducted by the Australian Bureau of Statistics (ABS) every five years, whereas a federal election (conducted by the Australian Electoral Commission (AEC)) usually occurs every three years. The first problem addressed is that of obtaining appropriate Census data for the 2004, 2007, 2010 and 2013 elections - election years in which a Census does not occur. The predominant approach in previous studies is to join voting outcomes to the nearest Census, without accounting for any temporal differences (see \citet{DavisStimson98}, \citet{Stimson06}, \citet{Liao09} and \citet{Stimson09}). Furthermore, electoral boundaries change regularly, so spatial discrepancies also arise when matching electoral data. To obtain appropriate Census data for these four elections, electoral socio-demographics are imputed using a spatio-temporal imputation that combines areal interpolation \citep{Goodchild1993} and linear time-interpolation. Collecting and wrangling the raw data, along with the imputation process, are detailed in section \ref{data}. All data and associated documentation relating to this procedure are available in the \texttt{eechidna} \texttt{R} package \citep{eechidna}, providing a resource for future analysis .
 
 Previous work on modelling Australian federal elections have found that aggregate socio-demographics are relatively good predictors of voting outcomes. \citet{Forrest01} does this using multiple regression of the Liberal and Labor primary vote for polling booths in the Farrer electorate in 1998. \citet{Stimson06}, \citet{Stimson09} and \citet{Stimson12} use principal component analysis of polling booths in the 2001, 2004 and 2007 elections respectively, also finding that socio-demographic characteristics of polling booths are linked to their two-party preferred vote. On the contrary, \citet{Stimson09} models the polling booth swing vote (change in the two-party preferred vote) in the 2007 election, finding that little of swing vote can be explained by Census data. Instead of analyzing a single election in isolation, this paper employs a consistent model framework across six elections so that temporal changes in the effects of socio-demographics can be observed, where each federal elections is modelled with a cross-sectional data set. The use of a regression framework to examine these socio-political relationships over time is seemingly absent from previous Australian studies. It also appears that no study has attempted any type of statistical analysis of socio-demographics in conjunction with voter behaviour in Australia since 2007, making this paper distinctly different from those previous.
 
 The cross-sectional data set for each election consists of the two-party preferred vote (response variable), and socio-demographic variables (explanatory variables) that characterise each electorate. To obtain these cross-sections, socio-demographic variables are first standardized, and then principal components are used to group variables into ``factors''. To account for the inherent spatial structure of the data, a spatial error model is fit for each election. These steps are discussed in section \ref{modelling}. In section \ref{results} inference is conducted on the models to see which effects are significant, how effects change over time and which electorates have abnormal voting behaviour.
 
 \hypertarget{data}{%
-\chapter{Data collection}\label{data}}
+\chapter{Data collection, wrangling and imputation}\label{data}}
 
-\hypertarget{voting-data}{%
-\section{Voting data}\label{voting-data}}
+\hypertarget{collecting-the-data}{%
+\section{Collecting the data}\label{collecting-the-data}}
 
 The voting outcome of interest is the electoral two-party preferred vote, which is provided by the Australian Electoral Commission (AEC) for the 2001, 2004, 2007, 2010, 2013 and 2016 elections via the AEC Tally Room. The AEC divide Australia into 150 regions called electorates, with each corresponding to a single seat in the House of Representatives. Voting is compulsory in Australia, and each voter assigns a numbered preference to each available candidate in their electorate. The two-party preferred vote is determined by a tally of these preferences where, by convention, only the ranks of the Labor and Liberal candidates are considered. This is recorded as a percentage preference in favour of the Liberal party.
 
-\hypertarget{census-data}{%
-\section{Census data}\label{census-data}}
-
 Socio-demographic variables are derived from the Census of Population and Housing (Census), which is a survey of every household in Australia, recording information such as age, gender, ethnicity, education level and income. There have been four Censuses in the 21st century, being that in 2001, 2006, 2011 and 2016. The Australian Bureau of Statistics (ABS) conducts the Census and publishes aggregated information. The ABS approximation of electorates at the time of the Census is chosen. From this aggregate information, 67 socio-demographic variables are computed for each of the electorates.
-
-\hypertarget{downloading-and-wrangling}{%
-\section{Downloading and wrangling}\label{downloading-and-wrangling}}
 
 Raw data is sourced online from the AEC and ABS websites in .csv and .xlsx files. The format of these files change over the years, making extracting the appropriate information a big task. The functions available in the \texttt{dplyr} \citep{dplyr} and \texttt{readxl} \citep{readxl} \texttt{R} packages are very useful, as they provide fast consistent tools for data manipulation and functions to import .xlsx files (respectively). The 2001 and 2006 Census data are however published in a format where each electorate has a separate document, making it difficult to use the \texttt{dplyr} tools and instead cells have to be selected from each individual file to construct the desired variables. All scripts required for the data wrangling process can be found in the github repository for the \texttt{eechidna} \texttt{R} package \citep{eechidna}, along with the raw data. The \texttt{eechidna} package makes this study entirely reproducible and provides a resource to help wrangle data for future Censuses and elections, when they become available.
 
-\hypertarget{imputation}{%
-\chapter{Joining Census and election data}\label{imputation}}
+\hypertarget{joining-census-and-election-data}{%
+\section{Joining Census and election data}\label{joining-census-and-election-data}}
 
 \hypertarget{differences-between-census-and-election-data}{%
-\section{Differences between Census and election data}\label{differences-between-census-and-election-data}}
+\subsection{Differences between Census and election data}\label{differences-between-census-and-election-data}}
 
 Between 2001 and 2016 there were six elections and four Censuses (see Figure \ref{fig:timeline}). Electoral boundaries are redistributed regularly by the AEC, meaning that only in the years where both a Census and election occur will the boundaries match - the case for the 2001 and 2016 election. Therefore, for the four elections between 2004 and 2013, both temporal and spatial differences in electorates need to be accounted for when joining the electoral two-party preferred vote with Census data. For these elections a spatio-temporal imputation method is employed to obtain electoral socio-demographics. This method uses Census information from both before and after the election of interest.
 
@@ -151,7 +145,7 @@ Between 2001 and 2016 there were six elections and four Censuses (see Figure \re
 \end{figure}
 
 \hypertarget{spatio-temporal-imputation}{%
-\section{Spatio-temporal imputation}\label{spatio-temporal-imputation}}
+\subsection{Spatio-temporal imputation}\label{spatio-temporal-imputation}}
 
 To account for spatial differences, the piece-wise approximation method in \citet{Goodchild1993} is adopted. Consider a map of source zones \(s = 1,...,S\), for which socio-demographic information is available, and a set of target zones \(t = 1,...,T\) for which information is to be imputed. In this context the map of electoral boundaries at the time of a Census would be the source zones, and the boundaries at the time of the election would be the target zones. Denote the area of intersection between source zone \(s\) and target zone \(t\) as \(A_{s,t}\), the population of the source zone \(s\) as \(U_s\), and the population of intersection between source zone \(s\) and target zone \(t\) as \(P_{s,t}\).
 
@@ -172,7 +166,7 @@ Denote year \(y\), with a Census falling on \(y_1\) and \(y_3\), and an election
 \[\hat{C}_{t,y_2} = \frac{y_3-y_2}{y_3-y_1}*\hat{C}_{t,y_1} + \frac{y_2-y_1}{y_3-y_1}*\hat{C}_{t,y_3}\]
 
 \hypertarget{applied}{%
-\section{Applied}\label{applied}}
+\subsection{Applied}\label{applied}}
 
 Publically available Census data is aggregated and there are different resolutions accessible, ranging from SA1 (over 50,000 zones) to electoral divisions (150 zones). For this study electoral divisions are used as source zones, and this imputation method is applied for each of the 2004, 2007, 2010 and 2013 elections. To demonstrate its functionality, consider the imputation of socio-demographic variables for the electorate of Hume in New South Wales (NSW), at the time of the 2013 federal election. Figure \ref{fig:hume13} shows this region amongst other NSW electorates.
 
@@ -413,7 +407,7 @@ so it can be written
 
 Estimation is done using feasible generalized least squares.
 
-Table 4.1 details the resultant estimated model coefficients and their estimated standard errors for each of the six elections. These are interpreted in the next section.
+Table 3.1 details the resultant estimated model coefficients and their estimated standard errors for each of the six elections. These are interpreted in the next section.
 
 \begin{table}[!htbp] \centering 
   \caption{Estimated model for each of the six elections.} 
@@ -526,6 +520,7 @@ Table 4.1 details the resultant estimated model coefficients and their estimated
   & & & & & & \\ 
 \hline \\[-1.8ex] 
 Observations & 150 & 150 & 150 & 150 & 150 & 150 \\ 
+Residual Standard Error (GLS) & 4.55 & 4.69 & 4.44 & 5.31 & 4.85 & 4.65 \\ 
 Log Likelihood & $-$398.33 & $-$403.34 & $-$398.73 & $-$418.08 & $-$405.41 & $-$399.52 \\ 
 Akaike Inf. Crit. & 860.67 & 870.68 & 861.46 & 900.16 & 874.83 & 863.03 \\ 
 Bayesian Inf. Crit. & 949.60 & 959.61 & 950.40 & 989.10 & 963.76 & 951.96 \\ 
@@ -546,25 +541,32 @@ Bayesian Inf. Crit. & 949.60 & 959.61 & 950.40 & 989.10 & 963.76 & 951.96 \\
 \hypertarget{spatial-autoregressive-parameter}{%
 \section{Spatial autoregressive parameter}\label{spatial-autoregressive-parameter}}
 
-\begin{center}\includegraphics{electoral-modelling-draft_files/figure-latex/rhovis-1} \end{center}
+\textbackslash begin\{figure\}{[}h{]}
 
-The spatial autoregressive coefficient \(\rho\) is positive and significant in only the 2001 and 2016 elections, meaning that in these elections, an electorate's political climate was affected by the attitudes of it's neighbours. Conversely, in the other four elections, it appears that after accounting for electoral socio-demographics, there is no spatial effect, meaning electorates effectively acted independently.
+\{\centering \includegraphics[height=0.15\textheight]{electoral-modelling-draft_files/figure-latex/rhovis-1}
+
+\}
+
+\textbackslash caption\{Estimates of the spatial autoregressive parameter for each of the six elections, with a 95\% confidence interval. Only in 2001 and 2016 is there a significant spatial component.\}\label{fig:rhovis}
+\textbackslash end\{figure\}
+
+The spatial autoregressive coefficient \(\rho\) is positive and significant in only the 2001 and 2016 elections, meaning that in these elections, an electorate's political climate was affected by the attitudes of it's neighbours. Conversely, in the other four elections, it appears that after accounting for electoral socio-demographics, there is no significant spatial effect, meaning electorates effectively acted independently.
 
 \hypertarget{influential-socio-demographics}{%
 \section{Influential socio-demographics}\label{influential-socio-demographics}}
 
-To investigate the socio-demographics that have a strong effect on the two-party preferred vote, partial residual plots are used. These show the direction, size and significance of an estimated effect, as the slope of the prediction line matches the estimated coefficient, and the shaded region represents a 95\% confidence band. If a horizontal line can be drawn through the confidence band, then the effect is insignificant. Plots for each election are faceted to compare the effects over time.
+To investigate the socio-demographics that have a strong effect on the two-party preferred vote, partial residual plots are used. These show the direction, size and significance of an estimated effect - the slope of the prediction line matches the estimated coefficient, and the shaded region represents a 95\% confidence band. If a horizontal line can be drawn through the confidence band, then the effect is insignificant. Plots for each election are faceted to compare the effects over time.
 
 \emph{It is important here to note the ecological fallacy - insights are being drawn at the electorate level, and cannot be inferred for another disaggregate level (e.g.~individual voters).}
 
 \hypertarget{income-and-unemployment}{%
 \subsection{Income and unemployment}\label{income-and-unemployment}}
 
-Typically the Labor party campaigns on more progressive policies, which often include tax reform that adversely affects higher income earners, and more generous social assistance programs. Although topical in the lead up to an election, incomes only significantly affected electoral two-party preference in 2016 (see Figure \ref{fig:plotincomes}), with higher income areas associated with support for the Liberal party. In the prior elections, the estimated effect is still positive, albeit insignificant. Unemployment on the other hand, was influential in 2001, 2004 and 2007 elections(Figure \ref{fig:plotunemploy}), with electorates with higher unemployment favouring Labor. This estimated effect has become weaker over time, with unemployment having virtually no effect in 2016.
+Typically the Labor party campaigns on more progressive policies, which often include tax reform that adversely affects higher income earners, and more generous social assistance programs. Despite this, incomes have only significantly affected the electoral two-party preference in 2016 (see Figure \ref{fig:plotincomes}), with higher income areas associated with support for the Liberal party. In the prior elections, the estimated effect is still positive, albeit insignificant. Unemployment on the other hand, was influential in 2001, 2004 and 2007 elections (Figure \ref{fig:plotunemploy}), with electorates with higher unemployment favouring Labor. This estimated effect has become weaker over time, with unemployment having virtually no effect in 2016.
 
 \begin{figure}[h]
 
-{\centering \includegraphics[width=0.6\linewidth]{electoral-modelling-draft_files/figure-latex/plotincomes-1} 
+{\centering \includegraphics[width=1\linewidth]{electoral-modelling-draft_files/figure-latex/plotincomes-1} 
 
 }
 
@@ -583,7 +585,7 @@ Typically the Labor party campaigns on more progressive policies, which often in
 \hypertarget{industry-and-type-of-work}{%
 \subsection{Industry and type of work}\label{industry-and-type-of-work}}
 
-Electorates with higher proportions of workers in mining, gas, water, agriculture, waste and electricity (grouped as \texttt{Extractive} industries) are consistently linked with higher support for the Liberal party, with the mangitude of this effect slightly increasing over the years (see Figure \ref{fig:plotextractive}). This is unsurprising, as the Liberal party has close ties with these traditional energy industries, and typically present policies to reduce taxation on energy production. Furthermore, electorates with more workers in construction or manufacturing industries (\texttt{Transformative}), as well as wholesale trade, retail trade, transport, post or warehousing (\texttt{Distributive}), are also linked with the Liberal party. However, these effects are not as strong, and \texttt{Transformative} is marginally insignificant in the 2010 election, whereas \texttt{Distributive} was not a key socio-demographic in 2001 or 2016. These effects are shown in Figures \ref{fig:plottransformative} and \ref{fig:plotdistributive}.
+Electorates with higher proportions of workers in mining, gas, water, agriculture, waste and electricity (grouped as \texttt{Extractive} industries) are consistently linked with higher support for the Liberal party, with the mangitude of this effect slightly increasing over the years (see Figure \ref{fig:plotextractive}). This is unsurprising, as the Liberal party has close ties with these traditional energy industries, and typically present policies to reduce taxation on energy production. Furthermore, electorates with more workers in construction or manufacturing industries (\texttt{Transformative}), as well as wholesale trade, retail trade, transport, post or warehousing (\texttt{Distributive}), are also linked with the Liberal party. However, these effects are not as strong, and \texttt{Transformative} was marginally insignificant in the 2010 election, whereas \texttt{Distributive} was not a key socio-demographic in 2001 or 2016. These effects are shown in Figures \ref{fig:plottransformative} and \ref{fig:plotdistributive}.
 
 \begin{figure}[h]
 
@@ -634,7 +636,7 @@ Similarly, the proportions of workers in managerial, administrative, clerical an
 \caption{Effect of DiffAddress}\label{fig:plotdiffaddress}
 \end{figure}
 
-Electorates with a higher proportion of people that have recently moved house (meaning in last five years) are more likely to support the Liberal party, with this effect becoming stronger since the 2010 election. Having controlled for characteristics of house ownership and rental prices (via the factors \texttt{PropertyOwned} and \texttt{RentLoan} respectively), this is effect is somewhat surprising. \emph{Add more here?}
+In each of the six elections, electorates with a higher proportion of people that have recently moved house (meaning in last five years) were more likely to support the Liberal party, with this effect becoming stronger since 2010. Having controlled for characteristics of house ownership and rental prices (via the factors \texttt{PropertyOwned} and \texttt{RentLoan} respectively), this is effect is somewhat surprising. \emph{Add more here?}
 
 \hypertarget{indigenous-population}{%
 \subsection{Indigenous population}\label{indigenous-population}}
@@ -655,16 +657,48 @@ The indigenous population of an electorate is found to be a significant predicto
 
 In each of the six elections, higher proportions people in de facto marriages are tied to support for the Labor party, whereas the effect of marriages themselves are insignificant. Larger family and household size (via the \texttt{FamHouseSize} factor) is also linked with Labor support, although only being significant in the 2007 and 2010 elections (see Figure \ref{fig:plotfamhousesize}).
 
-\emph{Potentially remove plots}
+\hypertarget{a-note-on-similar-variables}{%
+\subsection{A note on similar variables}\label{a-note-on-similar-variables}}
 
-\hypertarget{residuals}{%
-\section{Residuals}\label{residuals}}
+Many of the Census variables represent similar information, which is why factors were created and some variables were removed. However, there still remain some variables which are closely related. For example, \texttt{OtherLanguageHome} is the proportion of households that speak a language other than English at home, which is likely to be related to the proportion of people born overseas (a sum of the variables with a \texttt{Born} prefix). In 2001, the coefficient estiamte for \texttt{OtherLanguageHome} is significant and negative, and all \texttt{Born} variables are insignificant. If \texttt{OtherLanguageHome} is removed from the model, populations born in South Eastern Europe (\texttt{Born\_SE\_Europe}) absorb the negative effect (\(p = 0.0011\)).
 
-Largest residuals
+\hypertarget{a-closer-look-at-the-residuals}{%
+\section{A closer look at the residuals}\label{a-closer-look-at-the-residuals}}
 
-Residuals by state
+\hypertarget{residuals-by-state}{%
+\subsection{Residuals by state}\label{residuals-by-state}}
 
-\begin{center}\includegraphics{electoral-modelling-draft_files/figure-latex/unnamed-chunk-2-1} \end{center}
+It is often hypothesized that states have systematic differences that cause their electorates to vote differently. Boxplots of residuals grouped by state reveal that only Tasmania and the Australian Capital Territory appear to have a state-specific effect that is not captured by the models. These states appear to have a bias towards Labor. There are few electorates in these states (five and two, respectively), so this might be due to incumbent effects rather than an actual state-specific bias.
+
+\begin{figure}[h]
+
+{\centering \includegraphics[width=0.75\linewidth]{electoral-modelling-draft_files/figure-latex/resstate-1} 
+
+}
+
+\caption{Boxplot of residuals by state.}\label{fig:resstate}
+\end{figure}
+
+\hypertarget{electorates-with-largest-residuals}{%
+\subsection{Electorates with largest residuals}\label{electorates-with-largest-residuals}}
+
+The electorates Capricornia (QLD), Leichhardt (QLD) and Riverina (NSW) have the three largest maximum absolute residuals across the six elections. Capricornia is a swing electorate, which strongly supported Labor between 2001 and 2010, before being narrowly won by Liberal in the last two elections. It has many people working in extractive jobs, an above-average Christian population, and above-average proportion of de facto relationships. The model tends to overpredict its two-party preferred vote (in favour of the Liberal party). Leichhardt is an area encompassing the northernmost tip of Queensland and consists of mainly small indigenous communities and uninhabited rural areas, which was won by the Liberal party in all but the 2007 election. It too has an above-average proportion of de facto relationships, along with an above-average proportion of people moving houses and a high proportion of single parent households. The model consistently underpredicts its two-party vote. Riverina is a rural electorate of NSW, and has been a very safe Liberal (National) seat since 1980. It has a relatively monocultural population consisting of a high proportion of Australian citizens and Christians, an above-average amount of extractive jobs and below average education levels. Its Liberal preference is also underpredicted.
+
+\hypertarget{concluding-comments}{%
+\chapter{Concluding comments}\label{concluding-comments}}
+
+Across the past six elections, the spatial error models reveal that the electoral socio-demographics driving the two-party preferred vote have remained relatively steady, with industry and type of work being particularly influential, along with the type of relationships and household mobility, among others. The neighbourhood (spatial) effects were only found to be significant in the 2001 and 2016 elections. Surprisingly, unemployment, incomes and family/household sizes were significant in only some elections, and other characteristics like education were not significant at all.
+
+The cross-sectional data set of Census and election data were obtained by collecting information from the ABS and AEC, and then applying a spatio-temporal imputation process, as detailed in section \ref{data}. This data is available in the \texttt{eechidna} \texttt{R} package, which can be downloaded from CRAN. All associated code to produce the data in the package from raw files can be found in the github repository (\url{https://github.com/ropenscilabs/eechidna}), and vignettes on how to use the data are located on the github page (\url{https://ropenscilabs.github.io/eechidna/}).
+
+Furthermore, this paper is generated using the \texttt{knitr} \citep{knitr} package, so code to reproduce the results are contained in the \texttt{RMarkdown} file.
+
+\hypertarget{software}{%
+\chapter{Software}\label{software}}
+
+\texttt{eechidna} (Exploring Election and Census Highly Informative Data Nationally for Australia) is an R package that makes it easy to look at the data from the Australian Federal elections and Censuses that occurred between 2001 and 2016. The data in this package includes voting results for each polling booth and electoral division (electorate), Census information for each electorate and maps of the electorates that were in place at the time of each event. All data in this package is obtained from the Australian Electoral Commission, the Australian Bureau of Statistics and the Australian Government. Census data is imputed for the election years in which a Census does not occur via a spatio-temporal imputation method.
+
+The Census and election datasets in the package can be linked by electorate using the unique identifier variable \texttt{UniqueID}. Vignettes describing how to use the data and how the data was obtained, can also be found on \url{https://ropenscilabs.github.io/eechidna/}.
 
 \bibliography{book.bib,packages.bib}
 
