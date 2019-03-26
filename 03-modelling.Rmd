@@ -42,10 +42,10 @@ $${\boldsymbol y} = {\boldsymbol X} {\boldsymbol \beta} + ({\boldsymbol I}_n-\rh
 
 Estimation is done using feasible generalized least squares.
 
-Table 4.1 details the resultant estimated model coefficients and their estimated standard errors for each of the six elections. These are interpreted in the next section.
+Table 3.1 details the resultant estimated model coefficients and their estimated standard errors for each of the six elections. These are interpreted in the next section.
 
 ```{r printmodels, eval = F}
-# Add rho and make adjustments to this
+# Add rho and GLS residual standard error
 stargazer::stargazer(glsmod01, glsmod04, glsmod07, glsmod10, glsmod13, glsmod16, header = FALSE, 
   column.sep.width = "1pt", 
   title = "Estimated model for each of the six elections.",
@@ -168,6 +168,7 @@ stargazer::stargazer(glsmod01, glsmod04, glsmod07, glsmod10, glsmod13, glsmod16,
   & & & & & & \\ 
 \hline \\[-1.8ex] 
 Observations & 150 & 150 & 150 & 150 & 150 & 150 \\ 
+Residual Standard Error (GLS) & 4.55 & 4.69 & 4.44 & 5.31 & 4.85 & 4.65 \\ 
 Log Likelihood & $-$398.33 & $-$403.34 & $-$398.73 & $-$418.08 & $-$405.41 & $-$399.52 \\ 
 Akaike Inf. Crit. & 860.67 & 870.68 & 861.46 & 900.16 & 874.83 & 863.03 \\ 
 Bayesian Inf. Crit. & 949.60 & 959.61 & 950.40 & 989.10 & 963.76 & 951.96 \\ 
