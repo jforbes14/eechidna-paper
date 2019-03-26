@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.14159265-2.6-0.99998 (TeX Live 2017) (preloaded format=xelatex 2018.3.14)  25 MAR 2019 16:25
+This is XeTeX, Version 3.14159265-2.6-0.99998 (TeX Live 2017) (preloaded format=xelatex 2018.3.14)  26 MAR 2019 12:03
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -944,46 +944,106 @@ LaTeX Font Info:    External font `lmex10' loaded for size
 
 ]
 
-LaTeX Warning: Float too large for page by 51.78072pt on input line 541.
+LaTeX Warning: Float too large for page by 271.31573pt on input line 541.
 
 [11] [12]
 Chapter 5.
 File: electoral-modelling-draft_files/figure-latex/rhovis-1.pdf Graphic file (t
 ype QTm)
 <use  "electoral-modelling-draft_files/figure-latex/rhovis-1.pdf" >
+Underfull \vbox (badness 10000) has occurred while \output is active []
 
-LaTeX Warning: Reference `fig:' on page 13 undefined on input line 550.
-
-File: electoral-modelling-draft_files/figure-latex/incomes-1.pdf Graphic file (
-type QTm)
-<use  "electoral-modelling-draft_files/figure-latex/incomes-1.pdf" > [13
+[13
 
 ]
+File: electoral-modelling-draft_files/figure-latex/plotincomes-1.pdf Graphic fi
+le (type QTm)
+<use  "electoral-modelling-draft_files/figure-latex/plotincomes-1.pdf" >
+File: electoral-modelling-draft_files/figure-latex/plotunemploy-1.pdf Graphic f
+ile (type QTm)
+<use  "electoral-modelling-draft_files/figure-latex/plotunemploy-1.pdf" >
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+File: electoral-modelling-draft_files/figure-latex/plotextractive-1.pdf Graphic
+ file (type QTm)
+<use  "electoral-modelling-draft_files/figure-latex/plotextractive-1.pdf" >
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+File: electoral-modelling-draft_files/figure-latex/plottransformative-1.pdf Gra
+phic file (type QTm)
+
+<use  "electoral-modelling-draft_files/figure-latex/plottransformative-1.pdf" >
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+File: electoral-modelling-draft_files/figure-latex/plotdistributive-1.pdf Graph
+ic file (type QTm)
+<use  "electoral-modelling-draft_files/figure-latex/plotdistributive-1.pdf" >
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+
+Overfull \hbox (53.55101pt too wide) in paragraph at lines 614--615
+[]\TU/lmr/m/n/10 Similarly, the proportions of workers in managerial, administr
+ative, clerical and sales roles (\TU/lmtt/m/n/10 ManagerAdminClericalSales\TU/l
+mr/m/n/10 )
+ []
+
+[14]
+File: electoral-modelling-draft_files/figure-latex/plotmanager-1.pdf Graphic fi
+le (type QTm)
+<use  "electoral-modelling-draft_files/figure-latex/plotmanager-1.pdf" >
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+File: electoral-modelling-draft_files/figure-latex/plotdiffaddress-1.pdf Graphi
+c file (type QTm)
+<use  "electoral-modelling-draft_files/figure-latex/plotdiffaddress-1.pdf" >
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+File: electoral-modelling-draft_files/figure-latex/plotindigenous-1.pdf Graphic
+ file (type QTm)
+<use  "electoral-modelling-draft_files/figure-latex/plotindigenous-1.pdf" >
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+
+Underfull \vbox (badness 7613) has occurred while \output is active []
+
+[15]
+
+LaTeX Warning: Reference `fig:plotfamhousesize' on page 16 undefined on input l
+ine 656.
+
+[16]
 File: electoral-modelling-draft_files/figure-latex/unnamed-chunk-2-1.pdf Graphi
 c file (type QTm)
 <use  "electoral-modelling-draft_files/figure-latex/unnamed-chunk-2-1.pdf" >
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-[14] (./electoral-modelling-draft.bbl [15])
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 561.
-[16
+[17] (./electoral-modelling-draft.bbl [18])
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 672.
+[19
 
 ]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 561.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 672.
 (./electoral-modelling-draft.aux)
-Package atveryend Info: Empty hook `AtVeryEndDocument' on input line 561.
-Package atveryend Info: Empty hook `AtEndAfterFileList' on input line 561.
+Package atveryend Info: Empty hook `AtVeryEndDocument' on input line 672.
+Package atveryend Info: Empty hook `AtEndAfterFileList' on input line 672.
 
 LaTeX Warning: There were undefined references.
 
  ) 
 Here is how much of TeX's memory you used:
- 21488 strings out of 493005
- 393909 string characters out of 6134596
- 539136 words of memory out of 5000000
- 25203 multiletter control sequences out of 15000+600000
- 35223 words of font info for 70 fonts, out of 8000000 for 9000
+ 21515 strings out of 493005
+ 394797 string characters out of 6134596
+ 540007 words of memory out of 5000000
+ 25225 multiletter control sequences out of 15000+600000
+ 35215 words of font info for 69 fonts, out of 8000000 for 9000
  1348 hyphenation exceptions out of 8191
- 41i,9n,68p,10423b,392s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 41i,9n,68p,10423b,396s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on electoral-modelling-draft.pdf (16 pages).
+Output written on electoral-modelling-draft.pdf (19 pages).
