@@ -192,7 +192,7 @@ no_OLH01 <- my_fgls(full_formula,
 summary(no_OLH01)$tTable
 ```
 
-## Residuals
+## A closer look at the residuals
 
 ```{r resids, include = F}
 all_resids <- data.frame(
@@ -205,60 +205,51 @@ all_resids <- data.frame(
     glsmod07$my_data %>% left_join(tpp07 %>% dplyr::select(DivisionNm, UniqueID, StateAb), by = "DivisionNm"), 
     glsmod04$my_data %>% left_join(tpp04 %>% dplyr::select(DivisionNm, UniqueID, StateAb), by = "DivisionNm"), 
     glsmod01$my_data %>% left_join(tpp01 %>% dplyr::select(DivisionNm, UniqueID, StateAb), by = "DivisionNm"))
-) %>% dplyr::select(Residuals, DivisionNm, UniqueID, StateAb, year, LNP_Percent, gls_residuals)
+) 
+#%>% dplyr::select(Residuals, DivisionNm, UniqueID, StateAb, year, LNP_Percent, gls_residuals)
 ```
 
-
-
-
-## Residuals by state
+### Residuals by state
 
 It is often hypothesized that states have systematic differences that cause their electorates to vote differently. Boxplots of residuals grouped by state reveal that only Tasmania and the Australian Capital Territory appear to have a state-specific effect that is not captured by the models. These states appear to have a bias towards Labor. There are few electorates in these states (five and two, respectively), so this might be due to incumbent effects rather than an actual state-specific bias.
 
-```{r resstate, fig.cap = "Boxplot of residuals by state.", fig.out="75%"}
+```{r resstate, fig.cap = "Boxplot of residuals by state.", out.width="75%"}
 all_resids %>% 
   ggplot(aes(x = StateAb, y = Residuals, col = StateAb)) + 
   geom_boxplot() + 
-  geom_jitter(aes(label = DivisionNm, shape = year), alpha = 0.4) +
+  geom_jitter(alpha = 0.4) +
+  #geom_jitter(aes(label = DivisionNm, shape = year), alpha = 0.4) +
   #facet_wrap(~year) + 
   guides(col = F, shape = F, DivisionNm = F)
 ```
 
-## Electorates with largest residuals
 
-```{r}
+### Electorates with largest residuals
+
+The electorates Capricornia (QLD), Leichhardt (QLD) and Riverina (NSW) have the three largest maximum absolute residuals across the six elections. Capricornia is a swing electorate, which strongly supported Labor between 2001 and 2010, before being narrowly won by Liberal in the last two elections. It has many people working in extractive jobs, an above-average Christian population, and above-average proportion of de facto relationships. The model tends to overpredict its two-party preferred vote (in favour of the Liberal party). Leichhardt is an area encompassing the northernmost tip of Queensland and consists of mainly small indigenous communities and uninhabited rural areas, which was won by the Liberal party in all but the 2007 election. It too has an above-average proportion of de facto relationships, along with an above-average proportion of people moving houses and a high proportion of single parent households. The model consistently underpredicts its two-party vote. Riverina is a rural electorate of NSW, and has been a very safe Liberal (National) seat since 1980. It has a relatively monocultural population consisting of a high proportion of Australian citizens and Christians, an above-average amount of extractive jobs and below average education levels. Its Liberal preference is also underpredicted.
+
+```{r eval = F}
+all_resids %>% 
+  group_by(UniqueID) %>% 
+  mutate(max_res = max(abs(Residuals))) %>% 
+  arrange(-max_res) %>% 
+  filter(max_res > 13.4) %>% 
+  dplyr::select(DivisionNm, LNP_Percent, year, everything())
+```
+
+
+```{r eval = F}
 library(plotly)
 ggplot(all_resids) + geom_jitter(aes(x = year, y = Residuals, label = DivisionNm))
 ggplotly()
 
 all_resids %>% 
   group_by(UniqueID) %>% 
-  mutate(mean_res = mean(abs(Residuals))) %>% 
-  filter(mean_res > 7) %>%
-  ungroup() %>% View
+  mutate(mean_res = mean(abs(Residuals)), min_res = min(abs(Residuals))) %>%
+  filter(min_res > 5) %>%
+  ungroup() %>% dplyr::select(Residuals, DivisionNm, year, min_res, mean_res, StateAb) %>% View
   ggplot(aes(x = year, y = Residuals, group = DivisionNm, col = DivisionNm, label = DivisionNm)) + 
   geom_line() + geom_point() +
-  guides(col = F)
-```
-
-Capricornia, Sydney, Shortland
-
-Residuals by state, by year
-
-
-```{r}
-coef_df %>% 
-  filter(variable != "Intercept") %>% 
-  mutate(upper95 = estimate + 1.96*se, lower95 = estimate - 1.96*se) %>% 
-  ggplot() +
-  geom_point(aes(x = year, y = estimate, col = factor(p < 0.05)), size = 2) +
-  geom_linerange(aes(x = year, ymin = lower95, ymax = upper95, col = factor(p < 0.05)), size = 1) + 
-  geom_hline(aes(yintercept = 0), alpha = 0.5, size = 1) + 
-  facet_wrap(~variable, scales = "free", ncol = 5) +
-  scale_color_manual(values = c("grey50", "black")) + 
-  theme(axis.text = element_text(size = 6), strip.text = element_text(size = 6)) +
-  labs(x = "", y = "Year") +
-  scale_x_continuous(breaks = c(2001, 2004, 2007, 2010, 2013, 2016)) +
   guides(col = F)
 ```
 
