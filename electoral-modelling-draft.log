@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.14159265-2.6-0.99998 (TeX Live 2017) (preloaded format=xelatex 2018.3.14)  26 MAR 2019 17:16
+This is XeTeX, Version 3.14159265-2.6-0.99998 (TeX Live 2017) (preloaded format=xelatex 2018.3.14)  26 MAR 2019 17:29
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -938,7 +938,7 @@ LaTeX Font Info:    External font `lmex10' loaded for size
 
 ]
 
-LaTeX Warning: Float too large for page by 279.42574pt on input line 536.
+LaTeX Warning: Float too large for page by 57.89072pt on input line 536.
 
 [10] [11]
 Chapter 4.
@@ -975,6 +975,13 @@ ic file (type QTm)
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
+
+Overfull \hbox (53.55101pt too wide) in paragraph at lines 616--617
+[]\TU/lmr/m/n/10 Similarly, the proportions of workers in managerial, administr
+ative, clerical and sales roles (\TU/lmtt/m/n/10 ManagerAdminClericalSales\TU/l
+mr/m/n/10 )
+ []
+
 File: electoral-modelling-draft_files/figure-latex/plotmanager-1.pdf Graphic fi
 le (type QTm)
 <use  "electoral-modelling-draft_files/figure-latex/plotmanager-1.pdf" > [13]
@@ -993,13 +1000,13 @@ File: electoral-modelling-draft_files/figure-latex/plotindigenous-1.pdf Graphic
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
 [14]
 
 LaTeX Warning: Reference `fig:plotfamhousesize' on page 15 undefined on input l
 ine 658.
-
-
-Underfull \vbox (badness 4001) has occurred while \output is active []
 
 [15]
 Underfull \vbox (badness 10000) has occurred while \output is active []
@@ -1036,11 +1043,11 @@ LaTeX Warning: There were undefined references.
 
  ) 
 Here is how much of TeX's memory you used:
- 21521 strings out of 493005
- 394949 string characters out of 6134596
- 540349 words of memory out of 5000000
- 25231 multiletter control sequences out of 15000+600000
- 35215 words of font info for 69 fonts, out of 8000000 for 9000
+ 21525 strings out of 493005
+ 395054 string characters out of 6134596
+ 540493 words of memory out of 5000000
+ 25233 multiletter control sequences out of 15000+600000
+ 35223 words of font info for 70 fonts, out of 8000000 for 9000
  1348 hyphenation exceptions out of 8191
  41i,9n,68p,10423b,368s stack positions out of 5000i,500n,10000p,200000b,80000s
 

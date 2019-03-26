@@ -1,7 +1,10 @@
 # Results
 
 ## Spatial autoregressive parameter
-```{r rhovis, out.height= "15%", fig.cap = "Estimates of the spatial autoregressive parameter for each of the six elections, with a 95% confidence interval. Only in 2001 and 2016 is there a significant spatial component."}
+
+The spatial autoregressive coefficient $\rho$ is positive and significant in only the 2001 and 2016 elections (Figure \@ref(fig:rhovis)), meaning that in these elections, an electorate's political climate was affected by the attitudes of it's neighbours. Conversely, in the other four elections, it appears that after accounting for electoral socio-demographics, there is no significant spatial effect, meaning electorates effectively acted independently.
+
+```{r rhovis, fig.cap="Estimates of the spatial autoregressive parameter for each of the six elections, with a 95\\% confidence interval. Only in 2001 and 2016 is there a significant spatial component", out.height='20%'}
 rho_df <- bind_rows(glsmod16$rho_df %>% mutate(year = "2016"), 
   glsmod13$rho_df %>% mutate(year = "2013"),
   glsmod10$rho_df %>% mutate(year = "2010"), 
@@ -20,8 +23,6 @@ rho_df %>% ggplot() +
   guides(col = F) +
   coord_fixed(ratio = 1)
 ```
-
-The spatial autoregressive coefficient $\rho$ is positive and significant in only the 2001 and 2016 elections, meaning that in these elections, an electorate's political climate was affected by the attitudes of it's neighbours. Conversely, in the other four elections, it appears that after accounting for electoral socio-demographics, there is no significant spatial effect, meaning electorates effectively acted independently.
 
 ## Influential socio-demographics
 To investigate the socio-demographics that have a strong effect on the two-party preferred vote, partial residual plots are used. These show the direction, size and significance of an estimated effect - the slope of the prediction line matches the estimated coefficient, and the shaded region represents a 95% confidence band. If a horizontal line can be drawn through the confidence band, then the effect is insignificant. Plots for each election are faceted to compare the effects over time.

@@ -60,7 +60,7 @@ stargazer::stargazer(glsmod01, glsmod04, glsmod07, glsmod10, glsmod13, glsmod16,
 \begin{table}[!htbp] \centering 
   \caption{Estimated model for each of the six elections.} 
   \label{} 
-\scriptsize 
+\tiny 
 \begin{tabular}{@{\extracolsep{1pt}}lcccccc} 
 \\[-1.8ex]\hline 
 \hline \\[-1.8ex] 

@@ -412,7 +412,7 @@ Table 3.1 details the resultant estimated model coefficients and their estimated
 \begin{table}[!htbp] \centering 
   \caption{Estimated model for each of the six elections.} 
   \label{} 
-\scriptsize 
+\tiny 
 \begin{tabular}{@{\extracolsep{1pt}}lcccccc} 
 \\[-1.8ex]\hline 
 \hline \\[-1.8ex] 
@@ -541,16 +541,16 @@ Bayesian Inf. Crit. & 949.60 & 959.61 & 950.40 & 989.10 & 963.76 & 951.96 \\
 \hypertarget{spatial-autoregressive-parameter}{%
 \section{Spatial autoregressive parameter}\label{spatial-autoregressive-parameter}}
 
-\textbackslash begin\{figure\}{[}h{]}
+The spatial autoregressive coefficient \(\rho\) is positive and significant in only the 2001 and 2016 elections (Figure \ref{fig:rhovis}), meaning that in these elections, an electorate's political climate was affected by the attitudes of it's neighbours. Conversely, in the other four elections, it appears that after accounting for electoral socio-demographics, there is no significant spatial effect, meaning electorates effectively acted independently.
 
-\{\centering \includegraphics[height=0.15\textheight]{electoral-modelling-draft_files/figure-latex/rhovis-1}
+\begin{figure}[h]
 
-\}
+{\centering \includegraphics[height=0.2\textheight]{electoral-modelling-draft_files/figure-latex/rhovis-1} 
 
-\textbackslash caption\{Estimates of the spatial autoregressive parameter for each of the six elections, with a 95\% confidence interval. Only in 2001 and 2016 is there a significant spatial component.\}\label{fig:rhovis}
-\textbackslash end\{figure\}
+}
 
-The spatial autoregressive coefficient \(\rho\) is positive and significant in only the 2001 and 2016 elections, meaning that in these elections, an electorate's political climate was affected by the attitudes of it's neighbours. Conversely, in the other four elections, it appears that after accounting for electoral socio-demographics, there is no significant spatial effect, meaning electorates effectively acted independently.
+\caption{Estimates of the spatial autoregressive parameter for each of the six elections, with a 95\% confidence interval. Only in 2001 and 2016 is there a significant spatial component}\label{fig:rhovis}
+\end{figure}
 
 \hypertarget{influential-socio-demographics}{%
 \section{Influential socio-demographics}\label{influential-socio-demographics}}
