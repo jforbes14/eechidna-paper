@@ -1,7 +1,7 @@
 # Results
 
 ## Spatial autoregressive parameter
-```{r rhovis}
+```{r rhovis, out.height= "15%", fig.cap = "Estimates of the spatial autoregressive parameter for each of the six elections, with a 95% confidence interval. Only in 2001 and 2016 is there a significant spatial component."}
 rho_df <- bind_rows(glsmod16$rho_df %>% mutate(year = "2016"), 
   glsmod13$rho_df %>% mutate(year = "2013"),
   glsmod10$rho_df %>% mutate(year = "2010"), 
@@ -15,7 +15,10 @@ rho_df %>% ggplot() +
   geom_linerange(aes(x = year, ymin = lower95, ymax = upper95, col = factor(p < 0.05)), size = 1.5) + 
   geom_hline(aes(yintercept = 0), alpha = 0.5, size = 1) +
   scale_color_manual(values = c("grey50", "black")) +
-  guides(col = F)
+  labs(x = "Election year", y = "Estimate of spatial autoregressive parameter") +
+  lims(y = c(-1,1)) +
+  guides(col = F) +
+  coord_fixed(ratio = 1)
 ```
 
 The spatial autoregressive coefficient $\rho$ is positive and significant in only the 2001 and 2016 elections, meaning that in these elections, an electorate's political climate was affected by the attitudes of it's neighbours. Conversely, in the other four elections, it appears that after accounting for electoral socio-demographics, there is no significant spatial effect, meaning electorates effectively acted independently.
@@ -48,7 +51,7 @@ my_visreg <- function(my_model, sp_weights, varname,
   
   # X
   x_mat <- my_model$my_data %>% 
-    dplyr::select(-LNP_Percent) %>% 
+    dplyr::select(-c(LNP_Percent, year, DivisionNm)) %>% 
     mutate(Intercept = 1) %>% 
     dplyr::select(Intercept, everything()) %>% 
     as.matrix()
@@ -60,7 +63,7 @@ my_visreg <- function(my_model, sp_weights, varname,
   t = qt(0.975, nrow(my_model$gls_data)-ncol(my_model$gls_data))
   
   # Lambda matrix (FGLS)
-  x <- round(seq(min(x_mat[, varname]), max(x_mat[, varname]), 0.025), 3)
+  x <- round(seq(min(as.numeric(x_mat[, varname])), max(as.numeric(x_mat[, varname])), 0.025), 3)
   lambda_mat <- data.frame(matrix(0, nrow = length(x), ncol = ncol(x_mat)))
   names(lambda_mat) <- dimnames(x_mat)[[2]]
   lambda_mat[, varname] <- x
@@ -127,7 +130,7 @@ grid_visreg <- function(varname, xvar_title, xlimits, ylimits) {
 
 ```
 
-```{r plotincomes, fig.cap = "Effect of Incomes", out.width="60%"}
+```{r plotincomes, fig.cap = "Effect of Incomes", out.width="100%"}
 p <- grid_visreg("Incomes", xvar_title = "Incomes", xlimits = c(-1.5, 3.6), ylimits = c(30, 95))
 ```
 
@@ -236,7 +239,6 @@ all_resids %>%
   filter(max_res > 13.4) %>% 
   dplyr::select(DivisionNm, LNP_Percent, year, everything())
 ```
-
 
 ```{r eval = F}
 library(plotly)
