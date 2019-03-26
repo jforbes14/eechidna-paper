@@ -1,4 +1,6 @@
 # Results
+
+## Spatial autoregressive parameter
 ```{r rhovis}
 rho_df <- bind_rows(glsmod16$rho_df %>% mutate(year = "2016"), 
   glsmod13$rho_df %>% mutate(year = "2013"),
@@ -16,9 +18,15 @@ rho_df %>% ggplot() +
   guides(col = F)
 ```
 
-The spatial autoregressive coefficient $\rho$ is significant in only the 2001 and 2016 elections, meaning that in these years an electorate's political climate was affected by the attitudes of it's neighbours. Conversely, in the other four elections, it appears that after accounting for electoral socio-demographics, there is no spatial effect, meaning electorates effectively acted independently.
+The spatial autoregressive coefficient $\rho$ is positive and significant in only the 2001 and 2016 elections, meaning that in these elections, an electorate's political climate was affected by the attitudes of it's neighbours. Conversely, in the other four elections, it appears that after accounting for electoral socio-demographics, there is no significant spatial effect, meaning electorates effectively acted independently.
 
-To investigate the socio-demographics that have a strong effect on the two-party preferred vote, partial residual plots are used. These show the direction, size and significance of an estimated effect, as the slope of the prediction line matches the estimated coefficient, and the shaded region represents a 95% confidence band. Typically the Labor party campaigns on more progressive policies, which often include tax reform that adversely affects higher income earners, and more generous social assistance programs. Although topical in the lead up to an election, incomes only significantly affected electoral two-party preference in 2016 (see Figure \@ref(fig:plotincomes)), with higher income areas associated with support for the Liberal party. In the prior elections, the estimated effect is still positive, albeit insignificant. Unemployment on the other hand, was influential in 2001, 2004 and 2007 elections(Figure \@ref(fig:plotunemploy)), with electorates with higher unemployment favouring Labor. This effect has become weaker over time, with unemployment having an estimated effect of virtually zero in 2016.
+## Influential socio-demographics
+To investigate the socio-demographics that have a strong effect on the two-party preferred vote, partial residual plots are used. These show the direction, size and significance of an estimated effect - the slope of the prediction line matches the estimated coefficient, and the shaded region represents a 95% confidence band. If a horizontal line can be drawn through the confidence band, then the effect is insignificant. Plots for each election are faceted to compare the effects over time.
+
+*It is important here to note the ecological fallacy - insights are being drawn at the electorate level, and cannot be inferred for another disaggregate level (e.g. individual voters).*
+
+### Income and unemployment
+Typically the Labor party campaigns on more progressive policies, which often include tax reform that adversely affects higher income earners, and more generous social assistance programs. Despite this, incomes have only significantly affected the electoral two-party preference in 2016 (see Figure \@ref(fig:plotincomes)), with higher income areas associated with support for the Liberal party. In the prior elections, the estimated effect is still positive, albeit insignificant. Unemployment on the other hand, was influential in 2001, 2004 and 2007 elections (Figure \@ref(fig:plotunemploy)), with electorates with higher unemployment favouring Labor. This estimated effect has become weaker over time, with unemployment having virtually no effect in 2016.
 
 ```{r myvisreg, include = F}
 # Function to produce visreg style conditional plots
@@ -102,8 +110,6 @@ my_visreg <- function(my_model, sp_weights, varname,
 }
 
 # Grid visreg
-library(gridExtra)
-library(grid)
 grid_visreg <- function(varname, xvar_title, xlimits, ylimits) {
   p16 <- my_visreg(glsmod16, sp_weights_16, varname = varname, nolabs = T, year = "2016", xlimits, ylimits)
   p13 <- my_visreg(glsmod13, sp_weights_13, varname = varname, nolabs = T, year = "2013", xlimits, ylimits)
@@ -113,30 +119,132 @@ grid_visreg <- function(varname, xvar_title, xlimits, ylimits) {
   p01 <- my_visreg(glsmod01, sp_weights_01, varname = varname, nolabs = T, year = "2001", xlimits, ylimits)
   
   plots <- grid.arrange(p01, p04, p07, p10, p13, p16, nrow = 2, 
-    left = textGrob("Two-party preferred vote (%)", gp = gpar(cex = 0.8), rot = 90), 
-    bottom = textGrob(xvar_title, gp = gpar(cex = 0.8)))
+    left = grid.text("Two-party preferred vote (%)", gp = gpar(cex = 0.8), rot = 90), 
+    bottom = grid.text(xvar_title, gp = gpar(cex = 0.8)))
   
   return(plots)
 }
 
 ```
 
-```{r plotincomes, fig.cap = "Effect of Incomes"}
+```{r plotincomes, fig.cap = "Effect of Incomes", out.width="60%"}
 p <- grid_visreg("Incomes", xvar_title = "Incomes", xlimits = c(-1.5, 3.6), ylimits = c(30, 95))
 ```
 
-```{r plotunemploy, fig.cap = "Effect of Unemployment"}
+```{r plotunemploy, fig.cap = "Effect of Unemployment", out.width="60%"}
 p <- grid_visreg("Unemployment", xvar_title = "Unemployment", xlimits = c(-2.1, 3.4), ylimits = c(28, 68))
+```
+
+### Industry and type of work
+Electorates with higher proportions of workers in mining, gas, water, agriculture, waste and electricity (grouped as `Extractive` industries) are consistently linked with higher support for the Liberal party, with the mangitude of this effect slightly increasing over the years (see Figure \@ref(fig:plotextractive)). This is unsurprising, as the Liberal party has close ties with these traditional energy industries, and typically present policies to reduce taxation on energy production. Furthermore, electorates with more workers in construction or manufacturing industries (`Transformative`), as well as wholesale trade, retail trade, transport, post or warehousing (`Distributive`), are also linked with the Liberal party. However, these effects are not as strong, and `Transformative` was marginally insignificant in the 2010 election, whereas `Distributive` was not a key socio-demographic in 2001 or 2016. These effects are shown in Figures \@ref(fig:plottransformative) and \@ref(fig:plotdistributive).
+
+```{r plotextractive, fig.cap = "Effect of Extractive", out.width="60%"}
+p <- grid_visreg("Extractive", xvar_title = "Extractive", xlimits = c(-0.7, 3.4), ylimits = c(35, 81))
+```
+
+```{r plottransformative, fig.cap = "Effect of Transformative", out.width="60%"}
+p <- grid_visreg("Transformative", xvar_title = "Transformative", xlimits = c(-2.25, 2.9), ylimits = c(34, 75))
+```
+```{r plotdistributive, fig.cap = "Effect of Distributive", out.width="60%"}
+p <- grid_visreg("Distributive", xvar_title = "Distributive", xlimits = c(-3.1, 2.5), ylimits = c(34, 65))
+```
+
+Similarly, the proportions of workers in managerial, administrative, clerical and sales roles (`ManagerAdminClericalSales`) is also a significant predictor of two-party preference across all six elections, with higher proportions supporting the Liberal party.
+
+```{r plotmanager, fig.cap = "Effect of ManagerAdminClericalSales", out.width="60%"}
+p <- grid_visreg("ManagerAdminClericalSales", xvar_title = "ManagerAdminClericalSales", xlimits = c(-3.75, 2.8), ylimits = c(32, 70))
+```
+
+### Household mobility
+```{r plotdiffaddress, fig.cap = "Effect of DiffAddress", out.width="60%"}
+p <- grid_visreg("DiffAddress", xvar_title = "DiffAddress", xlimits = c(-2.1, 3.65), ylimits = c(34, 81))
+```
+
+In each of the six elections, electorates with a higher proportion of people that have recently moved house (meaning in last five years) were more likely to support the Liberal party, with this effect becoming stronger since 2010. Having controlled for characteristics of house ownership and rental prices (via the factors `PropertyOwned` and `RentLoan` respectively), this is effect is somewhat surprising. *Add more here?*
+
+### Indigenous population
+```{r plotindigenous, fig.cap = "Effect of Indigenous population", out.width="60%"}
+p <- grid_visreg("Indigenous", xvar_title = "Indigenous", xlimits = c(-0.6, 9.5), ylimits = c(35, 120))
+```
+
+The indigenous population of an electorate is found to be a significant predictor in every election, with higher indigenous populations supporting the Liberal party. There are a few outliers with Lingiari (NT) being the most extreme. However, Lingiari itself has been a strong Labor supporter, and this effect appears to be driven by the other electorates with high Indigenous populations (Kalgoorlie (WA), Leichhardt (NSW), Durack (WA), Parkes(NSW) and Kennedy (QLD)), which have almost always elected a Liberal candidate. 
+
+### Relationships and families
+In each of the six elections, higher proportions people in de facto marriages are tied to support for the Labor party, whereas the effect of marriages themselves are insignificant. Larger family and household size (via the `FamHouseSize` factor) is also linked with Labor support, although only being significant in the 2007 and 2010 elections (see Figure \@ref(fig:plotfamhousesize)).
+
+```{r plotdefacto, fig.cap = "Effect of DeFacto", out.width="60%", eval = F}
+p <- grid_visreg("DeFacto", xvar_title = "DeFacto", xlimits = c(-2.2, 5.1), ylimits = c(12, 83))
+```
+
+```{r plotfamhousesize, fig.cap = "Effect of FamHouseSize", out.width="60%", eval = F}
+p <- grid_visreg("FamHouseSize", xvar_title = "FamHouseSize", xlimits = c(-3.4, 2.7), ylimits = c(12, 83))
+```
+
+### A note on similar variables
+
+Many of the Census variables represent similar information, which is why factors were created and some variables were removed. However, there still remain some variables which are closely related. For example, `OtherLanguageHome` is the proportion of households that speak a language other than English at home, which is likely to be related to the proportion of people born overseas (a sum of the variables with a `Born` prefix). In 2001, the coefficient estiamte for `OtherLanguageHome` is significant and negative, and all `Born` variables are insignificant. If `OtherLanguageHome` is removed from the model, populations born in South Eastern Europe (`Born_SE_Europe`) absorb the negative effect ($p = 0.0011$).
+
+```{r removeolh, eval = F}
+no_OLH01 <- my_fgls(full_formula, 
+  my_data = model_df %>% filter(year == "2001") %>% dplyr::select(-OtherLanguageHome),
+  sp_weights = sp_weights_01)
+
+summary(no_OLH01)$tTable
+```
+
+## Residuals
+
+```{r resids, include = F}
+all_resids <- data.frame(
+  Residuals = c(glsmod16$actual_residuals, glsmod13$actual_residuals, glsmod10$actual_residuals, glsmod07$actual_residuals, glsmod04$actual_residuals, glsmod01$actual_residuals),
+  gls_residuals = c(glsmod16$residuals, glsmod13$residuals, glsmod10$residuals, glsmod07$residuals, glsmod04$residuals, glsmod01$residuals),
+  bind_rows(
+    glsmod16$my_data %>% left_join(tpp16 %>% dplyr::select(DivisionNm, UniqueID, StateAb), by = "DivisionNm"), 
+    glsmod13$my_data %>% left_join(tpp13 %>% dplyr::select(DivisionNm, UniqueID, StateAb), by = "DivisionNm"), 
+    glsmod10$my_data %>% left_join(tpp10 %>% dplyr::select(DivisionNm, UniqueID, StateAb), by = "DivisionNm"), 
+    glsmod07$my_data %>% left_join(tpp07 %>% dplyr::select(DivisionNm, UniqueID, StateAb), by = "DivisionNm"), 
+    glsmod04$my_data %>% left_join(tpp04 %>% dplyr::select(DivisionNm, UniqueID, StateAb), by = "DivisionNm"), 
+    glsmod01$my_data %>% left_join(tpp01 %>% dplyr::select(DivisionNm, UniqueID, StateAb), by = "DivisionNm"))
+) %>% dplyr::select(Residuals, DivisionNm, UniqueID, StateAb, year, LNP_Percent, gls_residuals)
 ```
 
 
 
 
+## Residuals by state
 
+It is often hypothesized that states have systematic differences that cause their electorates to vote differently. Boxplots of residuals grouped by state reveal that only Tasmania and the Australian Capital Territory appear to have a state-specific effect that is not captured by the models. These states appear to have a bias towards Labor. There are few electorates in these states (five and two, respectively), so this might be due to incumbent effects rather than an actual state-specific bias.
 
+```{r resstate, fig.cap = "Boxplot of residuals by state.", fig.out="75%"}
+all_resids %>% 
+  ggplot(aes(x = StateAb, y = Residuals, col = StateAb)) + 
+  geom_boxplot() + 
+  geom_jitter(aes(label = DivisionNm, shape = year), alpha = 0.4) +
+  #facet_wrap(~year) + 
+  guides(col = F, shape = F, DivisionNm = F)
+```
 
+## Electorates with largest residuals
 
-This section summarises the main findings made about the relationships between socio-demographic chracteristics and voting behaviour. 
+```{r}
+library(plotly)
+ggplot(all_resids) + geom_jitter(aes(x = year, y = Residuals, label = DivisionNm))
+ggplotly()
+
+all_resids %>% 
+  group_by(UniqueID) %>% 
+  mutate(mean_res = mean(abs(Residuals))) %>% 
+  filter(mean_res > 7) %>%
+  ungroup() %>% View
+  ggplot(aes(x = year, y = Residuals, group = DivisionNm, col = DivisionNm, label = DivisionNm)) + 
+  geom_line() + geom_point() +
+  guides(col = F)
+```
+
+Capricornia, Sydney, Shortland
+
+Residuals by state, by year
+
 
 ```{r}
 coef_df %>% 
