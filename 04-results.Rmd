@@ -2,7 +2,7 @@
 
 ## Spatial autoregressive parameter
 
-The spatial autoregressive coefficient $\rho$ is positive and significant in only the 2001 and 2016 elections (Figure \@ref(fig:rhovis)), meaning that in these elections, an electorate's political climate was affected by the attitudes of it's neighbours. Conversely, in the other four elections, it appears that after accounting for electoral socio-demographics, there is no significant spatial effect, meaning electorates effectively acted independently.
+The spatial autoregressive coefficient $\rho$ is positive and significant in only the 2001 and 2016 elections (Figure \@ref(fig:rhovis)), meaning that in these elections, an electorate's political climate was affected by the attitudes of it's neighbours. Conversely, in the other four elections, the spatial effect weakens to become marginally insignficant. In these years, it appears that the spatial component does not explain anything over and above the electoral socio-demographics, meaning electorates effectively acted more independently.
 
 ```{r rhovis, fig.cap="Estimates of the spatial autoregressive parameter for each of the six elections, with a 95\\% confidence interval. Only in 2001 and 2016 is there a significant spatial component", out.height='20%'}
 rho_df <- bind_rows(glsmod16$rho_df %>% mutate(year = "2016"), 
@@ -14,8 +14,8 @@ rho_df <- bind_rows(glsmod16$rho_df %>% mutate(year = "2016"),
   mutate(upper95 = estimate + 1.96*se, lower95 = estimate - 1.96*se)
 
 rho_df %>% ggplot() + 
-  geom_point(aes(x = year, y = estimate, col = factor(p < 0.05)), size = 3) +
-  geom_linerange(aes(x = year, ymin = lower95, ymax = upper95, col = factor(p < 0.05)), size = 1.5) + 
+  geom_point(aes(x = year, y = estimate), size = 3) +
+  geom_linerange(aes(x = year, ymin = lower95, ymax = upper95), size = 1.5) + 
   geom_hline(aes(yintercept = 0), alpha = 0.5, size = 1) +
   scale_color_manual(values = c("grey50", "black")) +
   labs(x = "Election year", y = "Estimate of spatial autoregressive parameter") +
@@ -23,6 +23,32 @@ rho_df %>% ggplot() +
   guides(col = F) +
   coord_fixed(ratio = 1)
 ```
+
+## Country-wide trend
+Since all socio-demographics have been standardized to have a mean of zero and a variance of one, the intercept in each model can be interpreted as the estimated two-party preferred vote for an electorate with mean characteristics[^3]. The baseline of party preference has varied over the elections, with the biggest swing occuring in the 2007 election where the mean electorate shifted more than five percentage points in favour of the Labor party.
+
+[^3]: Mean of all variables aside from Judaism, Indigenous, Islam and Buddhism, where it assumes the mean of the log value.
+
+```{r plotintercept, fig.cap = "Estimated intercept for each election, which represents the two-party preferred vote for an electorate with mean characteristics.", out.height="20%"}
+intercept_df <- bind_rows(data.frame(summary(glsmod16)$tTable)[1, ]  %>% mutate(year = "2016"), 
+  data.frame(summary(glsmod13)$tTable)[1, ] %>% mutate(year = "2013"),
+  data.frame(summary(glsmod10)$tTable)[1, ] %>% mutate(year = "2010"), 
+  data.frame(summary(glsmod07)$tTable)[1, ] %>% mutate(year = "2007"),
+  data.frame(summary(glsmod04)$tTable)[1, ] %>% mutate(year = "2004"), 
+  data.frame(summary(glsmod01)$tTable)[1, ] %>% mutate(year = "2001")) %>% 
+  rename(se = `Std.Error`, estimate = Value, p = `p.value`) %>% 
+  mutate(upper95 = estimate + 1.96*se, lower95 = estimate - 1.96*se)
+
+intercept_df %>% ggplot() + 
+  geom_point(aes(x = year, y = estimate), size = 2) +
+  geom_linerange(aes(x = year, ymin = lower95, ymax = upper95), size = 1.5) + 
+  geom_hline(aes(yintercept = 50), alpha = 0.5, size = 1) +
+  labs(x = "Election year", y = "Estimate of intercept") +
+  guides(col = F) +
+  coord_fixed(ratio = 0.2) +
+  lims(y = c(45, 55))
+```
+
 
 ## Influential socio-demographics
 To investigate the socio-demographics that have a strong effect on the two-party preferred vote, partial residual plots are used. These show the direction, size and significance of an estimated effect - the slope of the prediction line matches the estimated coefficient, and the shaded region represents a 95% confidence band. If a horizontal line can be drawn through the confidence band, then the effect is insignificant. Plots for each election are faceted to compare the effects over time.
@@ -184,16 +210,23 @@ p <- grid_visreg("DeFacto", xvar_title = "DeFacto", xlimits = c(-2.2, 5.1), ylim
 p <- grid_visreg("FamHouseSize", xvar_title = "FamHouseSize", xlimits = c(-3.4, 2.7), ylimits = c(12, 83))
 ```
 
+### Diversity
+In the lead up to the 2001 election, the Liberal government (in power) refused permission for the MV Tampa, a ship carrying 433 rescued refugees and 5 crew to enter Australian waters. This, along with the 9/11 attacks, were two key issues that are widely believed to have pushed the Liberal party to victory. In this 2001 election, electorates with a higher proportion of people speaking languages other than english at home (`OtherLanguageHome`) were significantly more likely to support Labor. This remains negative up until the 2016 election albeit insignificant. Higher proportions of people born in Asia (`Born_Asia`) is also significantly linked with Labor support in 2010, which may be due to refugee policy again arising as a key election issue in lead up to the election.
+
+```{r plototherlanguagehome, fig.cap = "Effect of OtherLanguageHome", out.width="60%", eval = F}
+p <- grid_visreg("OtherLanguageHome", xvar_title = "OtherLanguageHome", xlimits = c(-1.1, 3.5), ylimits = c(5, 80))
+```
+
 ### A note on similar variables
 
-Many of the Census variables represent similar information, which is why factors were created and some variables were removed. However, there still remain some variables which are closely related. For example, `OtherLanguageHome` is the proportion of households that speak a language other than English at home, which is likely to be related to the proportion of people born overseas (a sum of the variables with a `Born` prefix). In 2001, the coefficient estiamte for `OtherLanguageHome` is significant and negative, and all `Born` variables are insignificant. If `OtherLanguageHome` is removed from the model, populations born in South Eastern Europe (`Born_SE_Europe`) absorb the negative effect ($p = 0.0011$).
+Many of the Census variables represent similar information, which is why factors were created and some variables were removed. However, there still remain some variables which are closely related. For example, `OtherLanguageHome` is the proportion of households that speak a language other than English at home, which is likely to be related to the proportion of people born overseas (a sum of the variables with a `Born` prefix). In 2004, the coefficient estiamte for `OtherLanguageHome` negative but not significant, and all `Born` variables are insignificant. If all `Born` variables are removed from the model, `OtherLanguageHome` absorbs the negative effect, becoming significant ($p = 0.01$).
 
 ```{r removeolh, eval = F}
-no_OLH01 <- my_fgls(full_formula, 
-  my_data = model_df %>% filter(year == "2001") %>% dplyr::select(-OtherLanguageHome),
-  sp_weights = sp_weights_01)
+OLH04 <- my_fgls(full_formula, 
+  my_data = model_df %>% filter(year == "2004") %>% dplyr::select(-starts_with("Born")),
+  sp_weights = sp_weights_04)
 
-summary(no_OLH01)$tTable
+summary(OLH04)$tTable
 ```
 
 ## A closer look at the residuals
@@ -227,6 +260,51 @@ all_resids %>%
   guides(col = F, shape = F, DivisionNm = F)
 ```
 
+### Outlier electorates
+
+In 
+
+```{r readcooksd, include = F, echo=FALSE}
+read_chunk('cooksd.R')
+```
+
+```{r getcooksd}
+<<GetCookDistance>>
+```
+
+```{r cooksd, include = F}
+cooksd_df <- data.frame(
+  Residuals = c(glsmod16$actual_residuals, glsmod13$actual_residuals, glsmod10$actual_residuals, glsmod07$actual_residuals, glsmod04$actual_residuals, glsmod01$actual_residuals),
+  gls_residuals = c(glsmod16$residuals, glsmod13$residuals, glsmod10$residuals, glsmod07$residuals, glsmod04$residuals, glsmod01$residuals),
+  cooksd = c(glsmod16$cooksd, glsmod13$cooksd, glsmod10$cooksd, glsmod07$cooksd, glsmod04$cooksd, glsmod01$cooksd),
+  bind_rows(
+    glsmod16$my_data %>% left_join(tpp16 %>% dplyr::select(DivisionNm, UniqueID, StateAb), by = "DivisionNm"), 
+    glsmod13$my_data %>% left_join(tpp13 %>% dplyr::select(DivisionNm, UniqueID, StateAb), by = "DivisionNm"), 
+    glsmod10$my_data %>% left_join(tpp10 %>% dplyr::select(DivisionNm, UniqueID, StateAb), by = "DivisionNm"), 
+    glsmod07$my_data %>% left_join(tpp07 %>% dplyr::select(DivisionNm, UniqueID, StateAb), by = "DivisionNm"), 
+    glsmod04$my_data %>% left_join(tpp04 %>% dplyr::select(DivisionNm, UniqueID, StateAb), by = "DivisionNm"), 
+    glsmod01$my_data %>% left_join(tpp01 %>% dplyr::select(DivisionNm, UniqueID, StateAb), by = "DivisionNm"))
+) 
+```
+
+```{r plotcooksd, fig.cap = "Electorates' Cook's Distance values in each election."}
+cooksd_df %>% 
+  ggplot(aes(x = cooksd)) + 
+  geom_dotplot() + 
+  facet_wrap(~year, nrow = 1) + 
+  coord_fixed(ratio = .5) +
+  labs(x = "Cook's Distance", y = "")
+```
+
+```{r}
+cooksd_df %>% 
+  filter(cooksd > 0.13) %>% 
+  select(DivisionNm, StateAb, year, cooksd, Residuals, LNP_Percent, everything()) %>% View
+```
+
+The dotplots in Figure \@ref(fig:plotcooksd) show that there are a few outliers in each election, using cook's distance as a measure of influence. The electorate of Sydney (NSW) has the largest cook's distance in 2001, 2004, 2007 and 2010, due to its diverse population (language, birthplace and religion), high number of defacto relationships,  high income, high household mobility and small amount of workers in extractive, distributive and transformative jobs. It has remained a strong supporter of the Labor party and is severely underpredicted by the model. Nearby in metropolitan NSW, the electorate of Wentworth is found to be an outlier in the 2010, 2013 and 2016 elections - coinciding with its Liberal member, Malcolm Turnbull, being the leader of the Liberal party. Wentworth was historically Liberal but increased its two-party vote by over 10 percentage points in 2010 with Turnbull as Liberal leader, whilst experiencing minimal change in its socio-demographics, causing the models to heavily underpredict its Liberal preference.
+
+Melbourne Ports, an upper-middle class electorate just south of Melbourne's the central business district, 
 
 ### Electorates with largest residuals
 
@@ -239,6 +317,22 @@ all_resids %>%
   arrange(-max_res) %>% 
   filter(max_res > 13.4) %>% 
   dplyr::select(DivisionNm, LNP_Percent, year, everything())
+
+all_resids %>% 
+  group_by(year) %>% 
+  mutate(yr_max = max(abs(Residuals))) %>% 
+  filter(abs(Residuals) == yr_max) %>% 
+  select(DivisionNm, StateAb, year, Residuals, LNP_Percent)
+
+cooksd_df %>% 
+  mutate(LNP_win = ifelse(LNP_Percent > 50, 1, 0),
+    LNP_predicted = ifelse(LNP_Percent - Residuals > 50, 1, 0),
+    correct = ifelse(LNP_win == LNP_predicted, 1, 0)) %>% 
+  filter(correct == 0) %>% dim
+  group_by(year) %>% 
+  mutate(yr_max = max(abs(Residuals))) %>% 
+  filter(abs(Residuals) == yr_max) %>% 
+  select(DivisionNm, StateAb, year, Residuals, LNP_Percent)
 ```
 
 ```{r eval = F}
