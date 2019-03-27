@@ -12,6 +12,7 @@ library(rgeos)
 library(spdep)
 library(gridExtra)
 library(grid)
+library(predictmeans)
 
 # Data
 data(tpp01)
@@ -38,6 +39,14 @@ standardise_vars <- function(df) {
   df$LNP_Percent <- hold$LNP_Percent
   return(df)
 }
+
+# Take log of indigneous, judaism, islam, buddhism
+abs2016 <- abs2016 %>% mutate(Indigenous = log(Indigenous), Judaism = log(Judaism), Islam = log(Islam), Buddhism = log(Buddhism))
+abs2013 <- abs2013 %>% mutate(Indigenous = log(Indigenous), Judaism = log(Judaism), Islam = log(Islam), Buddhism = log(Buddhism))
+abs2010 <- abs2010 %>% mutate(Indigenous = log(Indigenous), Judaism = log(Judaism), Islam = log(Islam), Buddhism = log(Buddhism))
+abs2007 <- abs2007 %>% mutate(Indigenous = log(Indigenous), Judaism = log(Judaism), Islam = log(Islam), Buddhism = log(Buddhism))
+abs2004 <- abs2004 %>% mutate(Indigenous = log(Indigenous), Judaism = log(Judaism), Islam = log(Islam), Buddhism = log(Buddhism))
+abs2001 <- abs2001 %>% mutate(Indigenous = log(Indigenous), Judaism = log(Judaism), Islam = log(Islam), Buddhism = log(Buddhism))
 
 # Combine and standardize
 my_df <- bind_rows(
@@ -226,6 +235,9 @@ my_fgls <- function(my_formula, my_data, sp_weights) {
   # GLS model
   my_formula <- formula(paste0(my_formula,  " - 1"))
   gls_model <- gls(my_formula, gls_data)
+  
+  # Cooks distance
+  #gls_model$cooksd <- unname(predictmeans::CookD(gls_model, plot = FALSE))
   
   # Call to function with stargazer
   gls_model$call$model <- formula(paste0("LNP_Percent ~ ", paste0(names(gls_data)[-1], collapse = " + ")))
