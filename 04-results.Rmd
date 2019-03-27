@@ -206,7 +206,6 @@ grid_visreg <- function(varname, xvar_title = "", xlimits = NULL, ylimits = NULL
 ```
 
 
-
 ### Income and unemployment
 
 Typically the Labor party campaigns on more progressive policies, which often include tax reform that adversely affects higher income earners, and more generous social assistance programs. Perhaps due to these policies, higher income electorates have been more likely to support the Liberal party, as the `Incomes` factor has a positive effect on Liberal preference (see Figure \@ref(fig:plotincomes)). This effect is signficant in every election aside from 2004, in which it is only marginally insignificant ($p = 0.0613$). Unemployment however, has not been as influential. In 2001 and 2004, electorates with higher unemployment were more likely to support Labor, but over time this has shifted towards support for the Liberal party, culminating in a significantly positive effect in 2016.
@@ -218,71 +217,65 @@ p <- grid_visreg("Incomes", xvar_title = "Incomes", plot = T, xlimits = c(-1.5, 
 ```{r plotunemploy, fig.cap = "Effect of Unemployment", out.width="60%"}
 p <- grid_visreg("Unemployment", xvar_title = "Unemployment", plot = T, xlimits = c(-2.1, 3.4), ylimits = c(28, 68))
 ```
-`
-
-
-### Income and unemployment
-Typically the Labor party campaigns on more progressive policies, which often include tax reform that adversely affects higher income earners, and more generous social assistance programs. Despite this, incomes have only significantly affected the electoral two-party preference in 2016 (see Figure \@ref(fig:plotincomes)), with higher income areas associated with support for the Liberal party. In the prior elections, the estimated effect is still positive, albeit insignificant. Unemployment on the other hand, was influential in 2001, 2004 and 2007 elections (Figure \@ref(fig:plotunemploy)), with electorates with higher unemployment favouring Labor. This estimated effect has become weaker over time, with unemployment having virtually no effect in 2016.
-
-```{r plotincomes, fig.cap = "Effect of Incomes", out.width="100%"}
-p <- grid_visreg("Incomes", xvar_title = "Incomes", xlimits = c(-1.5, 3.6), ylimits = c(30, 95))
-```
-
-```{r plotunemploy, fig.cap = "Effect of Unemployment", out.width="60%"}
-p <- grid_visreg("Unemployment", xvar_title = "Unemployment", xlimits = c(-2.1, 3.4), ylimits = c(28, 68))
-```
 
 ### Industry and type of work
-Electorates with higher proportions of workers in mining, gas, water, agriculture, waste and electricity (grouped as `Extractive` industries) are consistently linked with higher support for the Liberal party, with the mangitude of this effect slightly increasing over the years (see Figure \@ref(fig:plotextractive)). This is unsurprising, as the Liberal party has close ties with these traditional energy industries, and typically present policies to reduce taxation on energy production. Furthermore, electorates with more workers in construction or manufacturing industries (`Transformative`), as well as wholesale trade, retail trade, transport, post or warehousing (`Distributive`), are also linked with the Liberal party. However, these effects are not as strong, and `Transformative` was marginally insignificant in the 2010 election, whereas `Distributive` was not a key socio-demographic in 2001 or 2016. These effects are shown in Figures \@ref(fig:plottransformative) and \@ref(fig:plotdistributive).
+Electorates with higher proportions of workers in mining, gas, water, agriculture, waste and electricity (grouped as `Extractive` industries) are consistently linked with higher support for the Liberal party, with the mangitude of this effect slightly increasing over the years (see Figure \@ref(fig:plotextractive)). This is unsurprising, as the Liberal party has close ties with these traditional energy industries, and typically present policies to reduce taxation on energy production. Furthermore, electorates with more workers in construction or manufacturing industries (`Transformative`) are also more likely to support the Liberal party (see Figure \@ref(fig:plottransformative)).
 
 ```{r plotextractive, fig.cap = "Effect of Extractive", out.width="60%"}
-p <- grid_visreg("Extractive", xvar_title = "Extractive", xlimits = c(-0.7, 3.4), ylimits = c(35, 81))
+p <- grid_visreg("Extractive", xvar_title = "Extractive", xlimits = c(-0.7, 3.4), ylimits = c(35, 81), plot = T)
 ```
 
 ```{r plottransformative, fig.cap = "Effect of Transformative", out.width="60%"}
-p <- grid_visreg("Transformative", xvar_title = "Transformative", xlimits = c(-2.25, 2.9), ylimits = c(34, 75))
-```
-```{r plotdistributive, fig.cap = "Effect of Distributive", out.width="60%"}
-p <- grid_visreg("Distributive", xvar_title = "Distributive", xlimits = c(-3.1, 2.5), ylimits = c(34, 65))
+p <- grid_visreg("Transformative", xvar_title = "Transformative", xlimits = c(-2.25, 2.9), ylimits = c(34, 75), plot = T)
 ```
 
-Similarly, the proportions of workers in managerial, administrative, clerical and sales roles (`ManagerAdminClericalSales`) is also a significant predictor of two-party preference across all six elections, with higher proportions supporting the Liberal party.
+Similarly, workers in managerial, administrative, clerical and sales roles (`ManagerAdminClericalSales`) is also a significant predictor of two-party preference vote across all six elections, with a higher proportion of people working these jobs increasing Liberal support. The magnitude of this effect has also increased over the years.
 
 ```{r plotmanager, fig.cap = "Effect of ManagerAdminClericalSales", out.width="60%"}
-p <- grid_visreg("ManagerAdminClericalSales", xvar_title = "ManagerAdminClericalSales", xlimits = c(-3.75, 2.8), ylimits = c(32, 70))
+p <- grid_visreg("ManagerAdminClericalSales", xvar_title = "ManagerAdminClericalSales", xlimits = c(-3.75, 2.8), ylimits = c(32, 70), plot = T)
 ```
+
 
 ### Household mobility
 ```{r plotdiffaddress, fig.cap = "Effect of DiffAddress", out.width="60%"}
-p <- grid_visreg("DiffAddress", xvar_title = "DiffAddress", xlimits = c(-2.1, 3.65), ylimits = c(34, 81))
+p <- grid_visreg("DiffAddress", xvar_title = "DiffAddress", xlimits = c(-2.1, 3.65), ylimits = c(34, 81), plot = T)
 ```
 
-In each of the six elections, electorates with a higher proportion of people that have recently moved house (meaning in last five years) were more likely to support the Liberal party, with this effect becoming stronger since 2010. Having controlled for characteristics of house ownership and rental prices (via the factors `PropertyOwned` and `RentLoan` respectively), this is effect is somewhat surprising. *Add more here?*
+In each of the six elections, electorates with a higher proportion of people that have recently moved house (meaning in last five years) were more likely to support the Liberal party, although this effect was marginally insignificant in 2013. Having controlled for characteristics of house ownership and rental prices (via the factors `PropertyOwned` and `RentLoan` respectively), this is effect is somewhat surprising.
 
-### Indigenous population
-```{r plotindigenous, fig.cap = "Effect of Indigenous population", out.width="60%"}
-p <- grid_visreg("Indigenous", xvar_title = "Indigenous", xlimits = c(-0.6, 9.5), ylimits = c(35, 120))
-```
-
-The indigenous population of an electorate is found to be a significant predictor in every election, with higher indigenous populations supporting the Liberal party. There are a few outliers with Lingiari (NT) being the most extreme. However, Lingiari itself has been a strong Labor supporter, and this effect appears to be driven by the other electorates with high Indigenous populations (Kalgoorlie (WA), Leichhardt (NSW), Durack (WA), Parkes(NSW) and Kennedy (QLD)), which have almost always elected a Liberal candidate. 
-
-### Relationships and families
-In each of the six elections, higher proportions people in de facto marriages are tied to support for the Labor party, whereas the effect of marriages themselves are insignificant. Larger family and household size (via the `FamHouseSize` factor) is also linked with Labor support, although only being significant in the 2007 and 2010 elections (see Figure \@ref(fig:plotfamhousesize)).
+### Relationships and age
+De facto relationships, but not marriages, is found to be an important (and significant) predictor of the two-party preferred vote in all six elections, with more de facto relationships associated with higher support for the Labor party. 
 
 ```{r plotdefacto, fig.cap = "Effect of DeFacto", out.width="60%", eval = F}
-p <- grid_visreg("DeFacto", xvar_title = "DeFacto", xlimits = c(-2.2, 5.1), ylimits = c(12, 83))
+p <- grid_visreg("DeFacto", xvar_title = "DeFacto", xlimits = c(-2.2, 5.1), ylimits = c(12, 83), plot = T)
 ```
 
-```{r plotfamhousesize, fig.cap = "Effect of FamHouseSize", out.width="60%", eval = F}
-p <- grid_visreg("FamHouseSize", xvar_title = "FamHouseSize", xlimits = c(-3.4, 2.7), ylimits = c(12, 83))
+Although only significant in 2007 and 2010, older electorates (higher median age) are consistently more likely to support the Liberal party. 
+
+```{r plotage, fig.cap = "Effect of MedianAge", out.width="60%", eval = F}
+p <- grid_visreg("MedianAge", xvar_title = "MedianAge", xlimits = c(-2.5, 2.7), ylimits = c(31, 70), plot = T)
+```
+
+### Education
+Since 2007, electorates with higher education levels have been associated with supporting the Labor party, although this effect is only significant in 2016. Prior to 2007, education had no material effect.
+
+```{r ploteducation, fig.cap = "Effect of Education", out.width="60%", eval = F}
+p <- grid_visreg("Education", xvar_title = "Education", xlimits = c(-2.5, 2.7), ylimits = c(31, 70), plot = T)
 ```
 
 ### Diversity
 In the lead up to the 2001 election, the Liberal government (in power) refused permission for the MV Tampa, a ship carrying 433 rescued refugees and 5 crew to enter Australian waters. This, along with the 9/11 attacks, were two key issues that are widely believed to have pushed the Liberal party to victory. In this 2001 election, electorates with a higher proportion of people speaking languages other than english at home (`OtherLanguageHome`) were significantly more likely to support Labor. This remains negative up until the 2016 election albeit insignificant. Higher proportions of people born in Asia (`Born_Asia`) is also significantly linked with Labor support in 2010, which may be due to refugee policy again arising as a key election issue in lead up to the election.
 
 ```{r plototherlanguagehome, fig.cap = "Effect of OtherLanguageHome", out.width="60%", eval = F}
-p <- grid_visreg("OtherLanguageHome", xvar_title = "OtherLanguageHome", xlimits = c(-1.1, 3.5), ylimits = c(5, 80))
+p <- grid_visreg("OtherLanguageHome", xvar_title = "OtherLanguageHome", xlimits = c(-1.1, 3.5), ylimits = c(5, 80), plot = T)
 ```
+
+
+```{r plotbornse, fig.cap = "Effect of Born_SE_Europe", out.width="60%", eval = F}
+p <- grid_visreg("Born_SE_Europe", xvar_title = "Born_SE_Europe", xlimits = c(-0.9, 5), ylimits = c(20, 70), plot = T)
+```
+
+
 
 ### A note on similar variables
 
