@@ -264,7 +264,9 @@ p <- grid_visreg("Education", xvar_title = "Education", xlimits = c(-2.5, 2.7), 
 ```
 
 ### Diversity
-In the lead up to the 2001 election, the Liberal government (in power) refused permission for the MV Tampa, a ship carrying 433 rescued refugees and 5 crew to enter Australian waters. This, along with the 9/11 attacks, were two key issues that are widely believed to have pushed the Liberal party to victory. In this 2001 election, electorates with a higher proportion of people speaking languages other than english at home (`OtherLanguageHome`) were significantly more likely to support Labor. This remains negative up until the 2016 election albeit insignificant. Higher proportions of people born in Asia (`Born_Asia`) is also significantly linked with Labor support in 2010, which may be due to refugee policy again arising as a key election issue in lead up to the election.
+Larger migrant populations from Asia, the Middle East, South-Eastern Europe, the United Kingdom and elsewhere, are assocated with Labor support, or had no effect. Of these areas, only South-Eastern European populations were signficant in each election and Asian migrants were a significant in 2010. However, the effect of other languages (aside from English) is a far stronger effect, as observed through `OtherLanguageHome`. Surprisingly, electorates with more diverse speech were more likely to support the Liberal party from 2004 onwards, with this effect being significant in 2007, 2010 and 2016.
+
+Of the variables relating to religion, only Judaism shows a consistent effect, with electorates with larger Jewish populations more likely to vote Liberal. 
 
 ```{r plototherlanguagehome, fig.cap = "Effect of OtherLanguageHome", out.width="60%", eval = F}
 p <- grid_visreg("OtherLanguageHome", xvar_title = "OtherLanguageHome", xlimits = c(-1.1, 3.5), ylimits = c(5, 80), plot = T)
@@ -275,6 +277,92 @@ p <- grid_visreg("OtherLanguageHome", xvar_title = "OtherLanguageHome", xlimits 
 p <- grid_visreg("Born_SE_Europe", xvar_title = "Born_SE_Europe", xlimits = c(-0.9, 5), ylimits = c(20, 70), plot = T)
 ```
 
+```{r plotbornasia, fig.cap = "Effect of Born_Asia", out.width="60%", eval = F}
+p <- grid_visreg("Born_Asia", xvar_title = "Born_Asia", xlimits = c(-0.9, 5), ylimits = c(20, 70), plot = T)
+```
+
+```{r plotjudaism, fig.cap = "Effect of Judaism", out.width="60%", eval = F}
+p <- grid_visreg("Judaism", xvar_title = "Judaism", xlimits = c(-1.5, 3.8), ylimits = c(40, 70), plot = T)
+```
+
+### Partial residual plots
+
+```{r}
+vars_to_plot <- c("Judaism", "Born_Asia", "Born_SE_Europe", "OtherLanguageHome", "Education", "MedianAge", "DeFacto", "DiffAddress", "ManagerAdminClericalSales", "Transformative", "Extractive", "Unemployment", "Incomes")
+
+ls_visreg <- list(Judaism = grid_visreg("Judaism"), Born_Asia = grid_visreg("Born_Asia"), Born_SE_Europe = grid_visreg("Born_SE_Europe"), OtherLanguageHome = grid_visreg("OtherLanguageHome"), Education = grid_visreg("Education"), MedianAge = grid_visreg("MedianAge"), DeFacto = grid_visreg("DeFacto"), DiffAddress = grid_visreg("DiffAddress"), ManagerAdminClericalSales = grid_visreg("ManagerAdminClericalSales"), Transformative = grid_visreg("Transformative"), Extractive = grid_visreg("Extractive"), Unemployment = grid_visreg("Unemployment"), Incomes = grid_visreg("Incomes"))
+
+all_bands_df <- bind_rows(
+  ls_visreg$Judaism$bands %>% mutate(varname = "Judaism", xmin = -1.5, xmax = 3.8),
+  ls_visreg$Born_Asia$bands %>% mutate(varname = "Born_Asia", xmin = -0.9, xmax = 5.15),
+  ls_visreg$Born_SE_Europe$bands %>% mutate(varname = "Born_SE_Europe", xmin = -0.85, xmax = 5.05),
+  ls_visreg$OtherLanguageHome$bands %>% mutate(varname = "OtherLanguageHome", xmin = -1, xmax = 3.4),
+  ls_visreg$Education$bands %>% mutate(varname = "Education", xmin = -1.3, xmax = 3),
+  ls_visreg$MedianAge$bands %>% mutate(varname = "MedianAge", xmin = -2.55, xmax = 2.8),
+  ls_visreg$DeFacto$bands %>% mutate(varname = "DeFacto", xmin = -2.2, xmax = 5.05),
+  ls_visreg$DiffAddress$bands %>% mutate(varname = "DiffAddress", xmin = -2.2, xmax = 3.75),
+  ls_visreg$ManagerAdminClericalSales$bands %>% mutate(varname = "ManagerAdminClericalSales", xmin = -3.75, xmax = 2.85),
+  ls_visreg$Transformative$bands %>% mutate(varname = "Transformative", xmin = -2.3, xmax = 2.92),
+  ls_visreg$Extractive$bands %>% mutate(varname = "Extractive", xmin = -0.75, xmax = 3.45),
+  ls_visreg$Unemployment$bands %>% mutate(varname = "Unemployment", xmin = -2.08, xmax = 3.37),
+  ls_visreg$Incomes$bands %>% mutate(varname = "Incomes", xmin = -1.5, xmax = 3.65)
+)
+
+all_points_df <- bind_rows(
+  ls_visreg$Judaism$points %>% mutate(varname = "Judaism"),
+  ls_visreg$Born_Asia$points %>% mutate(varname = "Born_Asia"),
+  ls_visreg$Born_SE_Europe$points %>% mutate(varname = "Born_SE_Europe"),
+  ls_visreg$OtherLanguageHome$points %>% mutate(varname = "OtherLanguageHome"),
+  ls_visreg$Education$points %>% mutate(varname = "Education"),
+  ls_visreg$MedianAge$points %>% mutate(varname = "MedianAge"),
+  ls_visreg$DeFacto$points %>% mutate(varname = "DeFacto"),
+  ls_visreg$DiffAddress$points %>% mutate(varname = "DiffAddress"),
+  ls_visreg$ManagerAdminClericalSales$points %>% mutate(varname = "ManagerAdminClericalSales"),
+  ls_visreg$Transformative$points %>% mutate(varname = "Transformative"),
+  ls_visreg$Extractive$points %>% mutate(varname = "Extractive"),
+  ls_visreg$Unemployment$points %>% mutate(varname = "Unemployment"),
+  ls_visreg$Incomes$points %>% mutate(varname = "Incomes")
+)
+
+ggplot(data = all_bands_df %>% filter(varname %in% vars_to_plot[8:13])) +
+  geom_ribbon(aes(x = variable, ymin = lower95, ymax = upper95), fill = "grey80") + 
+  geom_point(aes(x = variable, y = part_res), data = all_points_df %>% filter(varname %in% vars_to_plot[8:13]), size = 0.75, col = "grey50") + 
+  geom_line(aes(x = variable, y = fitted), col = "blue", size = 1) +
+  theme_bw()+ 
+  labs(x = varname, y = "Response") + 
+  facet_wrap(varname ~ year, ncol = 6, scales = "free")
+
+
+my_x_ranges <- range(range(model_df$Judaism), range(model_df$Born_Asia), range(model_df$Born_SE_Europe), range(model_df$OtherLanguageHome), range(model_df$Education), range(model_df$MedianAge), range(model_df$DeFacto), range(model_df$DiffAddress), range(model_df$ManagerAdminClericalSales), range(model_df$Transformative), range(model_df$Extractive), range(model_df$Unemployment), range(model_df$Incomes))
+
+my_y_ranges <- range(
+  range(c(ls_visreg$Judaism$bands$upper95, ls_visreg$Judaism$bands$lower95, ls_visreg$Judaism$points$part_res)),
+  range(c(ls_visreg$Born_Asia$bands$upper95, ls_visreg$Born_Asia$bands$lower95, ls_visreg$Born_Asia$points$part_res)),
+  range(c(ls_visreg$Born_SE_Europe$bands$upper95, ls_visreg$Born_SE_Europe$bands$lower95, ls_visreg$Born_SE_Europe$points$part_res)),
+  range(c(ls_visreg$OtherLanguageHome$bands$upper95, ls_visreg$OtherLanguageHome$bands$lower95, ls_visreg$OtherLanguageHome$points$part_res)),
+  range(c(ls_visreg$Education$bands$upper95, ls_visreg$Education$bands$lower95, ls_visreg$Education$points$part_res)),
+  range(c(ls_visreg$MedianAge$bands$upper95, ls_visreg$MedianAge$bands$lower95, ls_visreg$MedianAge$points$part_res)),
+  range(c(ls_visreg$DeFacto$bands$upper95, ls_visreg$DeFacto$bands$lower95, ls_visreg$DeFacto$points$part_res)),
+  range(c(ls_visreg$DiffAddress$bands$upper95, ls_visreg$DiffAddress$bands$lower95, ls_visreg$DiffAddress$points$part_res)),
+  range(c(ls_visreg$ManagerAdminClericalSales$bands$upper95, ls_visreg$ManagerAdminClericalSales$bands$lower95, ls_visreg$ManagerAdminClericalSales$points$part_res)),
+  range(c(ls_visreg$Transformative$bands$upper95, ls_visreg$Transformative$bands$lower95, ls_visreg$Transformative$points$part_res)),
+  range(c(ls_visreg$Extractive$bands$upper95, ls_visreg$Extractive$bands$lower95, ls_visreg$Extractive$points$part_res)),
+  range(c(ls_visreg$Unemployment$bands$upper95, ls_visreg$Unemployment$bands$lower95, ls_visreg$Unemployment$points$part_res)),
+  range(c(ls_visreg$Incomes$bands$upper95, ls_visreg$Incomes$bands$lower95, ls_visreg$Incomes$points$part_res))
+  )
+
+ggplot(data = all_bands_df %>% filter(varname %in% vars_to_plot[12:13])) +
+  geom_ribbon(aes(x = variable, ymin = lower95, ymax = upper95), fill = "grey80") + 
+  geom_point(aes(x = variable, y = part_res), data = all_points_df %>% filter(varname %in% vars_to_plot[12:13]), size = 0.75, col = "grey50") + 
+  geom_line(aes(x = variable, y = fitted), col = "blue", size = 1) +
+  theme_bw() + 
+  labs(x = varname, y = "Response") + 
+  facet_wrap(varname ~ year, ncol = 6, scales = "free") +
+  expand_limits(x = my_x_ranges[23:26], y = my_y_ranges[23:26])
+
+# https://stackoverflow.com/questions/18046051/setting-individual-axis-limits-with-facet-wrap-and-scales-free-in-ggplot2
+
+```
 
 
 ### A note on similar variables
