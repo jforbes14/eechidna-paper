@@ -2,7 +2,7 @@
 
 ## Spatial autoregressive parameter
 
-The spatial autoregressive coefficient $\rho$ is positive and significant in only the 2001 and 2016 elections (Figure \@ref(fig:rhovis)), meaning that in these elections, an electorate's political climate was affected by the attitudes of it's neighbours. Conversely, in the other four elections, the spatial effect weakens to become marginally insignficant. In these years, it appears that the spatial component does not explain anything over and above the electoral socio-demographics, meaning electorates effectively acted more independently.
+The spatial autoregressive coefficient $\rho$ is positive and significant in only the 2001 and 2016 elections (Figure \@ref(fig:rhovis)), meaning that in these elections, an electorate's political climate was affected by the attitudes of it's neighbours. Conversely, in the other four elections, the spatial effect weakens to become insignficant. In these years, it appears that the spatial component does not explain anything over and above the electoral socio-demographics, meaning electorates effectively acted more independently.
 
 ```{r rhovis, fig.cap="Estimates of the spatial autoregressive parameter for each of the six elections, with a 95\\% confidence interval. Only in 2001 and 2016 is there a significant spatial component", out.height='20%'}
 rho_df <- bind_rows(glsmod16$rho_df %>% mutate(year = "2016"), 
@@ -55,13 +55,11 @@ To investigate the socio-demographics that have a strong effect on the two-party
 
 *It is important here to note the ecological fallacy - insights are being drawn at the electorate level, and cannot be inferred for another disaggregate level (e.g. individual voters).*
 
-### Income and unemployment
-Typically the Labor party campaigns on more progressive policies, which often include tax reform that adversely affects higher income earners, and more generous social assistance programs. Despite this, incomes have only significantly affected the electoral two-party preference in 2016 (see Figure \@ref(fig:plotincomes)), with higher income areas associated with support for the Liberal party. In the prior elections, the estimated effect is still positive, albeit insignificant. Unemployment on the other hand, was influential in 2001, 2004 and 2007 elections (Figure \@ref(fig:plotunemploy)), with electorates with higher unemployment favouring Labor. This estimated effect has become weaker over time, with unemployment having virtually no effect in 2016.
 
 ```{r myvisreg, include = F}
 # Function to produce visreg style conditional plots
 my_visreg <- function(my_model, sp_weights, varname, 
-  nolabs = FALSE, xlimits = NULL, ylimits = NULL, year = "") {
+  plot = FALSE, nolabs = FALSE, xlimits = NULL, ylimits = NULL, year = "") {
   
   # Extract fitted parameters
   rho <- my_model$rho_df$estimate
@@ -117,7 +115,8 @@ my_visreg <- function(my_model, sp_weights, varname,
   )
   
   # Plot
-  myplot <- ggplot(data = plot_df) + 
+  if (plot == TRUE) {
+      myplot <- ggplot(data = plot_df) + 
     geom_ribbon(aes(x = variable, ymin = lower95, ymax = upper95), fill = "grey80") + 
     geom_point(aes(x = variable, y = part_res), data = points_df, size = 0.75, col = "grey50") + 
     geom_line(aes(x = variable, y = fitted), col = "blue", size = 1) +
@@ -135,27 +134,95 @@ my_visreg <- function(my_model, sp_weights, varname,
   if (!is.null(xlimits) & !is.null(ylimits)) {
     myplot <- myplot + coord_cartesian(xlim = xlimits, ylim = ylimits)
   }
+      return(myplot)
+  }
+
+  # Points
+  if (plot == FALSE) {
+    return_ls <- list(bands = plot_df, points = points_df)
+    
+    return(return_ls)
+  }
   
-  return(myplot)
+  
 }
 
 # Grid visreg
-grid_visreg <- function(varname, xvar_title, xlimits, ylimits) {
-  p16 <- my_visreg(glsmod16, sp_weights_16, varname = varname, nolabs = T, year = "2016", xlimits, ylimits)
-  p13 <- my_visreg(glsmod13, sp_weights_13, varname = varname, nolabs = T, year = "2013", xlimits, ylimits)
-  p10 <- my_visreg(glsmod10, sp_weights_10, varname = varname, nolabs = T, year = "2010", xlimits, ylimits)
-  p07 <- my_visreg(glsmod07, sp_weights_07, varname = varname, nolabs = T, year = "2007", xlimits, ylimits)
-  p04 <- my_visreg(glsmod04, sp_weights_04, varname = varname, nolabs = T, year = "2004", xlimits, ylimits)
-  p01 <- my_visreg(glsmod01, sp_weights_01, varname = varname, nolabs = T, year = "2001", xlimits, ylimits)
+grid_visreg <- function(varname, xvar_title = "", xlimits = NULL, ylimits = NULL, plot = FALSE) {
+  if (plot == TRUE) {
+    p16 <- my_visreg(glsmod16, sp_weights_16, varname = varname, plot = T, nolabs = T, 
+      year = "2016", xlimits, ylimits)
+    p13 <- my_visreg(glsmod13, sp_weights_13, varname = varname, plot = T, nolabs = T, 
+      year = "2013", xlimits, ylimits)
+    p10 <- my_visreg(glsmod10, sp_weights_10, varname = varname, plot = T, nolabs = T, 
+      year = "2010", xlimits, ylimits)
+    p07 <- my_visreg(glsmod07, sp_weights_07, varname = varname, plot = T, nolabs = T, 
+      year = "2007", xlimits, ylimits)
+    p04 <- my_visreg(glsmod04, sp_weights_04, varname = varname, plot = T, nolabs = T, 
+      year = "2004", xlimits, ylimits)
+    p01 <- my_visreg(glsmod01, sp_weights_01, varname = varname, plot = T, nolabs = T, 
+      year = "2001", xlimits, ylimits)
   
-  plots <- grid.arrange(p01, p04, p07, p10, p13, p16, nrow = 2, 
-    left = grid.text("Two-party preferred vote (%)", gp = gpar(cex = 0.8), rot = 90), 
-    bottom = grid.text(xvar_title, gp = gpar(cex = 0.8)))
+    plots <- grid.arrange(p01, p04, p07, p10, p13, p16, nrow = 2, 
+      left = grid.text("Two-party preferred vote (%)", gp = gpar(cex = 0.8), rot = 90), 
+      bottom = grid.text(xvar_title, gp = gpar(cex = 0.8)))
   
   return(plots)
+  }
+  
+  if (plot == FALSE) {
+    p16 <- my_visreg(glsmod16, sp_weights_16, varname = varname, plot = F, year = "2016")
+    p13 <- my_visreg(glsmod13, sp_weights_13, varname = varname, plot = F, year = "2013")
+    p10 <- my_visreg(glsmod10, sp_weights_10, varname = varname, plot = F, year = "2010")
+    p07 <- my_visreg(glsmod07, sp_weights_07, varname = varname, plot = F, year = "2007")
+    p04 <- my_visreg(glsmod04, sp_weights_04, varname = varname, plot = F, year = "2004")
+    p01 <- my_visreg(glsmod01, sp_weights_01, varname = varname, plot = F, year = "2001")
+    
+    bands_df <- bind_rows(
+      p16$bands %>% mutate(year = "2016"),
+      p13$bands %>% mutate(year = "2013"),
+      p10$bands %>% mutate(year = "2010"),
+      p07$bands %>% mutate(year = "2007"),
+      p04$bands %>% mutate(year = "2004"),
+      p01$bands %>% mutate(year = "2001")
+    )
+    
+    points_df <- bind_rows(
+      p16$points %>% mutate(year = "2016"),
+      p13$points %>% mutate(year = "2013"),
+      p10$points %>% mutate(year = "2010"),
+      p07$points %>% mutate(year = "2007"),
+      p04$points %>% mutate(year = "2004"),
+      p01$points %>% mutate(year = "2001")
+    )
+    
+    return_df <- list(bands = bands_df, points = points_df)
+    
+    return(return_df)
+  }
+  
 }
 
 ```
+
+
+
+### Income and unemployment
+
+Typically the Labor party campaigns on more progressive policies, which often include tax reform that adversely affects higher income earners, and more generous social assistance programs. Perhaps due to these policies, higher income electorates have been more likely to support the Liberal party, as the `Incomes` factor has a positive effect on Liberal preference (see Figure \@ref(fig:plotincomes)). This effect is signficant in every election aside from 2004, in which it is only marginally insignificant ($p = 0.0613$). Unemployment however, has not been as influential. In 2001 and 2004, electorates with higher unemployment were more likely to support Labor, but over time this has shifted towards support for the Liberal party, culminating in a significantly positive effect in 2016.
+
+```{r plotincomes, fig.cap = "Effect of Incomes", out.width="100%"}
+p <- grid_visreg("Incomes", xvar_title = "Incomes", plot = T, xlimits = c(-1.5, 3.6), ylimits = c(30, 95))
+```
+
+```{r plotunemploy, fig.cap = "Effect of Unemployment", out.width="60%"}
+p <- grid_visreg("Unemployment", xvar_title = "Unemployment", plot = T, xlimits = c(-2.1, 3.4), ylimits = c(28, 68))
+```
+`
+
+
+### Income and unemployment
+Typically the Labor party campaigns on more progressive policies, which often include tax reform that adversely affects higher income earners, and more generous social assistance programs. Despite this, incomes have only significantly affected the electoral two-party preference in 2016 (see Figure \@ref(fig:plotincomes)), with higher income areas associated with support for the Liberal party. In the prior elections, the estimated effect is still positive, albeit insignificant. Unemployment on the other hand, was influential in 2001, 2004 and 2007 elections (Figure \@ref(fig:plotunemploy)), with electorates with higher unemployment favouring Labor. This estimated effect has become weaker over time, with unemployment having virtually no effect in 2016.
 
 ```{r plotincomes, fig.cap = "Effect of Incomes", out.width="100%"}
 p <- grid_visreg("Incomes", xvar_title = "Incomes", xlimits = c(-1.5, 3.6), ylimits = c(30, 95))
