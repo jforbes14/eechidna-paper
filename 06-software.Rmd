@@ -1,5 +1,0 @@
-# Software
-
-`eechidna` (Exploring Election and Census Highly Informative Data Nationally for Australia) is an R package that makes it easy to look at the data from the Australian Federal elections and Censuses that occurred between 2001 and 2016. The data in this package includes voting results for each polling booth and electoral division (electorate), Census information for each electorate and maps of the electorates that were in place at the time of each event. All data in this package is obtained from the Australian Electoral Commission, the Australian Bureau of Statistics and the Australian Government. Census data is imputed for the election years in which a Census does not occur via a spatio-temporal imputation method.
-
-The Census and election datasets in the package can be linked by electorate using the unique identifier variable `UniqueID`. Vignettes describing how to use the data and how the data was obtained, can also be found on https://ropenscilabs.github.io/eechidna/.
