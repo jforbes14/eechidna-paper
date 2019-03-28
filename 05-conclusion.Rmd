@@ -1,0 +1,7 @@
+# Conclusion
+
+Across the past six elections, the spatial error models reveal that the electoral socio-demographics driving the two-party preferred vote have remained relatively steady, with industry and type of work being particularly influential, along with the type of relationships and household mobility, among others. The neighbourhood (spatial) effects were only found to be significant in the 2001 and 2016 elections. Surprisingly, unemployment, incomes and family/household sizes were significant in only some elections, and other characteristics like education were not significant at all. 
+
+The cross-sectional data set of Census and election data were obtained by collecting information from the ABS and AEC, and then applying a spatio-temporal imputation process, as detailed in section \@ref(data). This data is available in the `eechidna` `R` package, which can be downloaded from CRAN. All associated code to produce the data in the package from raw files can be found in the github repository (https://github.com/ropenscilabs/eechidna), and vignettes on how to use the data are located on the github page (https://ropenscilabs.github.io/eechidna/).
+
+Furthermore, this paper is generated using the `knitr` [@knitr] package, so code to reproduce the results are contained in the `RMarkdown` file.
