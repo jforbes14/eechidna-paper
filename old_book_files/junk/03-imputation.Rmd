@@ -1,0 +1,120 @@
+# Joining Census and election data {#imputation}
+
+## Differences between Census and election data
+
+Between 2001 and 2016 there were six elections and four Censuses (see Figure \@ref(fig:timeline)). Electoral boundaries are redistributed regularly by the AEC, meaning that only in the years where both a Census and election occur will the boundaries match - the case for the 2001 and 2016 election. Therefore, for the four elections between 2004 and 2013, both temporal and spatial differences in electorates need to be accounted for when joining the electoral two-party preferred vote with Census data. For these elections a spatio-temporal imputation method is employed to obtain electoral socio-demographics. This method uses Census information from both before and after the election of interest.
+
+```{r timeline, message = F, echo = F, fig.cap="Timeline of Australian elections and Censuses. They do not always occur in the same year.", out.width = "90%", fig.align="center"}
+timeline <- data.frame(year = c(2001:2016)) %>%
+  mutate(Election = ifelse(year %in% c(2001, 2004, 2007, 2010, 2013, 2016),1,0),
+         Census = ifelse(year %in% c(2001, 2006, 2011, 2016), 1.4, 0)) %>%
+  gather(c(Election,Census), key = event, value = measure) %>%  filter(measure != 0) %>%
+  mutate(year_vis = ifelse(event == "Census", year + 0.1, year))
+
+
+ggplot(timeline, aes(x=year_vis, y=measure)) + geom_point(aes(color=as.factor(event),shape=as.factor(event)),size = 4) + labs(color = "Event", shape = "Event") + geom_hline(yintercept=0, size =1, color = 'grey', show.legend = FALSE) + geom_segment(x=2001,xend=2001, y=1, yend=0, color = '#00BFC4') + geom_segment(x=2004,xend=2004, y=1, yend=0, color = '#00BFC4') + geom_segment(x=2007,xend=2007, y=1, yend=0, color = '#00BFC4') + geom_segment(x=2010,xend=2010, y=1, yend=0, color = '#00BFC4') + geom_segment(x=2013,xend=2013, y=1, yend=0, color = '#00BFC4') + geom_segment(x=2016,xend=2016, y=1, yend=0, color = '#00BFC4') + geom_segment(x=2001.1,xend=2001.1, y=1.4, yend=0, color = '#F8766D') + geom_segment(x=2006.1,xend=2006.1, y=1.4, yend=0, color = '#F8766D') + geom_segment(x=2011.1,xend=2011.1, y=1.4, yend=0, color = '#F8766D') + geom_segment(x=2016.1,xend=2016.1, y=1.4, yend=0, color = '#F8766D') + labs(x="Year") + theme(text=element_text(size=10), axis.text.x=element_text(size=6),axis.text.y=element_blank(), axis.title.y=element_blank(), plot.background=element_blank(), axis.ticks.y = element_blank(), panel.background = element_blank()) + scale_x_discrete(limits = c(2001:2016)) + coord_fixed(ratio = 2)
+```
+
+## Spatio-temporal imputation
+
+To account for spatial differences, the piece-wise approximation method in @Goodchild1993 is adopted. Consider a map of source zones $s = 1,...,S$, for which socio-demographic information is available, and a set of target zones $t = 1,...,T$ for which information is to be imputed. In this context the map of electoral boundaries at the time of a Census would be the source zones, and the boundaries at the time of the election would be the target zones. Denote the area of intersection between source zone $s$ and target zone $t$ as $A_{s,t}$, the population of the source zone $s$ as $U_s$, and the population of intersection between source zone $s$ and target zone $t$ as $P_{s,t}$.
+
+Compute each $A_{s,t}$ and estimate population of the intersection:
+
+$$\hat{P}_{s,t} = \frac{U_s*A_{s,t}}{\sum_{t=1}^T A_{s,t}}$$
+This assumes that populations are uniformly distributed within each source zone.
+
+In order to calculate socio-demographic information for each of the target zones, a weighted average is taken using the estimated population as weights. Denote a given Census variable for the target zone $C_t$, and the same Census variable for the source zone $D_s$:
+
+$$\hat{C}_t = \frac{\sum_{s=1}^{S}{D_s*\hat{P}_{s,t}}}{\sum_{s=1}^{S}{\hat{P}_{s,t}}}$$
+This assumes that each individual in a source zone assumes the aggregate characteristics of the zone.
+
+Applying this to each of the target zones addresses the spatial component, as it imputes the required socio-demographic for the desired electoral boundaries. However these are applicable at the time of the Census (source year) and are not yet appropriate for the election (target year). 
+
+Denote year $y$, with a Census falling on $y_1$ and $y_3$, and an election on year $y_2$, and add this subscript to the Census variable estimate, $\hat{C}_{t,y}$. To account for temporal changes, linear interpolation is used between Census years to get the final estimate of a Census variable for the target zone in the election year $y_2$. This assumes that population evolves in a linear manner over time.
+
+$$\hat{C}_{t,y_2} = \frac{y_3-y_2}{y_3-y_1}*\hat{C}_{t,y_1} + \frac{y_2-y_1}{y_3-y_1}*\hat{C}_{t,y_3}$$
+
+## Applied
+
+Publically available Census data is aggregated and there are different resolutions accessible, ranging from SA1 (over 50,000 zones) to electoral divisions (150 zones). For this study electoral divisions are used as source zones, and this imputation method is applied for each of the 2004, 2007, 2010 and 2013 elections. To demonstrate its functionality, consider the imputation of socio-demographic variables for the electorate of Hume in New South Wales (NSW), at the time of the 2013 federal election. Figure \@ref(fig:hume13) shows this region amongst other NSW electorates.
+
+```{r hume13, fig.cap = "Some of the electoral boundaries in NSW for 2013, with the electoral boundary for Hume, shown in purple.", out.height="30%"}
+hume_area13 <- nat_map13 %>% 
+  filter(state %in% c("ACT","NSW"), long < 154)
+
+ggplot(data=hume_area13) +
+  geom_polygon(aes(x=long, y=lat, group=group, fill = elect_div == "HUME"),
+               colour="grey50", alpha = 0.4) +
+  scale_fill_manual(name="Boundary", values=c("white", "purple"), labels = c("Other 2013 Electorates", "Hume 2013")) +
+  theme_map() + coord_equal()
+```
+
+The Censuses neighbouring the 2013 election are those in 2011 and 2016, and the Hume boundary is changed, as seen by plotting the Hume boundary (purple) in the 2013 election over the divisions in 2016 (see Figure \@ref(fig:hume16)).
+
+```{r hume16, fig.cap = "Census division boundaries in NSW for 2016, with the 2013 electoral boundary for Hume, shown in purple. The purple region is not contained within a single Census division.", out.height="30%"}
+hume_area16 <- nat_map16 %>% 
+  filter(state %in% c("ACT","NSW"), long < 154) %>% 
+  mutate(year = "2016") %>% 
+  bind_rows(hume_area13 %>% filter(elect_div == "HUME") %>% mutate(year = "2013"))
+
+ggplot(data=hume_area16) +
+  geom_polygon(aes(x=long, y=lat, group=group, fill = year == "2013", 
+    alpha = year == "2013", colour=year == "2013")) +
+  scale_fill_manual(name="Boundary", values=c("grey95", "purple"), labels = c("2016 Electorates", "Hume 2013")) +
+  scale_alpha_manual(values=c(0, 0.4)) +
+  scale_color_manual(values=c("grey50", NA)) +
+  theme_map() + coord_equal() + guides(alpha = F, color = F)
+```
+
+There are many electorates in 2016 that intersect with the purple region (Hume boundary for 2013), these include the divisions of Riverina, Eden-Monaro and Hume, along with smaller intersecting areas with Fenner, Calare, Gilmore and Whitlam. To impute Census information for this purple region, calculate the percentage of each 2016 electorate that intersects with the purple region, which is then used to estimate intersection populations $\hat{P}_{s,t}$.
+
+Electorate (2016) | Percentage | Population in Electorate | Estimated Population Allocated to Purple Region: $\hat{P}_{s,t}$
+---------------------|------------|--------------------------|------------------------------------------------
+HUME              | 96.54%     | 150643                   | 145427
+RIVERINA          | 25.11%     | 155793                   | 39117
+EDEN-MONARO       | 11.09%     | 147532                   | 16358
+CANBERRA          | 0.28%      | 196037                   | 548
+FENNER            | 0.23%      | 202955                   | 474
+WHITLAM           | 0.06%      | 152280                   | 92
+GILMORE           | 0.06%      | 150436                   | 86
+CALARE            | 0.01%      | 161298                   | 21
+
+Now consider the socio-demographic $AusCitizen$ - the proportion of people in the region who are Australian citizens.
+
+```{r eval = F, include = F}
+auscitizen_ex <- abs2016 %>% 
+  filter(DivisionNm %in% c("HUME", "RIVERINA", "EDEN-MONARO", "CANBERRA", "FENNER", "WHITLAM", "GILMORE", "CALARE")) %>%
+  select(DivisionNm, AusCitizen) %>% 
+  mutate(`Estimated Population Allocated to Purple Region` = c(21, 548, 16358, 474, 86, 145427, 39117, 92),
+    AusCitizen = round(AusCitizen, 2)) %>% 
+  arrange(-`Estimated Population Allocated to Purple Region`)
+
+auscitizen_ex %>% 
+  kable()
+
+weighted.mean(x = auscitizen_ex$AusCitizen, w = auscitizen_ex$`Estimated Population Allocated to Purple Region`)
+```
+
+|DivisionNm      | AusCitizen (%): $D_s$| Estimated Population Allocated to Purple Region: $\hat{P}_{s,t}$|
+|----------------|-------------------|------------------------------------------------|
+|HUME            |              90.02|                                          145427|
+|RIVERINA        |              89.11|                                           39117|
+|EDEN-MONARO     |              88.00|                                           16358|
+|CANBERRA        |              85.48|                                             548|
+|FENNER          |              83.64|                                             474|
+|WHITLAM         |              89.52|                                              92|
+|GILMORE         |              89.03|                                              86|
+|CALARE          |              87.56|                                              21|
+
+Then taking a weighted average of $AusCitizen$ using the estimated population as weights yields $\hat{C}_{Hume,2016} = 89.65 \%$. Repeating this process using the 2011 Census and electoral boundaries yields $\hat{C}_{Hume,2011} = 91.00 \%$
+
+Finally, linearly interpolate between 2011 and 2016 to arrive at the 2013 estimate:
+\begin{eqnarray*}
+\hat{C}_{Hume,2013} & = &\frac{3}{5} \cdot \hat{C}_{Hume,2011} + \frac{2}{5} \cdot \hat{C}_{Hume,2016} \\ 
+& = & \frac{3}{5} \cdot 91.00 \% + \frac{2}{5} \cdot 89.65 \% \\ 
+& = & 90.46 \%
+\end{eqnarray*}
+
+This is done for each of the socio-demographic variables, and repeated each of the 2013 electorates.
+
