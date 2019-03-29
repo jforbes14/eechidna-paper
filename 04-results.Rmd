@@ -148,51 +148,8 @@ my_visreg <- function(my_model, sp_weights, varname,
 }
 
 # Grid visreg
-grid_visreg <- function(varname, xvar_title = "", xlimits = NULL, ylimits = NULL, plot = FALSE, table = TRUE, years = FALSE) {
-  if (plot == TRUE) {
-    
-    if (years == TRUE) {
-    p16 <- my_visreg(glsmod16, sp_weights_16, varname = varname, plot = T, nolabs = T, 
-      year = "2016", xlimits, ylimits)
-    p13 <- my_visreg(glsmod13, sp_weights_13, varname = varname, plot = T, nolabs = T, 
-      year = "2013", xlimits, ylimits)
-    p10 <- my_visreg(glsmod10, sp_weights_10, varname = varname, plot = T, nolabs = T, 
-      year = "2010", xlimits, ylimits)
-    p07 <- my_visreg(glsmod07, sp_weights_07, varname = varname, plot = T, nolabs = T, 
-      year = "2007", xlimits, ylimits)
-    p04 <- my_visreg(glsmod04, sp_weights_04, varname = varname, plot = T, nolabs = T, 
-      year = "2004", xlimits, ylimits)
-    p01 <- my_visreg(glsmod01, sp_weights_01, varname = varname, plot = T, nolabs = T, 
-      year = "2001", xlimits, ylimits)
-    } else {
-      p16 <- my_visreg(glsmod16, sp_weights_16, varname = varname, plot = T, nolabs = T, 
-      xlimits, ylimits)
-    p13 <- my_visreg(glsmod13, sp_weights_13, varname = varname, plot = T, nolabs = T, 
-      xlimits, ylimits)
-    p10 <- my_visreg(glsmod10, sp_weights_10, varname = varname, plot = T, nolabs = T, 
-      xlimits, ylimits)
-    p07 <- my_visreg(glsmod07, sp_weights_07, varname = varname, plot = T, nolabs = T, 
-      xlimits, ylimits)
-    p04 <- my_visreg(glsmod04, sp_weights_04, varname = varname, plot = T, nolabs = T, 
-      xlimits, ylimits)
-    p01 <- my_visreg(glsmod01, sp_weights_01, varname = varname, plot = T, nolabs = T, 
-      xlimits, ylimits)
-    }
-    
-  
-    if (table == TRUE) {
-      plots <- grid.arrange(p01, p04, p07, p10, p13, p16, nrow = 1, 
-        bottom = grid.text(xvar_title, gp = gpar(fontface = "bold", cex = 0.6)))
-    } else {
-      plots <- grid.arrange(p01, p04, p07, p10, p13, p16, nrow = 1, 
-        left = grid.text("Two-party preferred vote (%)", gp = gpar(cex = 0.8), rot = 90), 
-        bottom = grid.text(xvar_title, gp = gpar(cex = 0.8)))
-    }
-  
-  return(plots)
-  }
-  
-  if (plot == FALSE) {
+grid_visreg <- function(varname, plot = TRUE, myscale = "free") {
+
     p16 <- my_visreg(glsmod16, sp_weights_16, varname = varname, plot = F, year = "2016")
     p13 <- my_visreg(glsmod13, sp_weights_13, varname = varname, plot = F, year = "2013")
     p10 <- my_visreg(glsmod10, sp_weights_10, varname = varname, plot = F, year = "2010")
@@ -207,7 +164,7 @@ grid_visreg <- function(varname, xvar_title = "", xlimits = NULL, ylimits = NULL
       p07$bands %>% mutate(year = "2007"),
       p04$bands %>% mutate(year = "2004"),
       p01$bands %>% mutate(year = "2001")
-    )
+    ) %>% mutate(varname = varname)
     
     points_df <- bind_rows(
       p16$points %>% mutate(year = "2016"),
@@ -216,20 +173,77 @@ grid_visreg <- function(varname, xvar_title = "", xlimits = NULL, ylimits = NULL
       p07$points %>% mutate(year = "2007"),
       p04$points %>% mutate(year = "2004"),
       p01$points %>% mutate(year = "2001")
-    )
+    ) %>% mutate(varname = varname)
     
-    return_df <- list(bands = bands_df, points = points_df)
+    if (plot == T) {
+      return_object <- ggplot(data = bands_df) +
+        geom_ribbon(aes(x = variable, ymin = lower95, ymax = upper95), fill = "grey80") + 
+        geom_point(aes(x = variable, y = part_res), data = points_df, size = 0.5, shape = 1, alpha = 0.5) +
+        geom_line(aes(x = variable, y = fitted), col = "blue", size = 1) +
+        theme_bw() + 
+        labs(x = "", y = "") + 
+        facet_grid(varname ~ year, scales = "free") + 
+        theme(strip.text.x = element_blank()) 
+      
+      if (myscale == "free") {
+        return_object <- return_object + lims(x = range(model_df %>% select(varname)), 
+          y = range(c(bands_df$upper95, bands_df$lower95, points_df$part_res)))
+      }
+      
+      if (myscale == "free_x") {
+        return_object <- return_object + lims(x = range(model_df %>% select(varname)))
+      }
+      
+      if (myscale == "free_y") {
+        return_object <- return_object + lims(y = range(c(bands_df$upper95, bands_df$lower95, points_df$part_res)))
+      }
+      
+      if (myscale == "none") {
+        return_object <- return_object
+      }
+    }
     
-    return(return_df)
-  }
+    if (plot == F) {
+      return_object <- list(bands = bands_df, points = points_df)
+    }
+    
+    return(return_object)
   
 }
+```
+
+```{r}
+grid_visreg(varname = "Incomes", plot = T)
 ```
 
 
 ### Income and unemployment
 
 Typically the Labor party campaigns on more progressive policies, which often include tax reform that adversely affects higher income earners, and more generous social assistance programs. Perhaps due to these policies, higher income electorates have been more likely to support the Liberal party, as the `Incomes` factor has a positive effect on Liberal preference (see Figure \@ref(fig:plotincomes)). This effect is signficant in every election aside from 2004, in which it is only marginally insignificant ($p = 0.0613$). Unemployment however, has not been as influential. In 2001 and 2004, electorates with higher unemployment were more likely to support Labor, but over time this has shifted towards support for the Liberal party, culminating in a significantly positive effect in 2016.
+
+### Industry and type of work
+Electorates with higher proportions of workers in mining, gas, water, agriculture, waste and electricity (grouped as `Extractive` industries) are consistently linked with higher support for the Liberal party, with the mangitude of this effect slightly increasing over the years (see Figure \@ref(fig:plotextractive)). This is unsurprising, as the Liberal party has close ties with these traditional energy industries, and typically present policies to reduce taxation on energy production. Furthermore, electorates with more workers in construction or manufacturing industries (`Transformative`) are also more likely to support the Liberal party (see Figure \@ref(fig:plottransformative)).
+
+Similarly, workers in managerial, administrative, clerical and sales roles (`ManagerAdminClericalSales`) is also a significant predictor of two-party preference vote across all six elections, with a higher proportion of people working these jobs increasing Liberal support. The magnitude of this effect has also increased over the years.
+
+### Household mobility
+In each of the six elections, electorates with a higher proportion of people that have recently moved house (meaning in last five years) were more likely to support the Liberal party, although this effect was marginally insignificant in 2013. Having controlled for characteristics of house ownership and rental prices (via the factors `PropertyOwned` and `RentLoan` respectively), this is effect is somewhat surprising.
+
+### Relationships and age
+De facto relationships, but not marriages, are found to be an important (and significant) predictor of the two-party preferred vote in all six elections, with more de facto relationships associated with higher support for the Labor party. Marriages however, are insignficiant.
+
+Older regions are often believed to be more conservative, and it can be seen that electorates with a higher median age have been more likely to support the Liberal party - although this effect is only significant in 2007 and 2010.
+
+### Education
+Since 2007, electorates with higher education levels have been associated with supporting the Labor party, although this effect is only significant in 2016. Prior to 2007, education had an almost zero effect.
+
+### Diversity
+Larger migrant populations from Asia, the Middle East, South-Eastern Europe, the United Kingdom and elsewhere, are either assocated with Labor support, or have no effect. Of these areas, only South-Eastern European populations were signficant in each election and Asian migrants were a significant in 2010. Speaking other language (aside from English) however, have a far stronger effect, as observed through `OtherLanguageHome`. Electorates with more diverse speech were more likely to support the Liberal party from 2004 onwards, with this effect being significant in 2007, 2010 and 2016. Furthermore, of the variables relating to religion, only Judaism shows a consistent effect, with electorates with larger Jewish populations more likely to vote Liberal. 
+
+### Partial residual plots
+
+#### Individual*
+
 
 ```{r plotincomes, fig.cap = "Effect of Incomes", out.width="100%"}
 p <- grid_visreg("Incomes", xvar_title = "Incomes", plot = T, xlimits = c(-1.5, 3.6), ylimits = c(30, 95), years = FALSE)
@@ -239,8 +253,6 @@ p <- grid_visreg("Incomes", xvar_title = "Incomes", plot = T, xlimits = c(-1.5, 
 p <- grid_visreg("Unemployment", xvar_title = "Unemployment", plot = T, xlimits = c(-2.1, 3.4), ylimits = c(28, 68))
 ```
 
-### Industry and type of work
-Electorates with higher proportions of workers in mining, gas, water, agriculture, waste and electricity (grouped as `Extractive` industries) are consistently linked with higher support for the Liberal party, with the mangitude of this effect slightly increasing over the years (see Figure \@ref(fig:plotextractive)). This is unsurprising, as the Liberal party has close ties with these traditional energy industries, and typically present policies to reduce taxation on energy production. Furthermore, electorates with more workers in construction or manufacturing industries (`Transformative`) are also more likely to support the Liberal party (see Figure \@ref(fig:plottransformative)).
 
 ```{r plotextractive, fig.cap = "Effect of Extractive", out.width="60%"}
 p <- grid_visreg("Extractive", xvar_title = "Extractive", xlimits = c(-0.7, 3.4), ylimits = c(35, 81), plot = T)
@@ -250,42 +262,28 @@ p <- grid_visreg("Extractive", xvar_title = "Extractive", xlimits = c(-0.7, 3.4)
 p <- grid_visreg("Transformative", xvar_title = "Transformative", xlimits = c(-2.25, 2.9), ylimits = c(34, 75), plot = T)
 ```
 
-Similarly, workers in managerial, administrative, clerical and sales roles (`ManagerAdminClericalSales`) is also a significant predictor of two-party preference vote across all six elections, with a higher proportion of people working these jobs increasing Liberal support. The magnitude of this effect has also increased over the years.
-
 ```{r plotmanager, fig.cap = "Effect of ManagerAdminClericalSales", out.width="60%"}
 p <- grid_visreg("ManagerAdminClericalSales", xvar_title = "ManagerAdminClericalSales", xlimits = c(-3.75, 2.8), ylimits = c(32, 70), plot = T)
 ```
 
 
-### Household mobility
 ```{r plotdiffaddress, fig.cap = "Effect of DiffAddress", out.width="60%"}
 p <- grid_visreg("DiffAddress", xvar_title = "DiffAddress", xlimits = c(-2.1, 3.65), ylimits = c(34, 81), plot = T)
 ```
 
-In each of the six elections, electorates with a higher proportion of people that have recently moved house (meaning in last five years) were more likely to support the Liberal party, although this effect was marginally insignificant in 2013. Having controlled for characteristics of house ownership and rental prices (via the factors `PropertyOwned` and `RentLoan` respectively), this is effect is somewhat surprising.
-
-### Relationships and age
-De facto relationships, but not marriages, are found to be an important (and significant) predictor of the two-party preferred vote in all six elections, with more de facto relationships associated with higher support for the Labor party. Marriages however, are insignficiant.
 
 ```{r plotdefacto, fig.cap = "Effect of DeFacto", out.width="60%", eval = F}
 p <- grid_visreg("DeFacto", xvar_title = "DeFacto", xlimits = c(-2.2, 5.1), ylimits = c(12, 83), plot = T)
 ```
 
-Older regions are often believed to be more conservative, and it can be seen that electorates with a higher median age have been more likely to support the Liberal party - although this effect is only significant in 2007 and 2010.
-
 ```{r plotage, fig.cap = "Effect of MedianAge", out.width="60%", eval = F}
 p <- grid_visreg("MedianAge", xvar_title = "MedianAge", xlimits = c(-2.5, 2.7), ylimits = c(31, 70), plot = T)
 ```
-
-### Education
-Since 2007, electorates with higher education levels have been associated with supporting the Labor party, although this effect is only significant in 2016. Prior to 2007, education had an almost zero effect.
 
 ```{r ploteducation, fig.cap = "Effect of Education", out.width="60%", eval = F}
 p <- grid_visreg("Education", xvar_title = "Education", xlimits = c(-2.5, 2.7), ylimits = c(31, 70), plot = T)
 ```
 
-### Diversity
-Larger migrant populations from Asia, the Middle East, South-Eastern Europe, the United Kingdom and elsewhere, are either assocated with Labor support, or have no effect. Of these areas, only South-Eastern European populations were signficant in each election and Asian migrants were a significant in 2010. Speaking other language (aside from English) however, have a far stronger effect, as observed through `OtherLanguageHome`. Electorates with more diverse speech were more likely to support the Liberal party from 2004 onwards, with this effect being significant in 2007, 2010 and 2016. Furthermore, of the variables relating to religion, only Judaism shows a consistent effect, with electorates with larger Jewish populations more likely to vote Liberal. 
 
 ```{r plototherlanguagehome, fig.cap = "Effect of OtherLanguageHome", out.width="60%", eval = F}
 p <- grid_visreg("OtherLanguageHome", xvar_title = "OtherLanguageHome", xlimits = c(-1.1, 3.5), ylimits = c(5, 80), plot = T)
@@ -304,9 +302,8 @@ p <- grid_visreg("Born_Asia", xvar_title = "Born_Asia", xlimits = c(-0.9, 5), yl
 p <- grid_visreg("Judaism", xvar_title = "Judaism", xlimits = c(-1.5, 3.8), ylimits = c(40, 70), plot = T)
 ```
 
-### Partial residual plots
 
-*Move the individual plots in each section to a global grid here*
+#### *Move the individual plots in each section to a global grid here*
 
 ```{r, eval = F}
 vars_to_plot <- c("Judaism", "Born_Asia", "Born_SE_Europe", "OtherLanguageHome", "Education", "MedianAge", "DeFacto", "DiffAddress", "ManagerAdminClericalSales", "Transformative", "Extractive", "Unemployment", "Incomes")
@@ -345,18 +342,18 @@ all_points_df <- bind_rows(
   ls_visreg$Incomes$points %>% mutate(varname = "Incomes")
 )
 
-ggplot(data = all_bands_df %>% filter(varname %in% vars_to_plot[8:13])) +
+ggplot(data = all_bands_df %>% filter(varname %in% vars_to_plot[1:6])) +
   geom_ribbon(aes(x = variable, ymin = lower95, ymax = upper95), fill = "grey80") + 
-  geom_point(aes(x = variable, y = part_res), data = all_points_df %>% filter(varname %in% vars_to_plot[8:13]), size = 0.75, col = "grey50") + 
+  geom_point(aes(x = variable, y = part_res), data = all_points_df %>% filter(varname %in% vars_to_plot[1:6]), size = 0.5, shape = 1, alpha = 0.5) + 
   geom_line(aes(x = variable, y = fitted), col = "blue", size = 1) +
   theme_bw()+ 
-  labs(x = varname, y = "Response") + 
-  facet_wrap(varname ~ year, ncol = 6, scales = "free")
+  labs(x = "", y = "Two-party preferred vote (%)") + 
+  facet_grid(varname ~ year, scales = "free_x") + theme(strip.text.x = element_blank())
 
 
-my_x_ranges <- range(range(model_df$Judaism), range(model_df$Born_Asia), range(model_df$Born_SE_Europe), range(model_df$OtherLanguageHome), range(model_df$Education), range(model_df$MedianAge), range(model_df$DeFacto), range(model_df$DiffAddress), range(model_df$ManagerAdminClericalSales), range(model_df$Transformative), range(model_df$Extractive), range(model_df$Unemployment), range(model_df$Incomes))
+my_x_ranges <- c(range(model_df$Judaism), range(model_df$Born_Asia), range(model_df$Born_SE_Europe), range(model_df$OtherLanguageHome), range(model_df$Education), range(model_df$MedianAge), range(model_df$DeFacto), range(model_df$DiffAddress), range(model_df$ManagerAdminClericalSales), range(model_df$Transformative), range(model_df$Extractive), range(model_df$Unemployment), range(model_df$Incomes))
 
-my_y_ranges <- range(
+my_y_ranges <- c(
   range(c(ls_visreg$Judaism$bands$upper95, ls_visreg$Judaism$bands$lower95, ls_visreg$Judaism$points$part_res)),
   range(c(ls_visreg$Born_Asia$bands$upper95, ls_visreg$Born_Asia$bands$lower95, ls_visreg$Born_Asia$points$part_res)),
   range(c(ls_visreg$Born_SE_Europe$bands$upper95, ls_visreg$Born_SE_Europe$bands$lower95, ls_visreg$Born_SE_Europe$points$part_res)),
@@ -372,15 +369,17 @@ my_y_ranges <- range(
   range(c(ls_visreg$Incomes$bands$upper95, ls_visreg$Incomes$bands$lower95, ls_visreg$Incomes$points$part_res))
   )
 
-ggplot(data = all_bands_df %>% filter(varname %in% vars_to_plot[13])) +
+ggplot(data = all_bands_df %>% filter(varname %in% vars_to_plot[1])) +
   geom_ribbon(aes(x = variable, ymin = lower95, ymax = upper95), fill = "grey80") + 
-  geom_point(aes(x = variable, y = part_res), data = all_points_df %>% filter(varname %in% vars_to_plot[13]), size = 0.75, col = "grey50") + 
+  geom_point(aes(x = variable, y = part_res), data = all_points_df %>% filter(varname %in% vars_to_plot[1]), size = 0.5, shape = 1, alpha = 0.5) + 
   geom_line(aes(x = variable, y = fitted), col = "blue", size = 1) +
-  theme_bw() + 
-  labs(x = varname, y = "Response") + 
-  facet_wrap(varname ~ year, ncol = 6, scales = "free") +
-  expand_limits(x = c(-2, 2))
-  expand_limits(x = my_x_ranges[25:26], y = my_y_ranges[25:26])
+  theme_bw()+ 
+  labs(x = "", y = "") + 
+  facet_grid(varname ~ year, scales = "free") + theme(strip.text.x = element_blank()) +
+  expand_limits(x = my_x_ranges[1:2], y = my_y_ranges[1:2])
+
+, y = my_y_ranges[1:12])
+"Two-party preferred vote (%)"
 
 # https://stackoverflow.com/questions/18046051/setting-individual-axis-limits-with-facet-wrap-and-scales-free-in-ggplot2
 
@@ -478,7 +477,7 @@ cooksd_df %>%
   theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 8), axis.text.y = element_text(size = 8))
 ```
 
-```{r}
+```{r, eval = F}
 cooksd_df %>% 
   filter(cooksd > 0.1) %>% 
   select(DivisionNm, StateAb, year, cooksd, Residuals, LNP_Percent, everything()) %>% View
