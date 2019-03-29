@@ -12,8 +12,8 @@ author:
 - familyname: Hyndman
   othernames: Rob
   address: Monash University\newline Melbourne, Australia
-abstract: "A brief summary of our ideas"
-keywords: "blah, blah"
+abstract: "This research examines the relationships between electoral socio-demographic characteristics and two-party preference in Australian federal elections, with the six elections from 2001 to 2016 considered. Socio-demographic information is derived from the Australian Census, which occurs every five years. Since a Census is not directly available for each election, a method of spatio-temporal imputation is employed to impute Census data for the electorates in each election. This accounts for both spatial and temporal changes in electoral characteristics between Censuses. To capture any spatial heterogeneity, a spatial error model is estimated for each election, which incorporates a spatially structured random effect vector that can thought of as the unobserved political climate in each electorate. Over time, most socio-demographic characteristics that affect electoral two-party preference do not vary, with industry of work, incomes, household mobility and de facto relationships having strong effects in the six elections. Education and unemployment are amongst those that have varying effects. It is also found that between 2004 and 2013, the spatial effect is insignificant, meaning that electorates voted effectively independently. All data featured in this study has been contributed to the `eechidna` `R` package (available on CRAN)."
+keywords: "federal election, Census, Australia, spatial modelling, imputation, socio-demographics, electorates, R, eechidna"
 wpnumber: no/yr
 jelcodes: C10,C14,C22
 blind: false
@@ -706,7 +706,7 @@ intercept_df %>% ggplot() +
 ## Influential socio-demographics
 To investigate the socio-demographics that have a strong effect on the two-party preferred vote, partial residual plots are used. These show the direction, size and significance of an estimated effect - the slope of the prediction line matches the estimated coefficient, and the shaded region represents a 95% confidence band. If a horizontal line can be drawn through the confidence band, then the effect is insignificant. Plots for each election are faceted to compare the effects over time in Figure \@ref(fig:partresplot1) and Figure \@ref(fig:partresplot2).
 
-It is important here to note the ecological fallacy - insights are being drawn at the electorate level, and cannot be inferred for another disaggregate level (e.g. individual voters).
+It is important here to note the ecological fallacy: insights are being drawn at the electorate level, and cannot be inferred for another disaggregate level (e.g. individual voters).
 
 ```{r myvisreg, include = F}
 # Function to produce visreg style conditional plots
@@ -910,7 +910,7 @@ p13 <- grid_visreg("Judaism")
 
 ### A note on similar variables
 
-Many of the Census variables represent similar information, which is why factors were created and some variables were removed. However, there still remain some variables which are closely related. For example, electorate income levels (via `Incomes`) is likely to be related to electoral unemployment and labor force participation (via `Unemployment`). In 2001, the coefficient estimate for `Unemployment` negative but not significant, and the `Incomes` variables  is significant. If the `Incomes` variable is removed from the model, `Unemployment` absorbs the negative effect, becoming significant ($p = 0.0056$).
+Many of the Census variables represent similar information, which is why factors were created and some variables were removed. However, there still remain some variables which are closely related. For example, electorate income levels (via `Incomes`) is likely to be related to electoral unemployment and labor force participation (via `Unemployment`). In 2001, the coefficient estimate for `Unemployment` negative but not significant, and the `Incomes` variables is significant. If the `Incomes` variable is removed from the model in 2016, `Unemployment` absorbs the negative effect, becoming significant ($p = 0.0056$).
 
 ```{r removeunemp, eval = F}
 unemp01 <- my_fgls(full_formula, 
@@ -1007,7 +1007,7 @@ plot(glsmod07$cooksd, hat(model_df %>% filter(year == "2007") %>% select(-c(year
 
 Across the past six elections, most of the socio-demographics that drive the electoral two-party preferred vote have remained steady, whilst a few (typically weaker) effects have varied over time. Industry and type of work are particularly influential, with energy-related and manufacturing/construction jobs, as well as administrative roles being strongly linked with the Liberal party in all elections. Incomes have had a similarly consistent effect, with higher income areas supporting Liberal. Higher levels of unemployment have shifted from weak association with Labor to a significant Liberal effect over the years, and higher education levels have been associated with Labor since 2007 (although only significant in 2016). It is also found that electorates with higher household mobility support Liberal, birthplace diversity favours Labor and more de facto relationships align with Labor preference - although marriages, family and household sizes have no material influence. Furthermore, the neighbourhood (spatial) effects were found to be positive in all elections, although only significant in 2001 and 2016, meaning that in the 2004-2013 elections, electorates effectively voted independently.
 
-The findings in this paper complement the existing literature by modelling temporal trends, which as far as the authors are aware, has not been done previously for Australian elections using a regression framework. It is also the first study to model any Australian election since 2010 using Census information. Additionally, a key contribution of this research is the spatio-temporal imputation, which is applied to obtain Census data for the 2004, 2007, 2010 and 2013 elections. All data sets used in this study have been contributed to the `eechidna` `R` package, which provides a rich, accessible data resource for future Australian electoral analysis.
+The findings in this paper complement the existing literature by modelling temporal trends, which as far as the authors are aware, has not been done previously for Australian elections using a regression framework. It is also the first study to model any Australian election since 2010 using Census information. Additionally, a key contribution of this research is the wrangling of the raw data and spatio-temporal imputation, which is applied to obtain Census data for the 2004, 2007, 2010 and 2013 elections. All data sets used in this study have been contributed to the `eechidna` `R` package, which provides a rich, accessible data resource for future Australian electoral analysis.
 
 # Acknowledgements
 
@@ -1015,7 +1015,7 @@ This paper was produced using `RMarkdown`[@rmarkdown] and `knitr` [@knitr]. All 
 
 # Software
 
-All election and Census data sets, along with electoral maps and more, are available in the `eechidna` `R` package, which can be downloaded from CRAN. `eechidna` (Exploring Election and Census Highly Informative Data Nationally for Australia) makes it easy to look at the data from the Australian Federal elections and Censuses that occurred between 2001 and 2016. This study contributed a large revision to the `eechidna` package, which included the addition of election and Census data for 2001-2010, vote outcomes for polling booths and imputed Census data for election years. For more details on using `eechidna`, please see the articles (vignettes) on the github page (https://ropenscilabs.github.io/eechidna/). 
+All election and Census data sets, along with electoral maps and more, are available in the `eechidna` `R` package, which can be downloaded from CRAN. `eechidna` (Exploring Election and Census Highly Informative Data Nationally for Australia) makes it easy to look at the data from the Australian Federal elections and Censuses that occurred between 2001 and 2016. This study contributed a large revision to the `eechidna` package, which included the addition of election and Census data for 2001-2010, voting outcomes for polling booths and imputed Census data for election years. For more details on using `eechidna`, please see the articles (vignettes) on the github page (https://ropenscilabs.github.io/eechidna/). 
 
 The authors would like to give a sincere thanks to Anthony Ebert, Heike Hofmann, Thomas Lumley, Ben Marwick, Carson Sievert, Mingzhu Sun, Dilini Talagala, Nicholas Tierney, Nathaniel Tomasetti, Earo Wang and Fang Zhou, all of whom have contributed to the `eechidna` package.
 
