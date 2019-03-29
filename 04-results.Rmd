@@ -2,9 +2,9 @@
 
 ## Spatial autoregressive parameter
 
-The spatial autoregressive coefficient $\rho$ is positive and significant in only the 2001 and 2016 elections (Figure \@ref(fig:rhovis)), meaning that in these elections, an electorate's political climate was affected by the attitudes of it's neighbours. Conversely, in the other four elections, the spatial effect weakens to become insignficant. In these years, it appears that the spatial component does not explain anything over and above the electoral socio-demographics, meaning electorates effectively acted more independently.
+The spatial autoregressive coefficient $\rho$ is positive and significant in only the 2001 and 2016 elections (Figure \@ref(fig:rhovis)), meaning that in these elections, an electorate's political climate was affected by the attitudes of it's neighbours. Conversely, in the other four elections, the spatial effect weakens to become insignficant. In these years, it appears that the spatial component does not explain anything over and above the electoral socio-demographics, meaning electorates voted effectively independently.
 
-```{r rhovis, fig.cap="Estimates of the spatial autoregressive parameter for each of the six elections, with a 95\\% confidence interval. Only in 2001 and 2016 is there a significant spatial component", out.height='20%'}
+```{r rhovis, fig.cap="Estimates of the spatial autoregressive parameter for each of the six elections, with a 95\\% confidence interval. Only in 2001 and 2016 is there a significant spatial component", out.height='20%', out.extra = ''}
 rho_df <- bind_rows(glsmod16$rho_df %>% mutate(year = "2016"), 
   glsmod13$rho_df %>% mutate(year = "2013"),
   glsmod10$rho_df %>% mutate(year = "2010"), 
@@ -21,7 +21,8 @@ rho_df %>% ggplot() +
   labs(x = "Election year", y = "Estimate of spatial autoregressive parameter") +
   lims(y = c(-1,1)) +
   guides(col = F) +
-  coord_fixed(ratio = 1)
+  coord_fixed(ratio = 1) +
+  theme_bw()
 ```
 
 ## Country-wide trend
@@ -29,7 +30,7 @@ Since all socio-demographics have been standardized to have a mean of zero and a
 
 [^3]: Mean of all variables aside from Judaism, Indigenous, Islam and Buddhism, where it assumes the mean of the log value.
 
-```{r plotintercept, fig.cap = "Estimated intercept for each election, which represents the two-party preferred vote for an electorate with mean characteristics.", out.height="20%"}
+```{r plotintercept, fig.cap = "Estimated intercept for each election, which represents the two-party preferred vote for an electorate with mean characteristics.", out.height="20%", out.extra = ''}
 intercept_df <- bind_rows(data.frame(summary(glsmod16)$tTable)[1, ]  %>% mutate(year = "2016"), 
   data.frame(summary(glsmod13)$tTable)[1, ] %>% mutate(year = "2013"),
   data.frame(summary(glsmod10)$tTable)[1, ] %>% mutate(year = "2010"), 
@@ -46,15 +47,15 @@ intercept_df %>% ggplot() +
   labs(x = "Election year", y = "Estimate of intercept") +
   guides(col = F) +
   coord_fixed(ratio = 0.2) +
-  lims(y = c(45, 55))
+  lims(y = c(45, 55)) +
+  theme_bw()
 ```
 
 
 ## Influential socio-demographics
-To investigate the socio-demographics that have a strong effect on the two-party preferred vote, partial residual plots are used. These show the direction, size and significance of an estimated effect - the slope of the prediction line matches the estimated coefficient, and the shaded region represents a 95% confidence band. If a horizontal line can be drawn through the confidence band, then the effect is insignificant. Plots for each election are faceted to compare the effects over time.
+To investigate the socio-demographics that have a strong effect on the two-party preferred vote, partial residual plots are used. These show the direction, size and significance of an estimated effect - the slope of the prediction line matches the estimated coefficient, and the shaded region represents a 95% confidence band. If a horizontal line can be drawn through the confidence band, then the effect is insignificant. Plots for each election are faceted to compare the effects over time in Figure \@ref(fig:partresplot1) and Figure \@ref(fig:partresplot2).
 
-*It is important here to note the ecological fallacy - insights are being drawn at the electorate level, and cannot be inferred for another disaggregate level (e.g. individual voters).*
-
+It is important here to note the ecological fallacy - insights are being drawn at the electorate level, and cannot be inferred for another disaggregate level (e.g. individual voters).
 
 ```{r myvisreg, include = F}
 # Function to produce visreg style conditional plots
@@ -148,7 +149,7 @@ my_visreg <- function(my_model, sp_weights, varname,
 }
 
 # Grid visreg
-grid_visreg <- function(varname, plot = TRUE, myscale = "free") {
+grid_visreg <- function(varname, plot = TRUE, myscale = "free", top = FALSE) {
 
     p16 <- my_visreg(glsmod16, sp_weights_16, varname = varname, plot = F, year = "2016")
     p13 <- my_visreg(glsmod13, sp_weights_13, varname = varname, plot = F, year = "2013")
@@ -182,8 +183,12 @@ grid_visreg <- function(varname, plot = TRUE, myscale = "free") {
         geom_line(aes(x = variable, y = fitted), col = "blue", size = 1) +
         theme_bw() + 
         labs(x = "", y = "") + 
-        facet_grid(varname ~ year, scales = "free") + 
-        theme(strip.text.x = element_blank()) 
+        facet_grid(varname ~ year, scales = "free") +
+        theme(plot.margin=unit(c(b = 0.05, l = 0, t = -0.2, r = 0),"cm"))
+      
+      if (top == FALSE) {
+        return_object <- return_object + theme(strip.text.x = element_blank()) 
+      }
       
       if (myscale == "free") {
         return_object <- return_object + lims(x = range(model_df %>% select(varname)), 
@@ -212,102 +217,65 @@ grid_visreg <- function(varname, plot = TRUE, myscale = "free") {
 }
 ```
 
-```{r}
-grid_visreg(varname = "Incomes", plot = T)
-```
-
-
 ### Income and unemployment
 
-Typically the Labor party campaigns on more progressive policies, which often include tax reform that adversely affects higher income earners, and more generous social assistance programs. Perhaps due to these policies, higher income electorates have been more likely to support the Liberal party, as the `Incomes` factor has a positive effect on Liberal preference (see Figure \@ref(fig:plotincomes)). This effect is signficant in every election aside from 2004, in which it is only marginally insignificant ($p = 0.0613$). Unemployment however, has not been as influential. In 2001 and 2004, electorates with higher unemployment were more likely to support Labor, but over time this has shifted towards support for the Liberal party, culminating in a significantly positive effect in 2016.
+Typically the Labor party campaigns on more progressive policies, which often include tax reform that adversely affects higher income earners, and more generous social assistance programs. Perhaps due to these policies, higher income electorates have been more likely to support the Liberal party, as the `Incomes` factor has a positive effect on Liberal preference (see row 1 in Figure \@ref(fig:partresplot1)). This effect is signficant in every election aside from 2004, in which it is only marginally insignificant ($p = 0.0613$). Unemployment however, has not been as influential. In 2001 and 2004, electorates with higher unemployment were more likely to support Labor, but over time this has shifted towards support for the Liberal party, culminating in a significantly positive effect in 2016.
 
 ### Industry and type of work
-Electorates with higher proportions of workers in mining, gas, water, agriculture, waste and electricity (grouped as `Extractive` industries) are consistently linked with higher support for the Liberal party, with the mangitude of this effect slightly increasing over the years (see Figure \@ref(fig:plotextractive)). This is unsurprising, as the Liberal party has close ties with these traditional energy industries, and typically present policies to reduce taxation on energy production. Furthermore, electorates with more workers in construction or manufacturing industries (`Transformative`) are also more likely to support the Liberal party (see Figure \@ref(fig:plottransformative)).
+Electorates with higher proportions of workers in mining, gas, water, agriculture, waste and electricity (grouped as `Extractive` industries) are consistently linked with higher support for the Liberal party, with the mangitude of this effect slightly increasing over the years (see row 3 in Figure \@ref(fig:partresplot1)). This is unsurprising, as the Liberal party has close ties with these traditional energy industries, and typically present policies to reduce taxation on energy production. Furthermore, electorates with more workers in construction or manufacturing industries (`Transformative`) are also more likely to support the Liberal party (see row 4 in Figure \@ref(fig:partresplot1)).
 
 Similarly, workers in managerial, administrative, clerical and sales roles (`ManagerAdminClericalSales`) is also a significant predictor of two-party preference vote across all six elections, with a higher proportion of people working these jobs increasing Liberal support. The magnitude of this effect has also increased over the years.
 
 ### Household mobility
-In each of the six elections, electorates with a higher proportion of people that have recently moved house (meaning in last five years) were more likely to support the Liberal party, although this effect was marginally insignificant in 2013. Having controlled for characteristics of house ownership and rental prices (via the factors `PropertyOwned` and `RentLoan` respectively), this is effect is somewhat surprising.
+In each of the six elections, electorates with a higher proportion of people that have recently moved house (meaning in last five years) were more likely to support the Liberal party, although this effect was marginally insignificant in 2013 (see row 6 in Figure \@ref(fig:partresplot1). Having controlled for characteristics of house ownership and rental prices (via the factors `PropertyOwned` and `RentLoan` respectively), this is effect is somewhat surprising.
 
-### Relationships and age
+### Relationships
 De facto relationships, but not marriages, are found to be an important (and significant) predictor of the two-party preferred vote in all six elections, with more de facto relationships associated with higher support for the Labor party. Marriages however, are insignficiant.
 
-Older regions are often believed to be more conservative, and it can be seen that electorates with a higher median age have been more likely to support the Liberal party - although this effect is only significant in 2007 and 2010.
+### Age
+Older regions are often believed to be more conservative, and it can be seen that electorates with a higher median age have been more likely to support the Liberal party - although this effect is only significant in 2007 and 2010 (see row 2 in Figure \@ref(fig:partresplot2)).
 
 ### Education
-Since 2007, electorates with higher education levels have been associated with supporting the Labor party, although this effect is only significant in 2016. Prior to 2007, education had an almost zero effect.
+Since 2007, electorates with higher education levels have been associated with supporting the Labor party, although this effect is only significant in 2016. Prior to 2007, education had an almost zero effect (see row 3 in \@ref(fig:partresplot1)).
 
 ### Diversity
 Larger migrant populations from Asia, the Middle East, South-Eastern Europe, the United Kingdom and elsewhere, are either assocated with Labor support, or have no effect. Of these areas, only South-Eastern European populations were signficant in each election and Asian migrants were a significant in 2010. Speaking other language (aside from English) however, have a far stronger effect, as observed through `OtherLanguageHome`. Electorates with more diverse speech were more likely to support the Liberal party from 2004 onwards, with this effect being significant in 2007, 2010 and 2016. Furthermore, of the variables relating to religion, only Judaism shows a consistent effect, with electorates with larger Jewish populations more likely to vote Liberal. 
 
 ### Partial residual plots
 
-#### Individual*
-
-
-```{r plotincomes, fig.cap = "Effect of Incomes", out.width="100%"}
-p <- grid_visreg("Incomes", xvar_title = "Incomes", plot = T, xlimits = c(-1.5, 3.6), ylimits = c(30, 95), years = FALSE)
+```{r prepplot, include = F}
+p1 <- grid_visreg("Incomes", top = T)
+p2 <- grid_visreg("Unemployment")
+p3 <- grid_visreg("Extractive")
+p4 <- grid_visreg("Transformative")
+p5 <- grid_visreg("ManagerAdminClericalSales")
+p6 <- grid_visreg("DiffAddress")
+p7 <- grid_visreg("DeFacto", top = T)
+p8 <- grid_visreg("MedianAge")
+p9 <- grid_visreg("Education")
+p10 <- grid_visreg("OtherLanguageHome")
+p11 <- grid_visreg("Born_SE_Europe")
+p12 <- grid_visreg("Born_Asia")
+p13 <- grid_visreg("Judaism")
 ```
 
-```{r plotunemploy, fig.cap = "Effect of Unemployment", out.width="100%"}
-p <- grid_visreg("Unemployment", xvar_title = "Unemployment", plot = T, xlimits = c(-2.1, 3.4), ylimits = c(28, 68))
+```{r partresplot1, fig.cap = "Partial residual plots for: income and unemployment, industry and type of work, and household mobility.", fig.height = 12,  fig.width = 9, warning = F}
+grid.arrange(p1, p2, p3, p4, p5, p6, nrow = 6,
+  heights = c(1.2, 1, 1, 1, 1, 1),
+  left = grid.text("Two-party preferred vote (%)", gp = gpar(cex = 0.8), rot = 90))
 ```
 
-
-```{r plotextractive, fig.cap = "Effect of Extractive", out.width="60%"}
-p <- grid_visreg("Extractive", xvar_title = "Extractive", xlimits = c(-0.7, 3.4), ylimits = c(35, 81), plot = T)
+```{r partresplot2, fig.cap = "Partial residual plots for: relationships and age, education and diversity.", fig.height = 12,  fig.width = 9, warning = F}
+grid.arrange(p7, p8, p9, p10, p11, p12, p13, nrow = 7,
+  heights = c(1.2, 1, 1, 1, 1, 1, 1),
+  left = grid.text("Two-party preferred vote (%)", gp = gpar(cex = 0.8), rot = 90))
 ```
-
-```{r plottransformative, fig.cap = "Effect of Transformative", out.width="60%"}
-p <- grid_visreg("Transformative", xvar_title = "Transformative", xlimits = c(-2.25, 2.9), ylimits = c(34, 75), plot = T)
-```
-
-```{r plotmanager, fig.cap = "Effect of ManagerAdminClericalSales", out.width="60%"}
-p <- grid_visreg("ManagerAdminClericalSales", xvar_title = "ManagerAdminClericalSales", xlimits = c(-3.75, 2.8), ylimits = c(32, 70), plot = T)
-```
-
-
-```{r plotdiffaddress, fig.cap = "Effect of DiffAddress", out.width="60%"}
-p <- grid_visreg("DiffAddress", xvar_title = "DiffAddress", xlimits = c(-2.1, 3.65), ylimits = c(34, 81), plot = T)
-```
-
-
-```{r plotdefacto, fig.cap = "Effect of DeFacto", out.width="60%", eval = F}
-p <- grid_visreg("DeFacto", xvar_title = "DeFacto", xlimits = c(-2.2, 5.1), ylimits = c(12, 83), plot = T)
-```
-
-```{r plotage, fig.cap = "Effect of MedianAge", out.width="60%", eval = F}
-p <- grid_visreg("MedianAge", xvar_title = "MedianAge", xlimits = c(-2.5, 2.7), ylimits = c(31, 70), plot = T)
-```
-
-```{r ploteducation, fig.cap = "Effect of Education", out.width="60%", eval = F}
-p <- grid_visreg("Education", xvar_title = "Education", xlimits = c(-2.5, 2.7), ylimits = c(31, 70), plot = T)
-```
-
-
-```{r plototherlanguagehome, fig.cap = "Effect of OtherLanguageHome", out.width="60%", eval = F}
-p <- grid_visreg("OtherLanguageHome", xvar_title = "OtherLanguageHome", xlimits = c(-1.1, 3.5), ylimits = c(5, 80), plot = T)
-```
-
-
-```{r plotbornse, fig.cap = "Effect of Born_SE_Europe", out.width="60%", eval = F}
-p <- grid_visreg("Born_SE_Europe", xvar_title = "Born_SE_Europe", xlimits = c(-0.9, 5), ylimits = c(20, 70), plot = T)
-```
-
-```{r plotbornasia, fig.cap = "Effect of Born_Asia", out.width="60%", eval = F}
-p <- grid_visreg("Born_Asia", xvar_title = "Born_Asia", xlimits = c(-0.9, 5), ylimits = c(20, 70), plot = T)
-```
-
-```{r plotjudaism, fig.cap = "Effect of Judaism", out.width="60%", eval = F}
-p <- grid_visreg("Judaism", xvar_title = "Judaism", xlimits = c(-1.5, 3.8), ylimits = c(40, 70), plot = T)
-```
-
 
 ### A note on similar variables
 
 Many of the Census variables represent similar information, which is why factors were created and some variables were removed. However, there still remain some variables which are closely related. For example, electorate income levels (via `Incomes`) is likely to be related to electoral unemployment and labor force participation (via `Unemployment`). In 2001, the coefficient estiamte for `Unemployment` negative but not significant, and the `Incomes` variables  is significant. If the `Incomes` variable is removed from the model, `Unemployment` absorbs the negative effect, becoming significant ($p = 0.0056$).
 
-```{r removeolh, eval = F}
+```{r removeunemp, eval = F}
 unemp01 <- my_fgls(full_formula, 
   my_data = model_df %>% filter(year == "2001") %>% dplyr::select(-Incomes),
   sp_weights = sp_weights_01)
@@ -336,27 +304,27 @@ all_resids <- data.frame(
 
 It is often hypothesized that states have systematic differences that cause their electorates to vote differently. Boxplots of residuals grouped by state reveal that only Tasmania, the Australian Capital Territory and the Northern Territory appear to have a state-specific effect that is not captured by the models. Tasmania and the Australian Capital Territory appear to have a bias towards Labor, whereas the Northern Territory has one towards Liberal. There are few electorates in these states (five, two and two respectively), so this might be due to incumbent effects rather than an actual state-specific bias.
 
-```{r resstate, fig.cap = "Boxplot of residuals by state.", out.width="75%"}
+```{r resstate, fig.cap = "Boxplot of residuals by state with jittered points.", fig.asp=0.6, out.width="80%", out.extra = ''}
 all_resids %>% 
-  ggplot(aes(x = StateAb, y = Residuals, col = StateAb)) + 
+  ggplot(aes(x = StateAb, y = Residuals)) + 
+  geom_hline(aes(yintercept = 0), col = "grey50") +
   geom_boxplot() + 
   geom_jitter(alpha = 0.4) +
-  #geom_jitter(aes(label = DivisionNm, shape = year), alpha = 0.4) +
-  #facet_wrap(~year) + 
-  guides(col = F, shape = F, DivisionNm = F)
+  guides(col = F, shape = F, DivisionNm = F) +
+  theme_bw()
 ```
 
 ### Outlier electorates
 
-```{r readcooksd, include = F, echo=FALSE}
+```{r readcooksd, eval = F}
 read_chunk('cooksd.R')
 ```
 
-```{r getcooksd}
+```{r getcooksd, eval = F}
 <<GetCookDistance>>
 ```
 
-```{r cooksd, include = F}
+```{r cooksd, eval = F}
 cooksd_df <- data.frame(
   Residuals = c(glsmod16$actual_residuals, glsmod13$actual_residuals, glsmod10$actual_residuals, glsmod07$actual_residuals, glsmod04$actual_residuals, glsmod01$actual_residuals),
   gls_residuals = c(glsmod16$residuals, glsmod13$residuals, glsmod10$residuals, glsmod07$residuals, glsmod04$residuals, glsmod01$residuals),
@@ -371,12 +339,12 @@ cooksd_df <- data.frame(
 ) 
 ```
 
-```{r plotcooksd, fig.cap = "Electorates' Cook's Distance values in each election."}
+```{r plotcooksd, fig.cap = "Electorates' Cook's Distance values in each election.", out.height = "15%", eval = F}
 cooksd_df %>% 
   ggplot(aes(x = cooksd)) + 
   geom_dotplot() + 
   facet_wrap(~year, nrow = 1) + 
-  coord_fixed(ratio = .5) +
+  #coord_fixed(ratio = .5) +
   labs(x = "Cook's Distance", y = "") + 
   theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 8), axis.text.y = element_text(size = 8))
 ```
@@ -387,56 +355,14 @@ cooksd_df %>%
   select(DivisionNm, StateAb, year, cooksd, Residuals, LNP_Percent, everything()) %>% View
 ```
 
-The dotplots in Figure \@ref(fig:plotcooksd) show that there are a few outliers in each election, using cook's distance as a measure of influence. Based on the distribution of the cook's distance values, a cook's distance greater than $0.1$ is considered to be an outlier. The electorate of Sydney (NSW) has a large cook's distance from 2001 to 2013, due to its diverse population (language, birthplace and religion), high number of defacto relationships, high income, high household mobility and small amount of workers in extractive, distributive and transformative jobs. It has remained a strong supporter of the Labor party and Liberal vote is severely overpredicted by the model. Nearby in metropolitan NSW, the electorate of Wentworth is found to be an outlier in all but the 2007 election. Although historically Liberal, its two-party vote jumped by over 10 percentage points in 2010 without experiencing any notable changes in its socio-demographic makeup - implying that this may be the direct effect of its Liberal member, Malcolm Turnbull, becoming the leader of the Liberal party. Liberal support in Wentworth is underpredicted by the model in each year, and more so with Turnbull as Liberal leader.
+Based on the distribution of the cook's distance values, a cook's distance greater than $0.1$ is considered to be influential and a potential outlier. The electorate of Sydney (NSW) has a large cook's distance from 2001 to 2013, due to its diverse population (language, birthplace and religion), high number of defacto relationships, high income, high household mobility and small amount of workers in extractive and transformative jobs. It has remained a strong supporter of the Labor party and Liberal vote is severely overpredicted by the model, making it an outlier. Nearby in metropolitan NSW, the electorate of Wentworth is found to be an outlier in all but the 2007 election. Although historically Liberal, its two-party vote jumped by over 10 percentage points in 2010 without experiencing any notable changes in its socio-demographic makeup - implying that this may be the direct effect of its Liberal member, Malcolm Turnbull, becoming the leader of the Liberal party. Liberal support in Wentworth is underpredicted by the model in each year, and more so with Turnbull as Liberal leader.
 
-Lingiari, an electorate taking up almost all of the Northern Territory, is an outlier in the 2001-2007 elections. This is likely due to its large Indigenous population, young age profile and low rates of property ownership. Other electorates with large cook's distance are Barton (NSW, 2016) and Leichhardt (QLD) in 2016, and Canberra (ACT) in 2007.
+Lingiari, an electorate taking up almost all of the Northern Territory, is an outlier in the 2001-2007 elections due to its large Indigenous population, young age profile and low rates of property ownership. Fowler (NSW) has a diverse population with a high proportion of migrants, many Buddhists and Muslims, and has very strong Labor support, making it influential in 2001, 2004 and 2010. Other electorates with large cook's distance are Barton (NSW) and Leichhardt (QLD) in 2016, and Canberra (ACT) in 2007.
 
 ```{r, eval = F}
 x <- model_df %>% filter(year == "2016") %>% select(-c(year, DivisionNm)) %>% as.matrix
 myhat <- hat(x)
 
-plot(glsmod10$cooksd, hat(model_df %>% filter(year == "2010") %>% select(-c(year, DivisionNm)) %>% as.matrix))
-```
-
-
-
-```{r eval = F}
-all_resids %>% 
-  group_by(UniqueID) %>% 
-  mutate(max_res = max(abs(Residuals))) %>% 
-  arrange(-max_res) %>% 
-  filter(max_res > 13.4) %>% 
-  dplyr::select(DivisionNm, LNP_Percent, year, everything())
-
-all_resids %>% 
-  group_by(year) %>% 
-  mutate(yr_max = max(abs(Residuals))) %>% 
-  filter(abs(Residuals) == yr_max) %>% 
-  select(DivisionNm, StateAb, year, Residuals, LNP_Percent)
-
-cooksd_df %>% 
-  mutate(LNP_win = ifelse(LNP_Percent > 50, 1, 0),
-    LNP_predicted = ifelse(LNP_Percent - Residuals > 50, 1, 0),
-    correct = ifelse(LNP_win == LNP_predicted, 1, 0)) %>% 
-  filter(correct == 0) %>% dim
-  group_by(year) %>% 
-  mutate(yr_max = max(abs(Residuals))) %>% 
-  filter(abs(Residuals) == yr_max) %>% 
-  select(DivisionNm, StateAb, year, Residuals, LNP_Percent)
-```
-
-```{r eval = F}
-library(plotly)
-ggplot(all_resids) + geom_jitter(aes(x = year, y = Residuals, label = DivisionNm))
-ggplotly()
-
-all_resids %>% 
-  group_by(UniqueID) %>% 
-  mutate(mean_res = mean(abs(Residuals)), min_res = min(abs(Residuals))) %>%
-  filter(min_res > 5) %>%
-  ungroup() %>% dplyr::select(Residuals, DivisionNm, year, min_res, mean_res, StateAb) %>% View
-  ggplot(aes(x = year, y = Residuals, group = DivisionNm, col = DivisionNm, label = DivisionNm)) + 
-  geom_line() + geom_point() +
-  guides(col = F)
+plot(glsmod07$cooksd, hat(model_df %>% filter(year == "2007") %>% select(-c(year, DivisionNm)) %>% as.matrix))
 ```
 
