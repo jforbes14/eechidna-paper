@@ -490,7 +490,6 @@ This is done for each of the 65 socio-demographic variables, and is repeated for
 
 # Modelling {#modelling}
 
-*1: HERE Introductory paragraph*
 Electoral socio-demographic variables are now available for each of the six elections and are joined with their corresponding two-party preferred votes. Before choosing an appropriate model, two issues with the socio-demographic variables are addressed. Firstly, variable scales change over the years, making it important to standardize variables. Secondly, many variables represent similar information and where appropriate, should be combined in some way. Principal component analysis is used to identify variables covary, from which intuitive groupings are selected to be combined into a single variable. This also reduces the dimension of the data. After these steps, a model specification is chosen.
 
 ## Standardizing variables
@@ -500,8 +499,6 @@ Many of the socio-demographic variables have changing scales over the years. For
 There are only $N = 150$ observations (electorates) in each election and $p = 65$ socio-demographic variables in each cross-section, with many variables represent similar information about an electorate. Any model that uses all variables would face serious problems with multi-collinearity and over-fitting, which would likely lead to erroneous conclusions regarding variable significance. To address this, groups of variables that represent similar information are combined into "factors"[^2]. 
 
 A factor is created from a group of variables if there is an intuitive reason as to why they should represent similar information and if there is evidence to suggest that they covary. For example, a potential group would be variables relating to electoral incomes - median family, household and personal incomes. To determine which variables covary, principal component analysis is used on a combined dataset of socio-demographic variables from all six elections. It is appropriate to compute principal components in this way because when computed separately for each election, scree plots level off after four components and the loadings of the first four components are similar across the elections.
-
-*2: HERE - ADD JUSTIFICATION FOR DOING SINGLE PCA AND EXPLAIN FACTORS CREATED*
 
 Only the first four principal components from the combined dataset are considered, as the scree plot corresponding to the combined dataset levels off after the fourth component. Variables that have a large loading in a particular component are deemed to covary, with a loading with magnitude greater than 0.15 being considered large. Six factors are created using this criteria. These are; `Incomes` - median personal, household and family incomes, `Unemployment` - unemployment and labor force participation rates, `ProportyOwned` - rates of housing ownership, mortgages, renting and government housing, `RentLoanPrice` - median rental and loan repayments, `FamHouseSize` - average household size, ratio of people to families and household makeup (single person, couple with kids and couple without kids) and `Education` - high school and university qualifications, jobs requiring higher levels of education as well as vocational course completions and jobs that do not require higher education levels (e.g. laborer, tradesperson). For each of these groups, variables with positive loadings are added and those with negative loadings are subtracted to create a factor. After computing these sums, each factor is standardized to have mean zero and variance one, within each election.
 
@@ -952,7 +949,7 @@ all_resids <- data.frame(
 
 It is often hypothesized that states have systematic differences that cause their electorates to vote differently. Boxplots of residuals grouped by state reveal that only Tasmania, the Australian Capital Territory and the Northern Territory appear to have a state-specific effect not captured by the models. Tasmania and the Australian Capital Territory appear to have a bias towards Labor, whereas the Northern Territory tends towards voting Liberal. However, there are relatively few electorates in each of these states (five, two and two respectively), so this apparent result may be due to incumbent effects rather than an actual state-specific bias.
 
-```{r resstate, fig.cap = "Boxplot of residuals by state with jittered points.", fig.asp=0.6, out.width="80%", fig.pos = 'h', out.extra = ''}
+```{r resstate, fig.cap = "Boxplot of residuals by state with jittered points.", fig.asp=0.6, out.width="70%", fig.pos = 'h', out.extra = ''}
 all_resids %>% 
   ggplot(aes(x = StateAb, y = Residuals)) + 
   geom_hline(aes(yintercept = 0), col = "grey50") +
@@ -1016,8 +1013,6 @@ plot(glsmod07$cooksd, hat(model_df %>% filter(year == "2007") %>% select(-c(year
 
 # Conclusion
 
-*3: HERE Add paragraph on the overall strategy and contributions - can restate stuff from intro*
-
 This paper explores the effects of electoral socio-demographic characteristics on the two-party preferred vote in the 2001-2016 elections, using information from the corresponding Australian federal elections and Censuses. As a Census does not always occur in the same year as an election, Census data for the 2004-2013 elections are generated by employing a method of spatio-temporal imputation. This imputes electoral socio-demographics for the electoral boundaries in place at the time of the election - an approach that is distinctly different from previous work on modelling election outcomes, where Census and election data are typically joined without addressing their temporal differences. Before estimating a model, these socio-demographic variables are standardized (to adjust for changing variable scales) and many variables (representing similar information) are combined into factors, resulting in a reduced predictor set. A spatial error model is then fit for each election, accounting for the inherent spatial structure of the data.
 
 Across the past six elections, most of the socio-demographics that drive the electoral two-party preferred vote are found to remain steady, whilst a few (typically weaker) effects vary over time. Industry and type of work are particularly influential, with energy-related and manufacturing/construction jobs, as well as administrative roles being strongly linked with the Liberal party in all elections. Incomes have a similarly consistent effect, with higher income areas supporting Liberal. Higher levels of unemployment shift from weak association with Labor to a significant Liberal effect over the years, and higher education levels are associated with Labor from 2007 (although only significant in 2016). It is also found that electorates with higher household mobility support Liberal, birthplace diversity favours Labor and more de facto relationships align with Labor preference - although marriages, family and household sizes have no material influence. Furthermore, the neighbourhood (spatial) effects are found to be positive in all elections, although only significant in 2001 and 2016, meaning that in the 2004-2013 elections, electorates effectively voted independently.
@@ -1034,13 +1029,13 @@ All election and Census datasets, along with electoral maps and more, are availa
 
 The authors would like to give a sincere thanks to Anthony Ebert, Heike Hofmann, Thomas Lumley, Ben Marwick, Carson Sievert, Mingzhu Sun, Dilini Talagala, Nicholas Tierney, Nathaniel Tomasetti, Earo Wang and Fang Zhou, all of whom have contributed to the `eechidna` package.
 
-```{r partresplot1, fig.cap = "Partial residual plots for: income and unemployment, industry and type of work, and household mobility.", fig.height = 9,  fig.width = 6, warning = F, fig.pos = 'h'}
+```{r partresplot1, fig.cap = "Partial residual plots for: Incomes, Unemployment, Extractive, Transformative, ManagerAdmin and DiffAddress", fig.height = 9,  fig.width = 6, warning = F, fig.pos = 'h'}
 grid.arrange(p1, p2, p3, p4, p5, p6, nrow = 6,
   heights = c(1.2, 1, 1, 1, 1, 1),
   left = grid.text("Two-party preferred vote (%)", gp = gpar(cex = 0.8), rot = 90))
 ```
 
-```{r partresplot2, fig.cap = "Partial residual plots for: relationships and age, education and diversity.", fig.height = 9,  fig.width = 6, warning = F, fig.pos = 'h'}
+```{r partresplot2, fig.cap = "Partial residual plots for: DeFacto, MedianAge, Education, OtherLanguage, BornSEEuro, BornAsia and Judaism.", fig.height = 9,  fig.width = 6, warning = F, fig.pos = 'h'}
 grid.arrange(p7, p8, p9, p10, p11, p12, p13, nrow = 7,
   heights = c(1.2, 1, 1, 1, 1, 1, 1),
   left = grid.text("Two-party preferred vote (%)", gp = gpar(cex = 0.8), rot = 90))
