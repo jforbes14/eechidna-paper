@@ -7,3 +7,5 @@
 /junk/*
 /_bookdown_files/*
 *.log
+anzsauth/
+old_book_files/
