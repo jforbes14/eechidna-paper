@@ -129,7 +129,8 @@ model_df <- small_df %>%
   dplyr::select(order(colnames(.))) %>% 
   rename(ManagerAdmin = ManagerAdminClericalSales, 
     OtherLanguage = OtherLanguageHome,
-    Born_SE_EU = Born_SE_Europe)
+    BornSEEuro = BornSEEurorope,
+    BornAsia = Born_Asia)
 ```
 
 ```{r spatialweights, eval = F}
@@ -911,8 +912,8 @@ p7 <- grid_visreg("DeFacto", top = T)
 p8 <- grid_visreg("MedianAge")
 p9 <- grid_visreg("Education")
 p10 <- grid_visreg("OtherLanguage")
-p11 <- grid_visreg("Born_SE_EU")
-p12 <- grid_visreg("Born_Asia")
+p11 <- grid_visreg("BornSEEuro")
+p12 <- grid_visreg("BornAsia")
 p13 <- grid_visreg("Judaism")
 ```
 
