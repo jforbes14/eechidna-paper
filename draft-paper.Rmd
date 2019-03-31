@@ -127,7 +127,9 @@ small_df <- bind_rows(
 model_df <- small_df %>% 
   arrange(year, DivisionNm) %>% 
   dplyr::select(order(colnames(.))) %>% 
-  rename(ManagerAdmin = ManagerAdminClericalSales)
+  rename(ManagerAdmin = ManagerAdminClericalSales, 
+    OtherLanguage = OtherLanguageHome,
+    Born_SE_EU = Born_SE_Europe)
 ```
 
 ```{r spatialweights, eval = F}
@@ -238,12 +240,12 @@ sp_weights_01 <- sp_weights_matrix(sF_01)
 
 ```{r FGLS, include = F}
 # Instead of running spatial weights
-load("/Users/Jeremy/Documents/R/eechidna-modelling/data/sp_weights_01.rda")
-load("/Users/Jeremy/Documents/R/eechidna-modelling/data/sp_weights_04.rda")
-load("/Users/Jeremy/Documents/R/eechidna-modelling/data/sp_weights_07.rda")
-load("/Users/Jeremy/Documents/R/eechidna-modelling/data/sp_weights_10.rda")
-load("/Users/Jeremy/Documents/R/eechidna-modelling/data/sp_weights_13.rda")
-load("/Users/Jeremy/Documents/R/eechidna-modelling/data/sp_weights_16.rda")
+load("data/sp_weights_01.rda")
+load("data/sp_weights_04.rda")
+load("data/sp_weights_07.rda")
+load("data/sp_weights_10.rda")
+load("data/sp_weights_13.rda")
+load("data/sp_weights_16.rda")
 
 
 # Function for FGLS
@@ -623,7 +625,7 @@ stargazer::stargazer(glsmod01, glsmod04, glsmod07, glsmod10, glsmod13, glsmod16,
  OneParent\_House & $-$1.73 & $-$0.45 & $-$0.75 & $-$1.46 & $-$0.77 & $-$0.74 \\ 
   & (1.36) & (1.59) & (1.49) & (1.69) & (1.57) & (1.47) \\ 
 
- OtherLanguageHome & $-$0.44 & 5.92 & 9.98$^{**}$ & 11.24$^{**}$ & 9.00$^{*}$ & 9.84$^{**}$ \\ 
+ OtherLanguage & $-$0.44 & 5.92 & 9.98$^{**}$ & 11.24$^{**}$ & 9.00$^{*}$ & 9.84$^{**}$ \\ 
   & (3.22) & (4.16) & (3.91) & (4.76) & (4.66) & (4.44) \\ 
 
  PropertyOwned & $-$0.46 & $-$0.53 & 0.67 & $-$0.94 & $-$0.48 & 1.41 \\ 
@@ -896,7 +898,7 @@ Regions comprised of older people are often believed to be more conservative, an
 Since 2007, electorates with higher education levels are associated with supporting the Labor party, although this effect is only significant in 2016. Before 2007, education has an almost zero effect (see row 3 in Figure \@ref(fig:partresplot1)).
 
 ### Diversity
-Larger migrant populations from Asia, the Middle East, South-Eastern Europe, the United Kingdom and elsewhere, are either associated with Labor support, or have no effect. Of these areas, only South-Eastern European populations appear significant in each election, with the proportion of Asian migrants also being significant in 2010. Speaking other languages (aside from English) however, appears to have a far stronger effect, as observed through the `OtherLanguageHome` variable. Electorates with more diverse speech are associated with higher support for the Liberal party from 2004 onwards, with this effect being significant in 2007, 2010 and 2016. Furthermore, of the variables relating to religion, only Judaism shows a consistent effect, with electorates with relatively large Jewish populations more likely to vote Liberal. 
+Larger migrant populations from Asia, the Middle East, South-Eastern Europe, the United Kingdom and elsewhere, are either associated with Labor support, or have no effect. Of these areas, only South-Eastern European populations appear significant in each election, with the proportion of Asian migrants also being significant in 2010. Speaking other languages (aside from English) however, appears to have a far stronger effect, as observed through the `OtherLanguage` variable. Electorates with more diverse speech are associated with higher support for the Liberal party from 2004 onwards, with this effect being significant in 2007, 2010 and 2016. Furthermore, of the variables relating to religion, only Judaism shows a consistent effect, with electorates with relatively large Jewish populations more likely to vote Liberal. 
 
 ```{r prepplot, include = F}
 p1 <- grid_visreg("Incomes", top = T)
@@ -908,8 +910,8 @@ p6 <- grid_visreg("DiffAddress")
 p7 <- grid_visreg("DeFacto", top = T)
 p8 <- grid_visreg("MedianAge")
 p9 <- grid_visreg("Education")
-p10 <- grid_visreg("OtherLanguageHome")
-p11 <- grid_visreg("Born_SE_Europe")
+p10 <- grid_visreg("OtherLanguage")
+p11 <- grid_visreg("Born_SE_EU")
 p12 <- grid_visreg("Born_Asia")
 p13 <- grid_visreg("Judaism")
 ```
