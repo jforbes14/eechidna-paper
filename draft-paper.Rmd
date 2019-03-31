@@ -131,6 +131,7 @@ model_df <- small_df %>%
     OtherLanguage = OtherLanguageHome,
     BornSEEuro = BornSEEurope,
     BornAsia = Born_Asia)
+
 ```
 
 ```{r spatialweights, eval = F}
