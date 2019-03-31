@@ -253,8 +253,7 @@
   \addspace\&\space}
 
 
-\wp{no/yr}
-\jel{C10,C14,C22}
+\jel{C31, C33, D72}
 
 \RequirePackage[absolute,overlay]{textpos}
 \setlength{\TPHorizModule}{1cm}
@@ -262,12 +261,12 @@
 \def\placefig#1#2#3#4{\begin{textblock}{.1}(#1,#2)\rlap{\includegraphics[#3]{#4}}\end{textblock}}
 
 
-
+\nocover
 
 \author{Jeremy~Forbes, Di~Cook, Rob~Hyndman}
 \addresses{\textbf{Jeremy Forbes}\newline
 Monash University\newline Melbourne, Australia
-\newline{Email: \href{mailto:jeremyforbes1995@gmail.com}{\nolinkurl{jeremyforbes1995@gmail.com}}}\newline Corresponding author\\[1cm]
+\newline{Email: \href{mailto:jeremy.forbes@monash.edu}{\nolinkurl{jeremy.forbes@monash.edu}}}\newline Corresponding author\\[1cm]
 \textbf{Di Cook}\newline
 Monash University\newline Melbourne, Australia
 \\[1cm]
@@ -296,7 +295,7 @@ Monash University\newline Melbourne, Australia
 \begin{document}
 \maketitle
 \begin{abstract}
-This research examines the relationships between electoral socio-demographic characteristics and two-party preference in Australian federal elections, with the six elections from 2001 to 2016 considered. Socio-demographic information is derived from the Australian Census, which occurs every five years. Since a Census is not directly available for each election, a method of spatio-temporal imputation is employed to impute Census data for the electorates in 2004-2013 elections. This accounts for both spatial and temporal changes in electoral characteristics between Censuses. To capture any spatial heterogeneity, a spatial error model is estimated for each election, which incorporates a spatially structured random effect vector that can thought of as the unobserved political climate in each electorate. Over time, most socio-demographic characteristics that affect electoral two-party preference do not vary, with industry of work, incomes, household mobility and de facto relationships having strong effects in the six elections. Education and unemployment are amongst those that have varying effects. It is also found that between 2004 and 2013, the spatial effect is insignificant, meaning that electorates voted effectively independently. All data featured in this study has been contributed to the \texttt{eechidna} \texttt{R} package (available on CRAN).
+This research examines the relationships between electoral socio-demographic characteristics and two-party preference in Australian federal elections, with the six elections from 2001 to 2016 considered. Socio-demographic information is derived from the Australian Census, which occurs every five years. Since a Census is not directly available for each election, a method of spatio-temporal imputation is employed to construct Census data for the electorates in 2004-2013 elections. This accounts for both spatial and temporal changes in electoral characteristics between Censuses. To capture any spatial heterogeneity, a spatial error model is estimated for each election, which incorporates a spatially structured random effect vector that can thought of as the unobserved political climate in each electorate. Over time, the impact of most socio-demographic characteristics that affect electoral two-party preference do not vary, with industry of work, incomes, household mobility and de facto relationships having strong effects in each of the six elections. Education and unemployment are amongst those that have varying effects. It is also found that between 2004 and 2013, the spatial effect is insignificant, meaning that electorates voted effectively independently. All data featured in this study has been contributed to the \texttt{eechidna} \texttt{R} package (available on CRAN).
 \end{abstract}
 \begin{keywords}
 federal election, Census, Australia, spatial modelling, imputation, socio-demographics, electorates, R, eechidna
@@ -347,7 +346,7 @@ Between 2001 and 2016 there were six elections and four Censuses (see Figure \re
 \hypertarget{spatio-temporal-imputation}{%
 \subsubsection{Spatio-temporal imputation}\label{spatio-temporal-imputation}}
 
-For each election, neighbouring Census information has to be combined in some way so that it represents the boundaries in place at the time of the election. This is done by taking the electoral boundaries and imputing the corresponding socio-demographic characteristics for each of neighbouring Censuses, thereby addressing the spatial aspect. Next, to deal with the temporal component, characteristcs at the time of the election are constructed using linear interpolation between the spatially imputed neighbouring Census variables.
+For each election, neighbouring Census information has to be combined in some way so that it represents the boundaries in place at the time of the election. This is done by taking the electoral boundaries and imputing the corresponding socio-demographic characteristics for each of neighbouring Censuses, thereby addressing the spatial aspect. Next, to deal with the temporal component, characteristics at the time of the election are constructed using linear interpolation between the spatially imputed neighbouring Census variables.
 
 To account for spatial differences, the piece-wise approximation method in \textcite{Goodchild1993} is adopted. Consider a map of source zones \(s = 1,...,S\), for which socio-demographic information is available, and a set of target zones \(t = 1,...,T\) for which information is to be imputed. This is described in the context of a single election, and a single neighbouring Census.
 
@@ -361,7 +360,7 @@ In order to calculate socio-demographic information for each of the target zones
 \[\hat{C}_t = \frac{\sum_{s=1}^{S}{D_s*\hat{P}_{s,t}}}{\sum_{s=1}^{S}{\hat{P}_{s,t}}}, \mbox{ for each } t=1,...,T.\]
 This concludes the spatial imputation of the socio-demographic characteristics for one target zone (a single electoral boundary), at time of only one of the neighbouring Censuses. This process is repeated for all of the target zones, and then for the other neighbouring Census.
 
-To account for temporal changes, linear interpolation is used between Census years to get the final estimate of a Census variable for the target zone in the election year. Let \(y_1\) be the year of the Census preceeding an election, let \(y_2\) be the year of the election and \(y_3\) be the year of the Census that follows. Add this year subscript to the Census variable estimate \(\hat{C}_t\), resulting in \(\hat{C}_{t,y}\). Linear interpolating between these Census years results an imputed value for the election year, given by
+To account for temporal changes, linear interpolation is used between Census years to get the final estimate of a Census variable for the target zone in the election year. Let \(y_1\) be the year of the Census preceding an election, let \(y_2\) be the year of the election and \(y_3\) be the year of the Census that follows. Add this year subscript to the Census variable estimate \(\hat{C}_t\), resulting in \(\hat{C}_{t,y}\). Linear interpolating between these Census years results an imputed value for the election year, given by
 
 \[\hat{C}_{t,y_2} = \frac{y_3-y_2}{y_3-y_1}*\hat{C}_{t,y_1} + \frac{y_2-y_1}{y_3-y_1}*\hat{C}_{t,y_3}.\]
 Implicitly this assumes that population characteristics change in a linear manner over time.
@@ -576,12 +575,12 @@ This is done for each of the 65 socio-demographic variables, and is repeated for
 \section{Modelling}\label{modelling}}
 
 \emph{1: HERE Introductory paragraph}
-Electoral socio-demographic variables are now available for each of the six elections and are joined with their corresponding two-party preferred votes. Before choosing an appropriate model, two issues with the socio-demographic variables are addressed. Firstly, variable scales change over the years and as such the data is standardized accordingly. Secondly, many variables represent similar information and where appropriate, should be combined in some way. Principal component analysis is used to identify variables covary, from which intuitive groupings are selected to be combined into a single variable. This also reduces the dimension of the data. After these steps, a model specification is chosen.
+Electoral socio-demographic variables are now available for each of the six elections and are joined with their corresponding two-party preferred votes. Before choosing an appropriate model, two issues with the socio-demographic variables are addressed. Firstly, variable scales change over the years, making it important to standardize variables. Secondly, many variables represent similar information and where appropriate, should be combined in some way. Principal component analysis is used to identify variables covary, from which intuitive groupings are selected to be combined into a single variable. This also reduces the dimension of the data. After these steps, a model specification is chosen.
 
 \hypertarget{standardizing-variables}{%
 \subsection{Standardizing variables}\label{standardizing-variables}}
 
-Many of the socio-demographic variables have changing scales over the years. For example, inflation-adjusted median rental prices increased across almost all electorates, with median rent of 200 dollars per week placing an electorate in the 90th percentile in 2001, but only the 30th percentile in 2016. In order for socio-demographic effects to be comparable across years, the explanatory variables are standardized to have mean zero and variance one within each election year. By standardizing, each variable is reported as a relative measure compared to all other electorates in the same year.
+Many of the socio-demographic variables have changing scales over the years. For example, inflation-adjusted median rental prices increased across almost all electorates, with median rent of 200 dollars per week placing an electorate in the 90th percentile in 2001, but only the 30th percentile in 2016. In order for socio-demographic effects to be comparable across years, all explanatory variables are standardized to have mean zero and variance one within each election year. By standardizing, each variable is reported as a relative measure compared to all other electorates in the same year.
 
 \hypertarget{creating-factors}{%
 \subsection{Creating factors}\label{creating-factors}}
@@ -592,7 +591,7 @@ A factor is created from a group of variables if there is an intuitive reason as
 
 \emph{2: HERE - ADD JUSTIFICATION FOR DOING SINGLE PCA AND EXPLAIN FACTORS CREATED}
 
-Only the first four principal components from the combined dataset are considered, as the scree plot levels off after the fourth component. Variables that have a large loading in a particular component are deemed to covary, with a loading with magnitude greater than 0.15 being considered large. Six factors are created using this criteria. These are; \texttt{Incomes} - median personal, household and family incomes, \texttt{Unemployment} - unemployment and labor force participation rates, \texttt{ProportyOwned} - rates of housing ownership, mortgages, renting and government housing, \texttt{RentLoanPrice} - median rental and loan repayments, \texttt{FamHouseSize} - average household size, ratio of people to families and household makeup (single person, couple with kids and couple without kids) and \texttt{Education} - high school and university qualifications, jobs requiring higher levels of education as well as vocational course completions and jobs that do not require higher education levels (e.g.~laborer, tradesperson). For each of these groups, variables with positive loadings are added and those with negative loadings are substracted to create a factor. After computing these sums, each factor is standardized to have mean zero and variance one, within each election.
+Only the first four principal components from the combined dataset are considered, as the scree plot corresponding to the combined dataset levels off after the fourth component. Variables that have a large loading in a particular component are deemed to covary, with a loading with magnitude greater than 0.15 being considered large. Six factors are created using this criteria. These are; \texttt{Incomes} - median personal, household and family incomes, \texttt{Unemployment} - unemployment and labor force participation rates, \texttt{ProportyOwned} - rates of housing ownership, mortgages, renting and government housing, \texttt{RentLoanPrice} - median rental and loan repayments, \texttt{FamHouseSize} - average household size, ratio of people to families and household makeup (single person, couple with kids and couple without kids) and \texttt{Education} - high school and university qualifications, jobs requiring higher levels of education as well as vocational course completions and jobs that do not require higher education levels (e.g.~laborer, tradesperson). For each of these groups, variables with positive loadings are added and those with negative loadings are subtracted to create a factor. After computing these sums, each factor is standardized to have mean zero and variance one, within each election.
 
 There are \(p=30\) variables in the resultant predictor set, with all of these used in the regression for each election.
 
@@ -637,16 +636,16 @@ Table 3 details the estimated model coefficients and their estimated standard er
  AusCitizen & $-$3.13 & $-$2.64 & $-$2.53 & $-$0.08 & $-$3.40 & $-$1.80 \\ 
   & (2.26) & (2.43) & (2.34) & (2.79) & (2.76) & (2.71) \\ 
 
- Born\_Asia & 2.22 & $-$0.95 & $-$1.60 & $-$6.83$^{**}$ & $-$3.03 & $-$0.55 \\ 
+ BornAsia & 2.22 & $-$0.95 & $-$1.60 & $-$6.83$^{**}$ & $-$3.03 & $-$0.55 \\ 
   & (2.18) & (2.44) & (2.19) & (2.73) & (2.71) & (2.17) \\ 
 
- Born\_MidEast & $-$1.15 & $-$1.59 & $-$2.01$^{*}$ & $-$2.03 & $-$0.92 & $-$1.44 \\ 
+ BornMidEast & $-$1.15 & $-$1.59 & $-$2.01$^{*}$ & $-$2.03 & $-$0.92 & $-$1.44 \\ 
   & (1.07) & (1.20) & (1.11) & (1.27) & (1.24) & (1.13) \\ 
 
- Born\_SE\_Europe & $-$3.21$^{**}$ & $-$4.24$^{***}$ & $-$3.61$^{***}$ & $-$4.14$^{***}$ & $-$3.69$^{***}$ & $-$2.72$^{***}$ \\ 
+ BornSEEuro & $-$3.21$^{**}$ & $-$4.24$^{***}$ & $-$3.61$^{***}$ & $-$4.14$^{***}$ & $-$3.69$^{***}$ & $-$2.72$^{***}$ \\ 
   & (1.42) & (1.46) & (1.02) & (1.19) & (1.07) & (0.97) \\ 
 
- Born\_UK & 0.25 & $-$0.07 & 0.34 & 0.56 & $-$0.09 & $-$1.32 \\ 
+ BornUK & 0.25 & $-$0.07 & 0.34 & 0.56 & $-$0.09 & $-$1.32 \\ 
   & (1.00) & (0.98) & (0.90) & (1.07) & (1.04) & (1.04) \\ 
 
  BornElsewhere & $-$5.04 & $-$4.91 & $-$4.13 & 2.35 & $-$5.23 & $-$4.14 \\ 
@@ -691,7 +690,7 @@ Table 3 details the estimated model coefficients and their estimated standard er
  Judaism & 1.88$^{*}$ & 1.78 & 2.66$^{***}$ & 1.97$^{*}$ & 2.74$^{**}$ & 1.65$^{*}$ \\ 
   & (1.05) & (1.13) & (1.01) & (1.15) & (1.10) & (1.00) \\ 
 
- ManagerAdminClericalSales & 2.06$^{***}$ & 3.32$^{***}$ & 6.00$^{***}$ & 5.47$^{***}$ & 5.04$^{***}$ & 5.78$^{***}$ \\ 
+ ManagerAdmin & 2.06$^{***}$ & 3.32$^{***}$ & 6.00$^{***}$ & 5.47$^{***}$ & 5.04$^{***}$ & 5.78$^{***}$ \\ 
   & (0.71) & (0.93) & (0.90) & (1.08) & (1.03) & (1.06) \\ 
 
  Married & 0.44 & 0.11 & $-$1.22 & $-$0.22 & 0.91 & $-$2.34 \\ 
@@ -703,10 +702,10 @@ Table 3 details the estimated model coefficients and their estimated standard er
  NoReligion & $-$1.57 & $-$0.92 & 0.56 & $-$0.30 & 1.02 & 1.31 \\ 
   & (1.59) & (1.71) & (1.73) & (1.92) & (1.94) & (2.04) \\ 
 
- OneParent\_House & $-$1.73 & $-$0.45 & $-$0.75 & $-$1.46 & $-$0.77 & $-$0.74 \\ 
+ OneParentHouse & $-$1.73 & $-$0.45 & $-$0.75 & $-$1.46 & $-$0.77 & $-$0.74 \\ 
   & (1.36) & (1.59) & (1.49) & (1.69) & (1.57) & (1.47) \\ 
 
- OtherLanguageHome & $-$0.44 & 5.92 & 9.98$^{**}$ & 11.24$^{**}$ & 9.00$^{*}$ & 9.84$^{**}$ \\ 
+ OtherLanguage & $-$0.44 & 5.92 & 9.98$^{**}$ & 11.24$^{**}$ & 9.00$^{*}$ & 9.84$^{**}$ \\ 
   & (3.22) & (4.16) & (3.91) & (4.76) & (4.66) & (4.44) \\ 
 
  PropertyOwned & $-$0.46 & $-$0.53 & 0.67 & $-$0.94 & $-$0.48 & 1.41 \\ 
@@ -786,7 +785,7 @@ Typically the Labor party campaigns on more progressive policies, which often in
 
 Electorates with higher proportions of workers in mining, gas, water, agriculture, waste and electricity (grouped as \texttt{Extractive} industries) are consistently linked with higher support for the Liberal party, with the magnitude of this effect slightly increasing over the years (see row 3 in Figure \ref{fig:partresplot1}). This is unsurprising, as the Liberal party has close ties with these traditional energy industries, and typically present policies to reduce taxation on energy production. Furthermore, electorates with more workers in construction or manufacturing industries (\texttt{Transformative}) are also more likely to support the Liberal party (see row 4 in Figure \ref{fig:partresplot1}).
 
-Similarly, workers in managerial, administrative, clerical and sales roles (\texttt{ManagerAdminClericalSales}) is also a significant predictor of two-party preference vote across all six elections, with a higher proportion of people working these jobs increasing Liberal support. The magnitude of this effect also seems to increase over the years.
+Similarly, workers in managerial, administrative, clerical and sales roles (\texttt{ManagerAdmin}) is also a significant predictor of two-party preference vote across all six elections, with a higher proportion of people working these jobs increasing Liberal support. The magnitude of this effect also seems to increase over the years.
 
 \hypertarget{household-mobility}{%
 \subsubsection{Household mobility}\label{household-mobility}}
@@ -796,7 +795,7 @@ In each of the six elections, electorates with a higher proportion of people tha
 \hypertarget{relationships}{%
 \subsubsection{Relationships}\label{relationships}}
 
-De facto relationships, but not marriages, are found to be an important (and significant) predictor of the two-party preferred vote in all six elections, with more de facto relationships associated with higher support for the Labor party. The proportion of individuals who are marriaged however, are insignificant (not shown).
+De facto relationships, but not marriages, are found to be an important (and significant) predictor of the two-party preferred vote in all six elections, with more de facto relationships associated with higher support for the Labor party. The proportion of individuals who are marriages however, are insignificant (not shown).
 
 \hypertarget{age}{%
 \subsubsection{Age}\label{age}}
@@ -811,7 +810,7 @@ Since 2007, electorates with higher education levels are associated with support
 \hypertarget{diversity}{%
 \subsubsection{Diversity}\label{diversity}}
 
-Larger migrant populations from Asia, the Middle East, South-Eastern Europe, the United Kingdom and elsewhere, are either associated with Labor support, or have no effect. Of these areas, only South-Eastern European populations appear significant in each election, with the proportion of Asian migrants also being significant in 2010. Speaking other languages (aside from English) however, appears to have a far stronger effect, as observed through the \texttt{OtherLanguageHome} variable. Electorates with more diverse speech are associated with higher support for the Liberal party from 2004 onwards, with this effect being significant in 2007, 2010 and 2016. Furthermore, of the variables relating to religion, only Judaism shows a consistent effect, with electorates with relatively large Jewish populations more likely to vote Liberal.
+Larger migrant populations from Asia, the Middle East, South-Eastern Europe, the United Kingdom and elsewhere, are either associated with Labor support, or have no effect. Of these areas, only South-Eastern European populations appear significant in each election, with the proportion of Asian migrants also being significant in 2010. Speaking other languages (aside from English) however, appears to have a far stronger effect, as observed through the \texttt{OtherLanguage} variable. Electorates with more diverse speech are associated with higher support for the Liberal party from 2004 onwards, with this effect being significant in 2007, 2010 and 2016. Furthermore, of the variables relating to religion, only Judaism shows a consistent effect, with electorates with relatively large Jewish populations more likely to vote Liberal.
 
 \hypertarget{a-note-on-similar-variables}{%
 \subsubsection{A note on similar variables}\label{a-note-on-similar-variables}}
