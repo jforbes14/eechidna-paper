@@ -9,3 +9,5 @@
 *.log
 anzsauth/
 old_book_files/
+*_cache/
+*_files/
