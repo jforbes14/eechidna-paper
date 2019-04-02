@@ -11,3 +11,12 @@ anzsauth/
 old_book_files/
 *_cache/
 *_files/
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.out
+*.run.xml
+*.synctex.gz
