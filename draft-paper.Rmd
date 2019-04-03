@@ -52,8 +52,9 @@ library(knitr)
 library(nlme)
 library(rgeos)
 library(spdep)
-library(gridExtra)
-library(grid)
+library(patchwork)
+#library(gridExtra)
+#library(grid)
 library(predictmeans)
 source("functions.R")
 ```
@@ -910,17 +911,9 @@ All election and Census datasets, along with electoral maps and more, are availa
 The authors would like to give a sincere thanks to Anthony Ebert, Heike Hofmann, Thomas Lumley, Ben Marwick, Carson Sievert, Mingzhu Sun, Dilini Talagala, Nicholas Tierney, Nathaniel Tomasetti, Earo Wang and Fang Zhou, all of whom have contributed to the `eechidna` package.
 
 ```{r partresplot1, fig.cap = "Partial residual plots for: Incomes, Unemployment, Extractive, Transformative, ManagerAdmin and DiffAddress", fig.height = 9, fig.width = 6, warning = FALSE, fig.pos = 'h'}
-grid.arrange(p1, p2, p3, p4, p5, p6,
-  nrow = 6,
-  heights = c(1.2, 1, 1, 1, 1, 1),
-  left = grid.text("Two-party preferred vote (%)", gp = gpar(cex = 0.8), rot = 90)
-)
+(p1 / p2 / (p3 + ylab("Two-party preferred vote (%)                     ")) / p4 / p5 / p6)
 ```
 
 ```{r partresplot2, fig.cap = "Partial residual plots for: DeFacto, MedianAge, Education, OtherLanguage, BornSEEuro, BornAsia and Judaism.", fig.height = 9,  fig.width = 6, warning = FALSE, fig.pos = 'h'}
-grid.arrange(p7, p8, p9, p10, p11, p12, p13,
-  nrow = 7,
-  heights = c(1.2, 1, 1, 1, 1, 1, 1),
-  left = grid.text("Two-party preferred vote (%)", gp = gpar(cex = 0.8), rot = 90)
-)
+(p7 / p8 / (p9 + ylab("Two-party preferred vote (%)                     ")) / p10 / p11 / p12)
 ```
