@@ -297,7 +297,7 @@ coef_df <- bind_rows(
 
 Australia has changed in many ways over the last two decades. Rising house prices, country-wide improvements in education, an ageing population, and a decline in religious affiliation, are just a few facets of the country's evolving socio-demographic characteristics. At the same time, political power has moved back and forth between the two major parties. In the 2007 and 2010 federal elections, the Australian Labor Party (Labor) was victorious, whereas the 2001, 2004, 2013 and 2016 elections were won by the Liberal National coalition (Liberal). The two-party preferred vote, a measure of support between these two parties, fluctuated between 47.3% and 53.5% (in favour of the Liberal party) over this period. This study explores how electoral socio-demographic characteristics relate to two-party preference, and whether their effects have changed over time. Electoral socio-demographics are derived from the Australian Census, and vote counts are obtained from Australian federal elections.
 
-Joining these two data sources is problematic as there in an inherent asynchronicity in the two types of events. A Census is conducted by the Australian Bureau of Statistics (ABS) every five years, whereas federal elections, conducted by the Australian Electoral Commission (AEC), usually occur every three years or so. The first problem addressed is that of constructing appropriate Census data for the 2004, 2007, 2010 and 2013 elections --- election years in which a Census does not occur. The predominant approach in previous studies was to join voting outcomes to the nearest Census, without accounting for any temporal differences (see @DavisStimson98, @Stimson06, @Liao09 and @Stimson09). Furthermore, electoral boundaries change regularly, so spatial discrepancies also arise when matching with electoral data. To obtain appropriate "Census-like" data for these four elections, electoral socio-demographics are constructed using a spatio-temporal imputation that combines areal interpolation [@Goodchild1993] and linear time-interpolation. Collecting and wrangling the raw data, along with the imputation process, are detailed in Section \@ref(data). All data and associated documentation relating to this procedure are available in the `eechidna` `R` package [@eechidna], providing a resource for future analysis.
+Joining these two data sources is problematic as there in an inherent asynchronicity in the two types of events. A Census is conducted by the Australian Bureau of Statistics (ABS) every five years, whereas federal elections, conducted by the Australian Electoral Commission (AEC), usually occur every three years or so. The first problem addressed is that of constructing appropriate Census data for the 2004, 2007, 2010 and 2013 elections --- election years in which a Census does not occur. The predominant approach in previous studies was to join voting outcomes to the nearest Census, without accounting for any temporal differences [see @DavisStimson98;@Stimson06;@Liao09;@Stimson09]. Furthermore, electoral boundaries change regularly, so spatial discrepancies also arise when matching with electoral data. To obtain appropriate "Census-like" data for these four elections, electoral socio-demographics are constructed using a spatio-temporal imputation that combines areal interpolation [@Goodchild1993] and linear time-interpolation. Collecting and wrangling the raw data, along with the imputation process, are detailed in Section \@ref(data). All data and associated documentation relating to this procedure are available in the `eechidna` `R` package [@eechidna], providing a resource for future analysis.
 
 Previous work on modelling Australian federal elections has found that aggregate socio-demographics are relatively good predictors of voting outcomes. @Forrest01 used multiple regression to model the Liberal and Labor primary vote for polling booths in the Farrer electorate in 1998 as a function of Census variables from 1996. @Stimson06, @Stimson09 and @Stimson12 used principal component analysis of polling booths in the 2001, 2004 and 2007 elections respectively, also finding that socio-demographic characteristics of polling booths are linked to their two-party preferred vote. In contrast, @Stimson09 models the polling booth swing vote (change in the two-party preferred vote) in the 2007 election, finding that little of the swing vote can be explained by Census data. Instead of analyzing a single election in isolation, this paper employs a consistent model framework across six elections so that temporal changes in the effects of socio-demographics can be observed, where each federal elections is modelled with a cross-sectional dataset. The use of a regression framework to examine these socio-political relationships over time is seemingly absent from previous Australian studies. It also appears that no study has attempted any type of statistical analysis of socio-demographics in conjunction with voter behaviour in Australia since 2007, making this paper distinctly different from previous work.
 
@@ -380,6 +380,8 @@ $$
 $$
 This concludes the spatial imputation of the socio-demographic characteristics for one target zone (a single electoral boundary), at the time of only one of the neighbouring Censuses. This process is repeated for all of the target zones, and then for the other neighbouring Census.
 
+\enlargethispage*{0.5cm}
+
 To account for temporal changes, linear interpolation is used between Census years to get the final estimate of a Census variable for the target zone in the election year. Let $y_1$ be the year of the Census preceding an election, let $y_2$ be the year of the election, and $y_3$ be the year of the Census that follows. Add this year subscript to the Census variable estimate $\hat{C}_t$, resulting in $\hat{C}_{t,y}$. Linear interpolating between these Census years results an imputed value for the election year, given by
 $$
   \hat{C}_{t,y_2} = \frac{y_3-y_2}{y_3-y_1} * \hat{C}_{t,y_1} +
@@ -387,7 +389,7 @@ $$
 $$
 Implicitly this assumes that population characteristics change in a linear manner over time.
 
-### An illustration of the spatio-temporal imputation
+### An illustration of the spatio-temporal imputation {-}
 
 Census data is publicly available at different levels of aggregation, ranging from SA1 (over 50,000 zones) to electoral divisions (150 zones). For this study, electoral divisions are used as source zones, and the imputation method is applied to produce socio-demographic variables for each of the 2004, 2007, 2010 and 2013 elections. As mentioned earlier, there is no need to impute socio-demographic variables for the 2001 and 2016 elections. To illustrate the method, consider the imputation of socio-demographic variables for the electorate of Hume in New South Wales (NSW) at the time of the 2013 federal election. The boundaries shown in Figure \@ref(fig:hume13) define all target zones in NSW for 2013, with the target zone of interest (Hume) shaded purple.
 
@@ -407,8 +409,6 @@ ggplot(data = hume_area13) +
   theme_map() +
   coord_equal()
 ```
-
-The corresponding source zones from the 2016 Census are shown in Figure \@ref(fig:hume16). As can be seen, the Hume boundary from the 2013 election (shaded purple) does not perfectly match any of the source zones.
 
 ```{r hume16, fig.cap = "Census division boundaries in NSW for 2016, with the 2013 electoral boundary for Hume, shown in purple. The purple region is not contained within a single Census division.", out.height="30%"}
 hume_area16 <- nat_map16 %>%
@@ -437,66 +437,72 @@ ggplot(data = hume_area16) +
   guides(alpha = FALSE, col = FALSE)
 ```
 
+The corresponding source zones from the 2016 Census are shown in Figure \@ref(fig:hume16). As can be seen, the Hume boundary from the 2013 election (shaded purple) does not perfectly match any of the source zones.
+
 There are many source zones from the 2016 Census that intersect with this purple region, including the divisions of Riverina, Eden-Monaro and Hume, along with smaller intersecting areas with Fenner, Calare, Gilmore and Whitlam. The proportion of each source zone that overlaps with the purple region is calculated, and used to obtain the intersecting populations $\hat{P}_{s,t}$.
 
-\footnotesize
+```{r hume1}
+hume <- abs2016 %>%
+  filter(DivisionNm %in%
+           c("HUME", "RIVERINA", "EDEN-MONARO", "CANBERRA",
+             "FENNER", "WHITLAM", "GILMORE", "CALARE")) %>%
+  mutate(
+    Pst = c(21, 548, 16358, 474, 86, 145427, 39117, 92),
+    Proportion = Pst/Population,
+    DivisionNm = tools::toTitleCase(tolower(DivisionNm))
+  ) %>%
+  select(DivisionNm, Proportion, Population, Pst, AusCitizen) %>%
+  arrange(desc(Proportion))
 
-Source Zone (2016) | Proportion | Source Zone Population | Population Allocated to Purple Region: $\hat{P}_{s,t}$
---------------------|----------|-----------|--------------------------------------------:
-HUME              | 0.9654     | 150643                   | 145427
-RIVERINA          | 0.2511     | 155793                   | 39117
-EDEN-MONARO       | 0.1109     | 147532                   | 16358
-CANBERRA          | 0.0280     | 196037                   | 548
-FENNER            | 0.0023     | 202955                   | 474
-WHITLAM           | 0.0006     | 152280                   | 92
-GILMORE           | 0.0006     | 150436                   | 86
-CALARE            | 0.0001     | 161298                   | 21
-
-\normalsize
+hume %>%
+  select(-AusCitizen) %>%
+  kable(longtable=FALSE, booktabs=TRUE, digits=4,
+        format='latex',escape=FALSE,
+        col.names=c(
+          "Source zone (2016)",
+          "Proportion",
+          "Source zone population",
+          "Population allocated to purple region: $\\hat{P}_{s,t}$")) %>%
+  kableExtra::kable_styling(font_size=10, latex_options='scale_down')
+```
 
 Now consider the socio-demographic variable *AusCitizen*, the proportion of people in the region who are Australian citizens.
 
-```{r eval = FALSE, include = FALSE}
-auscitizen_ex <- abs2016 %>%
-  filter(DivisionNm %in% c("HUME", "RIVERINA", "EDEN-MONARO", "CANBERRA", "FENNER", "WHITLAM", "GILMORE", "CALARE")) %>%
-  select(DivisionNm, AusCitizen) %>%
-  mutate(
-    `Estimated Population Allocated to Purple Region` = c(21, 548, 16358, 474, 86, 145427, 39117, 92),
-    AusCitizen = round(AusCitizen, 2)
-  ) %>%
-  arrange(-`Estimated Population Allocated to Purple Region`) %>%
-  rename(`Source Zone (2016)` = DivisionNm)
-
-auscitizen_ex %>%
-  kable()
-
-weighted.mean(x = auscitizen_ex$AusCitizen, w = auscitizen_ex$`Estimated Population Allocated to Purple Region`)
+```{r hume2, dependson='hume1'}
+hume %>%
+  select(DivisionNm, AusCitizen, Pst) %>%
+  kable(longtable=FALSE, booktabs=TRUE, digits=2,
+        format='latex',escape=FALSE,
+        col.names=c(
+          "Source zone (2016)",
+          "AusCitizen (\\%): $D_s$",
+          "Population allocated to purple region: $\\hat{P}_{s,t}$")) %>%
+  kableExtra::kable_styling(font_size=10)
 ```
 
-\footnotesize
+```{r wave, include=FALSE}
+wave2016 <- weighted.mean(x = hume$AusCitizen, w = hume$Pst)
+hume11 <- abs2011 %>%
+  filter(DivisionNm %in%
+           c("HUME", "RIVERINA", "EDEN-MONARO", "CANBERRA",
+             "FENNER", "WHITLAM", "GILMORE", "CALARE")) %>%
+  mutate(
+    Pst = c(21, 548, 16358, 474, 86, 145427), # Needs adjusting
+    Proportion = Pst/Population,
+    DivisionNm = tools::toTitleCase(tolower(DivisionNm))
+  ) %>%
+  select(DivisionNm, Proportion, Population, Pst, AusCitizen) %>%
+  arrange(desc(Proportion))
+wave2011 <- 91.00 #weighted.mean(x = hume11$AusCitizen, w = hume11$Pst)
+```
 
-|Source Zone (2016)   | AusCitizen (%): $D_s$| Estimated Population Allocated to Purple Region: $\hat{P}_{s,t}$|
-|--------------------------|-------------------|-----------------------------------------------:|
-|HUME            |              90.02|                                          145427|
-|RIVERINA        |              89.11|                                           39117|
-|EDEN-MONARO     |              88.00|                                           16358|
-|CANBERRA        |              85.48|                                             548|
-|FENNER          |              83.64|                                             474|
-|WHITLAM         |              89.52|                                              92|
-|GILMORE         |              89.03|                                              86|
-|CALARE          |              87.56|                                              21|
-
-\normalsize
-
-A weighted average of $AusCitizen$, with the allocated population from each source zone as weights, yields $\hat{C}_{Hume,2016} = 89.65 \%$. Repeating this process using the 2011 Census yields $\hat{C}_{Hume,2011} = 91.00 \%$
-
-Finally, linear interpolation between 2011 and 2016 yields the 2013 estimate:
-\begin{eqnarray*}
-\hat{C}_{Hume,2013} & = &\frac{3}{5} \cdot \hat{C}_{Hume,2011} + \frac{2}{5} \cdot \hat{C}_{Hume,2016} \\
-& = & \frac{3}{5} \cdot 91.00 \% + \frac{2}{5} \cdot 89.65 \% \\
-& = & 90.46 \%
-\end{eqnarray*}
-
+A weighted average of *AusCitizen*, with the allocated population from each source zone as weights, yields $\hat{C}_{\text{Hume},2016} = `r sprintf("%4.2f",wave2016)`\%$. Repeating this process using the 2011 Census yields $\hat{C}_{\text{Hume},2011} = `r sprintf("%4.2f",wave2011)`\%$. Finally, linear interpolation between 2011 and 2016 yields the 2013 estimate:
+$$
+  \hat{C}_{\text{Hume},2013}
+    = \frac{3}{5} \hat{C}_{\text{Hume},2011} + \frac{2}{5} \hat{C}_{\text{Hume},2016}
+    % = \frac{3}{5} \cdot 91.00 \% + \frac{2}{5} \cdot 89.65 \% \\
+    =  90.46\%.
+$$
 This is done for each of the 65 socio-demographic variables, and is repeated for each of the 149 remaining target zones corresponding with 2013 electorates.
 
 # Modelling {#modelling}
@@ -524,24 +530,6 @@ For each cross-section, let the response $\boldsymbol y$ be the vector two-party
 
 The spatial error model [@Anselin88] is chosen because captures spatial heterogeneity by incorporating a spatially structured random effect vector [@LeSage2009]. In this context, the random effect can be thought of as capturing the unobserved political climate in each electorate, where this climate is correlated with the climate in neighbouring electorates, under the assumption that the climate is independent of electoral socio-demographics.
 
-Spatial weights are calculated in accordance with the assumption that an electorate is equally correlated with any electorate that shares a part of its boundary. Let $\rho$ be spatial autoregressive coefficient, $\boldsymbol v$ be a spherical error term, ${\boldsymbol W}$ be a matrix of spatial weights (containing information about the neighbouring regions), $\boldsymbol X$ be a matrix of socio-demographic covariates, $\boldsymbol \beta$ be a vector of regression coefficients and $\boldsymbol a$ be a spatially structured random effect vector.
-
-$${\boldsymbol y} = {\boldsymbol X} {\boldsymbol \beta} + {\boldsymbol a},$$
-and
-
-$${\boldsymbol a} = \rho {\boldsymbol W} {\boldsymbol a} + {\boldsymbol v},$$
-where
-
-$${\boldsymbol v} \sim N({\boldsymbol 0}, \sigma^2 {\boldsymbol I_n}),$$.
-
-and hence
-
-$${\boldsymbol y} = {\boldsymbol X} {\boldsymbol \beta} + ({\boldsymbol I}_n-\rho {\boldsymbol W})^{-1}{\boldsymbol v}.$$
-
-Estimation of the above spatial error model is undertaken using feasible generalized least squares.
-
-Table 3 details the estimated model coefficients and their estimated standard errors, for each of the six elections. An interpretation of these estimated values is provided in the next section.
-
 ```{r printmodels, eval = FALSE}
 # Add rho and GLS residual standard error
 stargazer::stargazer(glsmod01, glsmod04, glsmod07, glsmod10, glsmod13, glsmod16,
@@ -557,7 +545,7 @@ stargazer::stargazer(glsmod01, glsmod04, glsmod07, glsmod10, glsmod13, glsmod16,
 )
 ```
 
-\begin{table}[!htbp] \centering
+\begin{table}[!p] \centering
   \caption{Estimated spatial error model parameters (standard errors) for each of the six election years.}
   \label{}
 \scriptsize
@@ -670,7 +658,25 @@ Residual Standard Error (GLS) & 4.69 & 5.04 & 4.79 & 5.63 & 5.18 & 4.88 \\
 \end{tabular}
 \end{table}
 
-\newpage
+Spatial weights are calculated in accordance with the assumption that an electorate is equally correlated with any electorate that shares a part of its boundary. Let $\rho$ be spatial autoregressive coefficient, $\boldsymbol v$ be a spherical error term, $\bm{W}$ be a matrix of spatial weights (containing information about the neighbouring regions), $\boldsymbol X$ be a matrix of socio-demographic covariates, $\boldsymbol \beta$ be a vector of regression coefficients and $\boldsymbol a$ be a spatially structured random effect vector.
+$$
+  \bm{y} = \bm{X} \bm{\beta} + \bm{a},
+$$
+and
+$$
+  \bm{a} = \rho \bm{W} \bm{a} + \bm{v},
+$$
+where
+$$
+  \bm{v} \sim N(\bm{0}, \sigma^2 \bm{I_n}),
+$$.
+and hence
+$$
+  \bm{y} = \bm{X} \bm{\beta} + (\bm{I}_n-\rho \bm{W})^{-1}\bm{v}.
+$$
+Estimation of the above spatial error model is undertaken using feasible generalized least squares.
+
+Table 3 details the estimated model coefficients and their estimated standard errors, for each of the six elections. An interpretation of these estimated values is provided in the next section.
 
 # Results
 
