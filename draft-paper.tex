@@ -406,48 +406,25 @@ There are many source zones from the 2016 Census that intersect with this purple
 \centering\begingroup\fontsize{10}{12}\selectfont
 
 \resizebox{\linewidth}{!}{
-\begin{tabular}{lrrr}
+\begin{tabular}{lrrrr}
 \toprule
-Source zone (2016) & Proportion & Source zone population & Population allocated to purple region: $\hat{P}_{s,t}$\\
+Source zone (2016) & Proportion & Source zone population & Population allocated to purple region: $\hat{P}_{s,t}$ & AusCitizen (\%): $D_s$\\
 \midrule
-Hume & 0.9654 & 150643 & 145427\\
-Riverina & 0.2511 & 155793 & 39117\\
-Eden-Monaro & 0.1109 & 147532 & 16358\\
-Canberra & 0.0028 & 196037 & 548\\
-Fenner & 0.0023 & 202955 & 474\\
+Hume & 0.9654 & 150643 & 145427 & 90.0168\\
+Riverina & 0.2511 & 155793 & 39117 & 89.1144\\
+Eden-Monaro & 0.1109 & 147532 & 16358 & 87.9999\\
+Canberra & 0.0028 & 196037 & 548 & 85.4793\\
+Fenner & 0.0023 & 202955 & 474 & 83.6432\\
 \addlinespace
-Whitlam & 0.0006 & 152280 & 92\\
-Gilmore & 0.0006 & 150436 & 86\\
-Calare & 0.0001 & 161298 & 21\\
+Whitlam & 0.0006 & 152280 & 92 & 89.5173\\
+Gilmore & 0.0006 & 150436 & 86 & 89.0266\\
+Calare & 0.0001 & 161298 & 21 & 87.5603\\
 \bottomrule
 \end{tabular}}
 \endgroup{}
 \end{table}
 
-Now consider the socio-demographic variable \emph{AusCitizen}, the proportion of people in the region who are Australian citizens.
-
-\begin{table}[H]
-\centering\begingroup\fontsize{10}{12}\selectfont
-
-\begin{tabular}{lrr}
-\toprule
-Source zone (2016) & AusCitizen (\%): $D_s$ & Population allocated to purple region: $\hat{P}_{s,t}$\\
-\midrule
-Hume & 90.02 & 145427\\
-Riverina & 89.11 & 39117\\
-Eden-Monaro & 88.00 & 16358\\
-Canberra & 85.48 & 548\\
-Fenner & 83.64 & 474\\
-\addlinespace
-Whitlam & 89.52 & 92\\
-Gilmore & 89.03 & 86\\
-Calare & 87.56 & 21\\
-\bottomrule
-\end{tabular}
-\endgroup{}
-\end{table}
-
-A weighted average of \emph{AusCitizen}, with the allocated population from each source zone as weights, yields \(\hat{C}_{\text{Hume},2016} = 89.65\%\). Repeating this process using the 2011 Census yields \(\hat{C}_{\text{Hume},2011} = 91.00\%\). Finally, linear interpolation between 2011 and 2016 yields the 2013 estimate:
+Now consider the socio-demographic variable \emph{AusCitizen}, the proportion of people in the region who are Australian citizens. A weighted average of \emph{AusCitizen}, with the allocated population from each source zone as weights, yields \(\hat{C}_{\text{Hume},2016} = 89.65\%\). Repeating this process using the 2011 Census yields \(\hat{C}_{\text{Hume},2011} = 91.00\%\). Finally, linear interpolation between 2011 and 2016 yields the 2013 estimate:
 \[
   \hat{C}_{\text{Hume},2013}
     = \frac{3}{5} \hat{C}_{\text{Hume},2011} + \frac{2}{5} \hat{C}_{\text{Hume},2016}
@@ -459,7 +436,7 @@ This is done for each of the 65 socio-demographic variables, and is repeated for
 \hypertarget{modelling}{%
 \section{Modelling}\label{modelling}}
 
-Electoral socio-demographic variables are now available for each of the six elections and are joined with their corresponding two-party preferred votes. Before choosing an appropriate model, two issues with the socio-demographic variables are addressed. Firstly, variable scales change over the years, making it important to standardize variables. Secondly, many variables represent similar information and where appropriate, should be combined in some way. Principal component analysis is used to identify variables covary, from which intuitive groupings are selected to be combined into a single variable. This also reduces the dimension of the data. After these steps, a model specification is chosen.
+Following this process, electoral socio-demographic variables are available for each of the six elections and can be joined with their corresponding two-party preferred votes. Before choosing an appropriate model, two issues with the socio-demographic variables need to be addressed. First, variable scales change over the years, making it important to standardize variables. Second, many variables represent similar information and where appropriate, should be combined in some way. Principal component analysis is used to identify variables covary, from which intuitive groupings are selected to be combined into a single variable. This also reduces the dimension of the data. After these steps, a model specification is chosen.
 
 \hypertarget{standardizing-variables}{%
 \subsection{Standardizing variables}\label{standardizing-variables}}
@@ -485,6 +462,88 @@ An identical model specification is used for each of the six elections, with eac
 For each cross-section, let the response \(\boldsymbol y\) be the vector two-party preferred vote in favour of the Liberal party, with \(y_i = 70\) representing a 70\% preference for Liberal, 30\% for Labor, in electorate \(i\). Although \(y_i\) lies in the interval \((0,100)\), observed values are never close to 0 or 100 (minimum \(24.05 \%\) and maximum \(74.90 \%\)), so there is no need to formally impose the constraint of \(y_i \in [0,100]\). Furthermore, the responses are found to be spatially correlated in each election (Moran's I test, \(p \le 7\cdot10^{-15}\)). This not surprising as electorates are aggregate spatial units, and hence the spatial structure of the data must modelled appropriately.
 
 The spatial error model \autocite{Anselin88} is chosen because captures spatial heterogeneity by incorporating a spatially structured random effect vector \autocite{LeSage2009}. In this context, the random effect can be thought of as capturing the unobserved political climate in each electorate, where this climate is correlated with the climate in neighbouring electorates, under the assumption that the climate is independent of electoral socio-demographics.
+
+\begin{table}[!htbp] \centering 
+  \caption{Estimated spatial error model parameters (standard errors) for each of the six election years.} 
+  \label{} 
+\scriptsize 
+\begin{tabular}{@{\extracolsep{1pt}}lcccccc} 
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+ & \multicolumn{6}{c}{\textit{Dependent variable:}} \\ 
+\cline{2-7} 
+\\[-1.8ex] & \multicolumn{6}{c}{LNP\_Percent} \\ 
+ & 2001 & 2004 & 2007 & 2010 & 2013 & 2016 \\ 
+\hline \\[-1.8ex] 
+ AusCitizen & $-$3.13 & $-$2.64 & $-$2.53 & $-$0.08 & $-$3.40 & $-$1.80 \\ 
+  & (2.26) & (2.43) & (2.34) & (2.79) & (2.76) & (2.71) \\ 
+  BornAsia & 2.22 & $-$0.95 & $-$1.60 & $-$6.83$^{**}$ & $-$3.03 & $-$0.55 \\ 
+  & (2.18) & (2.44) & (2.19) & (2.73) & (2.71) & (2.17) \\ 
+  Born\_MidEast & $-$1.15 & $-$1.59 & $-$2.01$^{*}$ & $-$2.03 & $-$0.92 & $-$1.44 \\ 
+  & (1.07) & (1.20) & (1.11) & (1.27) & (1.24) & (1.13) \\ 
+  BornSEEuro & $-$3.21$^{**}$ & $-$4.24$^{***}$ & $-$3.61$^{***}$ & $-$4.14$^{***}$ & $-$3.69$^{***}$ & $-$2.72$^{***}$ \\ 
+  & (1.42) & (1.46) & (1.02) & (1.19) & (1.07) & (0.97) \\ 
+  Born\_UK & 0.25 & $-$0.07 & 0.34 & 0.56 & $-$0.09 & $-$1.32 \\ 
+  & (1.00) & (0.98) & (0.90) & (1.07) & (1.04) & (1.04) \\ 
+  BornElsewhere & $-$5.04 & $-$4.91 & $-$4.13 & 2.35 & $-$5.23 & $-$4.14 \\ 
+  & (3.30) & (3.68) & (3.38) & (4.23) & (4.15) & (3.97) \\ 
+  Buddhism & $-$0.49 & $-$0.17 & $-$1.37 & $-$0.83 & $-$0.12 & $-$1.60 \\ 
+  & (1.39) & (1.61) & (1.61) & (1.80) & (1.68) & (1.56) \\ 
+  Christianity & $-$2.48 & $-$1.23 & 0.38 & 0.50 & 2.41 & 1.68 \\ 
+  & (1.73) & (1.85) & (1.83) & (1.99) & (1.85) & (1.78) \\ 
+  CurrentlyStudying & $-$2.19$^{**}$ & $-$0.13 & 2.06$^{*}$ & 2.12$^{*}$ & 1.15 & $-$0.16 \\ 
+  & (0.99) & (1.13) & (1.17) & (1.25) & (1.26) & (1.18) \\ 
+  DeFacto & $-$6.44$^{***}$ & $-$5.37$^{**}$ & $-$6.43$^{***}$ & $-$8.07$^{***}$ & $-$6.56$^{**}$ & $-$8.53$^{***}$ \\ 
+  & (1.87) & (2.48) & (2.31) & (3.06) & (3.11) & (2.83) \\ 
+  DiffAddress & 3.88$^{***}$ & 5.06$^{***}$ & 4.22$^{***}$ & 5.57$^{***}$ & 3.53$^{*}$ & 5.67$^{***}$ \\ 
+  & (0.94) & (1.12) & (0.99) & (1.76) & (1.91) & (1.60) \\ 
+  Distributive & 1.27 & 2.01$^{*}$ & 1.36 & 1.57 & 2.10$^{*}$ & 1.20 \\ 
+  & (1.12) & (1.21) & (1.13) & (1.34) & (1.27) & (1.21) \\ 
+  Education & 1.08 & 0.52 & $-$5.52$^{*}$ & $-$4.08 & $-$4.44 & $-$7.07$^{**}$ \\ 
+  & (2.38) & (3.12) & (3.27) & (3.95) & (3.78) & (3.55) \\ 
+  Extractive & 4.83$^{***}$ & 5.45$^{***}$ & 5.37$^{***}$ & 7.31$^{***}$ & 6.71$^{***}$ & 7.43$^{***}$ \\ 
+  & (1.48) & (1.42) & (1.36) & (1.56) & (1.47) & (1.39) \\ 
+  FamHouseSize & $-$0.16 & 0.87 & $-$2.40 & $-$2.53 & $-$3.26 & $-$2.91 \\ 
+  & (2.19) & (2.72) & (2.69) & (3.25) & (3.28) & (2.90) \\ 
+  Incomes & 4.36$^{**}$ & 5.03$^{*}$ & 9.45$^{***}$ & 7.09$^{**}$ & 7.97$^{***}$ & 12.20$^{***}$ \\ 
+  & (1.77) & (2.66) & (2.75) & (3.25) & (2.92) & (2.75) \\ 
+  Indigenous & 2.91$^{*}$ & 1.97 & 2.48 & 2.84 & 0.67 & $-$0.05 \\ 
+  & (1.68) & (1.95) & (1.75) & (2.16) & (2.14) & (2.00) \\ 
+  Islam & $-$0.92 & $-$0.97 & $-$0.54 & $-$2.50 & $-$0.82 & $-$0.95 \\ 
+  & (1.22) & (1.36) & (1.27) & (1.52) & (1.42) & (1.34) \\ 
+  Judaism & 1.88$^{*}$ & 1.78 & 2.66$^{***}$ & 1.97$^{*}$ & 2.74$^{**}$ & 1.65$^{*}$ \\ 
+  & (1.05) & (1.13) & (1.01) & (1.15) & (1.10) & (1.00) \\ 
+  ManagerAdmin & 2.06$^{***}$ & 3.32$^{***}$ & 6.00$^{***}$ & 5.47$^{***}$ & 5.04$^{***}$ & 5.78$^{***}$ \\ 
+  & (0.71) & (0.93) & (0.90) & (1.08) & (1.03) & (1.06) \\ 
+  Married & 0.44 & 0.11 & $-$1.22 & $-$0.22 & 0.91 & $-$2.34 \\ 
+  & (2.31) & (2.96) & (2.83) & (3.15) & (3.03) & (2.81) \\ 
+  MedianAge & 2.32$^{*}$ & 4.96$^{***}$ & 3.66$^{**}$ & 4.00$^{*}$ & 2.30 & 2.87 \\ 
+  & (1.32) & (1.65) & (1.81) & (2.26) & (2.08) & (1.79) \\ 
+  NoReligion & $-$1.57 & $-$0.92 & 0.56 & $-$0.30 & 1.02 & 1.31 \\ 
+  & (1.59) & (1.71) & (1.73) & (1.92) & (1.94) & (2.04) \\ 
+  OneParentHouse & $-$1.73 & $-$0.45 & $-$0.75 & $-$1.46 & $-$0.77 & $-$0.74 \\ 
+  & (1.36) & (1.59) & (1.49) & (1.69) & (1.57) & (1.47) \\ 
+  OtherLanguage & $-$0.44 & 5.92 & 9.98$^{**}$ & 11.24$^{**}$ & 9.00$^{*}$ & 9.84$^{**}$ \\ 
+  & (3.22) & (4.16) & (3.91) & (4.76) & (4.66) & (4.44) \\ 
+  PropertyOwned & $-$0.46 & $-$0.53 & 0.67 & $-$0.94 & $-$0.48 & 1.41 \\ 
+  & (1.37) & (1.50) & (1.43) & (1.76) & (1.67) & (1.50) \\ 
+  RentLoanPrice & $-$1.57 & $-$3.32$^{*}$ & $-$4.01$^{**}$ & $-$0.97 & $-$0.70 & $-$0.89 \\ 
+  & (1.49) & (1.76) & (1.67) & (2.07) & (2.07) & (2.16) \\ 
+  SocialServ & 2.51$^{*}$ & 1.65 & 2.47$^{*}$ & 2.53$^{*}$ & 2.35$^{*}$ & 4.45$^{***}$ \\ 
+  & (1.33) & (1.41) & (1.29) & (1.47) & (1.32) & (1.19) \\ 
+  Transformative & 3.24$^{**}$ & 4.73$^{***}$ & 4.84$^{***}$ & 4.46$^{**}$ & 3.56$^{**}$ & 4.58$^{***}$ \\ 
+  & (1.55) & (1.78) & (1.74) & (1.98) & (1.78) & (1.53) \\ 
+  Unemployment & $-$2.45$^{*}$ & $-$3.07$^{*}$ & 0.29 & 0.08 & 1.67 & 2.79$^{**}$ \\ 
+  & (1.40) & (1.63) & (1.51) & (1.76) & (1.51) & (1.37) \\ 
+  Constant & 50.81$^{***}$ & 52.60$^{***}$ & 47.31$^{***}$ & 49.93$^{***}$ & 53.51$^{***}$ & 50.49$^{***}$ \\ 
+  & (0.71) & (0.58) & (0.52) & (0.57) & (0.58) & (0.80) \\ 
+ \hline \\[-1.8ex] 
+Observations & 150 & 150 & 150 & 150 & 150 & 150 \\ 
+\hline 
+\hline \\[-1.8ex] 
+\textit{Note:}  & \multicolumn{6}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
+\end{tabular} 
+\end{table}
 
 \begin{table}[!p] \centering
   \caption{Estimated spatial error model parameters (standard errors) for each of the six election years.}
