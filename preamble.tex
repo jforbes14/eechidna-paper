@@ -1,10 +1,9 @@
 %% Any special functions or other packages can be loaded here.
-\usepackage{longtable}
 \usepackage{float}
 \let\origfigure\figure
 \let\endorigfigure\endfigure
 \renewenvironment{figure}[1][2] {
-    \expandafter\origfigure\expandafter[!htbp]
+    \expandafter\origfigure\expandafter[htbp]
 } {
     \endorigfigure
 }
