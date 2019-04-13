@@ -226,7 +226,7 @@ my_visreg <- function(my_model, sp_weights, varname,
 }
 
 # Grid visreg
-grid_visreg <- function(varname, plot = TRUE, myscale = "free", top = FALSE) {
+grid_visreg <- function(varname, plot = TRUE, myscale = "free_y", top = FALSE) {
 
     p16 <- my_visreg(glsmod16, sp_weights_16, varname = varname, plot = FALSE, year = "2016")
     p13 <- my_visreg(glsmod13, sp_weights_13, varname = varname, plot = FALSE, year = "2013")
@@ -260,7 +260,7 @@ grid_visreg <- function(varname, plot = TRUE, myscale = "free", top = FALSE) {
         geom_line(aes(x = variable, y = fitted), col = "blue", size = 1) +
         theme_bw() +
         labs(x = "", y = "") +
-        facet_grid(varname ~ year, scales = "free") +
+        facet_grid(varname ~ year, scales = "free_y") +
         theme(plot.margin=unit(c(b = 0.05, l = 0, t = -0.2, r = 0),"cm"))
 
       if (top == FALSE) {
