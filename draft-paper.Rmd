@@ -528,7 +528,8 @@ The spatial error model [@Anselin88] is chosen because it captures spatial heter
 
 ```{r printmodels, warning=FALSE, message=FALSE, include=FALSE}
 # Add rho and GLS residual standard error
-  regtable <- stargazer::stargazer(glsmod01, glsmod04, glsmod07, glsmod10, glsmod13, glsmod16,
+regtable <- stargazer::stargazer(
+  glsmod01, glsmod04, glsmod07, glsmod10, glsmod13, glsmod16,
   header = FALSE,
   column.sep.width = "1pt",
   no.space=TRUE,
@@ -577,6 +578,13 @@ sigmaline <- paste("Residual Standard Error (GLS)",
                    sep="", collapse=""),
              "\\\\", sep="", collapse="")
 regtable <- c(regtable[1:77],sigmaline, regtable[78:length(regtable)])
+# Allow alignment on decimal point
+regtable[6] <- "\\begin{tabular}{@{\\extracolsep{1pt}}lrrrrrr}" 
+regtable[12:75] <- gsub(")","\\\\rlap{)}",regtable[12:75])
+regtable[12:75] <- gsub("$^{*}$","\\rlap{$^{*}$}", regtable[12:75], fixed=TRUE)
+regtable[12:75] <- gsub("$^{**}$","\\rlap{$^{**}$}", regtable[12:75], fixed=TRUE)
+regtable[12:75] <- gsub("$^{***}$","\\rlap{$^{***}$}", regtable[12:75], fixed=TRUE)
+regtable[5] <- "\\scriptsize\\tabcolsep=0.35cm"
 ```
 
 ```{r printmodels2, results='asis', dependson='printmodels'}
