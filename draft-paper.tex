@@ -306,10 +306,6 @@ Monash University\newline Melbourne, Australia
   {0pt}                          % How much space exists between the prefix and the title
   {}    % How the section is represented
 
-% Align tabular column on decimal point
-\usepackage{dcolumn}
-\newcolumntype{d}[1]{D{.}{\cdot}{#1}}
-
 
 \begin{document}
 \maketitle
@@ -421,10 +417,12 @@ The corresponding source zones from the 2016 Census are shown in Figure \ref{fig
 
 There are many source zones from the 2016 Census that intersect with this purple region, including the divisions of Riverina, Eden-Monaro and Hume, along with smaller intersecting areas with Fenner, Calare, Gilmore and Whitlam. The proportion of each source zone that overlaps with the purple region is calculated, and used to obtain the intersecting populations \(\hat{P}_{s,t}\).
 
-\begin{table}[H]
-\centering\begingroup\fontsize{10}{12}\selectfont
+\begin{table}[t]
 
+\caption{\label{tab:hume1}Population from each intersecting Census source zone (2016) that is allocated to the target zone (purple region - Hume electoral boundary in 2013), and the corresponding proportion of Australian citizens in each of these source zones.}
+\centering
 \resizebox{\linewidth}{!}{
+\fontsize{10}{12}\selectfont
 \begin{tabular}{lrrrr}
 \toprule
 Source zone (2016) & Proportion & Source zone population & Population allocated to purple region: $\hat{P}_{s,t}$ & AusCitizen (\%): $D_s$\\
@@ -440,7 +438,6 @@ Gilmore & 0.0006 & 150436 & 86 & 89.0266\\
 Calare & 0.0001 & 161298 & 21 & 87.5603\\
 \bottomrule
 \end{tabular}}
-\endgroup{}
 \end{table}
 
 Now consider the socio-demographic variable \emph{AusCitizen}, the proportion of people in the region who are Australian citizens. A weighted average of \emph{AusCitizen}, with the allocated population from each source zone as weights, yields \(\hat{C}_{\text{Hume},2016} = 89.65\%\). Repeating this process using the 2011 Census yields \(\hat{C}_{\text{Hume},2011} = 91.00\%\). Finally, linear interpolation between 2011 and 2016 yields the 2013 estimate:
@@ -559,9 +556,9 @@ Since all socio-demographics have been standardized to have a mean of zero and a
 \caption{Partial residual plots by election year for a selection of predictors. Linear model with 95\% confidence bands is overlaid. Several predictors have a negative relationship: with larger values indicating the electorate more likely preferences Labor. Education exhibits a strong temporal change.}\label{fig:partresplot2}
 \end{figure}
 
-To investigate the socio-demographics that have a strong effect on the two-party preferred vote, partial residual plots are used and shown in Figures \ref{fig:partresplot1} and \ref{fig:partresplot2}. The partial residuals are the residuals from the fitted model with the estimated effect an individual variable added. These show the direction, size and significance of an estimated effect --- the slope of the prediction line matches the estimated coefficient, and the shaded region represents a 95\% confidence band. If a horizontal line can be drawn through the confidence band, then the effect is insignificant. The estimated intercept is also added to the partial residuals for interpretability. Plots for each election are faceted to compare the effects over time in Figures \ref{fig:partresplot1} and \ref{fig:partresplot2}.
+To investigate the socio-demographics that have a strong effect on the two-party preferred vote, partial residual plots are used and shown in Figures \ref{fig:partresplot1} and \ref{fig:partresplot2}. The partial residuals are the residuals from the fitted model with the estimated effect an individual variable added. These show the direction, size and significance of an estimated effect --- the slope of the prediction line matches the estimated coefficient, and the shaded region represents a 95\% confidence band. The confidence bands around each prediction line are constructed in the usual way, as described in \textcite{visreg}. If a horizontal line can be drawn through the confidence band, then the effect is insignificant. The estimated intercept is also added to the partial residuals for interpretability. Plots for each election are faceted to compare the effects over time in Figures \ref{fig:partresplot1} and \ref{fig:partresplot2}. Only socio-demographics that have a significant effect in at least one election are displayed in Figures \ref{fig:partresplot1} and \ref{fig:partresplot2}.
 
-It is important here to note the ecological fallacy: insights are being drawn at the electorate level, and cannot be inferred for another disaggregate level (e.g., individual voters).
+It is important here to note the ecological fallacy: insights are being drawn at the electorate level, and cannot be inferred for another disaggregate level (e.g.~individual voters).
 
 \hypertarget{income-and-unemployment}{%
 \subsubsection{Income and unemployment}\label{income-and-unemployment}}

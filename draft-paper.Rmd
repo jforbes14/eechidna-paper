@@ -190,6 +190,7 @@ model_df <- small_df %>%
 
 ```{r spatialweights, eval = FALSE}
 # Get spatial weights
+# This is not run, as weights are pulled from github, but this can be run to get them from scratch.
 sF_16 <- sF_download(2016)
 sF_13 <- sF_download(2013)
 sF_10 <- sF_download(2010)
@@ -206,7 +207,7 @@ sp_weights_01 <- sp_weights_matrix(sF_01)
 ```
 
 ```{r FGLS, include = FALSE}
-# Instead of running spatial weights
+# Instead of running spatial weights, load from github
 load("data/sp_weights_01.rda")
 load("data/sp_weights_04.rda")
 load("data/sp_weights_07.rda")
@@ -462,7 +463,8 @@ hume %>%
           "Proportion",
           "Source zone population",
           "Population allocated to purple region: $\\hat{P}_{s,t}$",
-          "AusCitizen (\\%): $D_s$")) %>%
+          "AusCitizen (\\%): $D_s$"),
+    caption = "Population from each intersecting Census source zone (2016) that is allocated to the target zone (purple region - Hume electoral boundary in 2013), and the corresponding proportion of Australian citizens in each of these source zones.") %>%
   kableExtra::kable_styling(font_size=10, latex_options='scale_down')
 ```
 
@@ -673,19 +675,21 @@ Since all socio-demographics have been standardized to have a mean of zero and a
 ## Influential socio-demographics
 
 ```{r prepplot, include = FALSE}
-p1 <- grid_visreg("Incomes", top = TRUE)
-p2 <- grid_visreg("Unemployment")
-p3 <- grid_visreg("Extractive")
+p1 <- grid_visreg("Extractive", top = TRUE)
+p2 <- grid_visreg("DiffAddress")
+p3 <- grid_visreg("ManagerAdmin")
 p4 <- grid_visreg("Transformative")
-p5 <- grid_visreg("ManagerAdmin")
-p6 <- grid_visreg("DiffAddress")
-p7 <- grid_visreg("DeFacto", top = TRUE)
-p8 <- grid_visreg("MedianAge")
-p9 <- grid_visreg("Education")
-p10 <- grid_visreg("OtherLanguage")
-p11 <- grid_visreg("BornSEEuro")
-p12 <- grid_visreg("BornAsia")
-p13 <- grid_visreg("Judaism")
+p5 <- grid_visreg("Incomes")
+p6 <- grid_visreg("Unemployment")
+
+p7 <- grid_visreg("MedianAge", top = TRUE)
+p8 <- grid_visreg("Judaism")
+p9 <- grid_visreg("OtherLanguage")
+temp <- grid_visreg("OtherLanguage")
+p10 <- grid_visreg("BornAsia")
+p11 <- grid_visreg("Education")
+p12 <- grid_visreg("BornSEEuro")
+p13 <- grid_visreg("DeFacto")
 ```
 
 
@@ -694,12 +698,12 @@ p13 <- grid_visreg("Judaism")
 ```
 
 ```{r partresplot2, fig.cap = "Partial residual plots by election year for a selection of predictors. Linear model with 95\\% confidence bands is overlaid. Several predictors have a negative relationship: with larger values indicating the electorate more likely preferences Labor. Education exhibits a strong temporal change.", fig.height = 8.5,  fig.width = 6, warning = FALSE, fig.pos = 'h'}
-(p7 / p8 / (p9 + ylab("Two-party preferred vote (%)                     ")) / p10 / p11 / p12)
+(p7 / p8 / (p9 + ylab("Two-party preferred vote (%)                     ")) / p10 / p11 / p12 / p13)
 ```
 
-To investigate the socio-demographics that have a strong effect on the two-party preferred vote, partial residual plots are used and shown in Figures \@ref(fig:partresplot1) and \@ref(fig:partresplot2). The partial residuals are the residuals from the fitted model with the estimated effect an individual variable added. These show the direction, size and significance of an estimated effect --- the slope of the prediction line matches the estimated coefficient, and the shaded region represents a 95% confidence band. If a horizontal line can be drawn through the confidence band, then the effect is insignificant. The estimated intercept is also added to the partial residuals for interpretability. Plots for each election are faceted to compare the effects over time in Figures \@ref(fig:partresplot1) and \@ref(fig:partresplot2).
+To investigate the socio-demographics that have a strong effect on the two-party preferred vote, partial residual plots are used and shown in Figures \@ref(fig:partresplot1) and \@ref(fig:partresplot2). The partial residuals are the residuals from the fitted model with the estimated effect an individual variable added. These show the direction, size and significance of an estimated effect --- the slope of the prediction line matches the estimated coefficient, and the shaded region represents a 95% confidence band. The confidence bands around each prediction line are constructed in the usual way, as described in @visreg. If a horizontal line can be drawn through the confidence band, then the effect is insignificant. The estimated intercept is also added to the partial residuals for interpretability. Plots for each election are faceted to compare the effects over time in Figures \@ref(fig:partresplot1) and \@ref(fig:partresplot2). Only socio-demographics that have a significant effect in at least one election are displayed in Figures \@ref(fig:partresplot1) and \@ref(fig:partresplot2).
 
-It is important here to note the ecological fallacy: insights are being drawn at the electorate level, and cannot be inferred for another disaggregate level (e.g., individual voters).
+It is important here to note the ecological fallacy: insights are being drawn at the electorate level, and cannot be inferred for another disaggregate level (e.g. individual voters).
 
 ### Income and unemployment
 
