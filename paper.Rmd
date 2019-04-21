@@ -10,6 +10,7 @@ biblio-style: anzsj
 output: 
   bookdown::pdf_document2:
     fig_caption: yes
+    citation_package: natbib
     keep_tex: yes
     number_sections: yes
     fig_height: 5
