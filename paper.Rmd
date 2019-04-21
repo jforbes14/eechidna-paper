@@ -7,7 +7,6 @@ classoption: times, doublespace
 fontfamily: times
 bibliography: references.bib
 biblio-style: anzsj
-geometry: "left=5cm,top=5cm"
 output: 
   bookdown::pdf_document2:
     fig_caption: yes
