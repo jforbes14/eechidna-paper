@@ -526,13 +526,13 @@ The spatial error model [@Anselin88] is chosen because it captures spatial heter
 regtable <- stargazer::stargazer(
   glsmod01, glsmod04, glsmod07, glsmod10, glsmod13, glsmod16,
   header = FALSE,
-  column.sep.width = "1pt",
+  column.sep.width = "2pt",
   no.space=TRUE,
   model.numbers=FALSE,
   keep.stat = c("n","ser"),
   dep.var.caption="",
-  dep.var.labels="\\vspace{-0.5cm}",
-  title = "Estimated spatial error model parameters (standard errors) for each of the six election years.",
+  dep.var.labels="\\vspace{-0.4cm}",
+  title = "Estimated spatial error model parameters (standard errors) for each of the six election years.\\vspace*{-0.4cm}",
   #dep.var.labels = "Two-party preferred vote in favor of the Liberal party",
   font.size = "scriptsize",
   digits = 2,
@@ -573,13 +573,18 @@ sigmaline <- paste("Residual Standard Error (GLS)",
                    sep="", collapse=""),
              "\\\\", sep="", collapse="")
 regtable <- c(regtable[1:77],sigmaline, regtable[78:length(regtable)])
+# Squeeze some more space
+regtable[2] <- "\\begin{table}[!htbp]\\vspace*{-0.4cm}\\centering "     
 # Allow alignment on decimal point
 regtable[6] <- "\\begin{tabular}{@{\\extracolsep{1pt}}lrrrrrr}" 
 regtable[12:75] <- gsub(")","\\\\rlap{)}",regtable[12:75])
 regtable[12:75] <- gsub("$^{*}$","\\rlap{$^{*}$}", regtable[12:75], fixed=TRUE)
 regtable[12:75] <- gsub("$^{**}$","\\rlap{$^{**}$}", regtable[12:75], fixed=TRUE)
 regtable[12:75] <- gsub("$^{***}$","\\rlap{$^{***}$}", regtable[12:75], fixed=TRUE)
+# Column spacing
 regtable[5] <- "\\scriptsize\\tabcolsep=0.35cm"
+# Remove "Note"
+regtable[81] <- "& \\multicolumn{6}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\\\"
 ```
 
 ```{r printmodels2, results='asis', dependson='printmodels'}
