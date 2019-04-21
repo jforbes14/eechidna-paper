@@ -1,24 +1,21 @@
 ---
 title: "Spatial modelling of the two-party preferred vote in Australian federal elections: 2001--2016"
-author: "Jeremy Forbes*, Dianne Cook, Rob J Hyndman Department of Econometrics and Business Statistics, Monash University"
-wpnumber:
-jelcodes: C31, C33, D72
-blind: false
-cover: false
+author: Jeremy Forbes$^*$, Dianne Cook, Rob J Hyndman
 toc: false
 documentclass: anzsauth
+classoption: times, doublespace
+fontfamily: times
 bibliography: references.bib
 biblio-style: anzsj
-classoption: times,doublespace
-header-includes: \usepackage{float, bm}
 output: 
-  pdf_document:
-    latex_engine: xelatex
+  bookdown::pdf_document2:
     fig_caption: yes
     keep_tex: yes
     number_sections: yes
     fig_height: 5
     fig_width: 8
+    includes:
+      in_header: anzjs_preamble.tex
 ---
 
 # Summary{-}
