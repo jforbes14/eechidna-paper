@@ -21,6 +21,7 @@
 \usepackage{microtype}
 \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
 }{}
+\usepackage[margin=1in]{geometry}
 \usepackage{hyperref}
 \hypersetup{unicode=true,
             pdftitle={Spatial modelling of the two-party preferred vote in Australian federal elections: 2001--2016},
@@ -123,6 +124,20 @@
 \posttitle{\end{center}\vspace{0.5cm}}
 \preauthor{\begin{center}\large}
 \postauthor{\end{center}\begin{center}\emph{Department of Econometrics \& Business Statistics, Monash University, Australia}\footnotetext{$^*$Corresponding author. Email: \texttt{jeremyforbes1995@gmail.com}}\end{center}}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{wrapfig}
+\usepackage{float}
+\usepackage{colortbl}
+\usepackage{pdflscape}
+\usepackage{tabu}
+\usepackage{threeparttable}
+\usepackage{threeparttablex}
+\usepackage[normalem]{ulem}
+\usepackage{makecell}
+\usepackage{xcolor}
 
 \begin{document}
 \maketitle
@@ -249,15 +264,15 @@ There are many source zones from the 2016 Census that intersect with this purple
 \toprule
 Source zone (2016) & Proportion & Source zone population & Population allocated to purple region: $\hat{P}_{s,t}$ & AusCitizen (\%): $D_s$\\
 \midrule
-Hume & 0.9654 & 150643 & 145427 & 90.0168\\
-Riverina & 0.2511 & 155793 & 39117 & 89.1144\\
-Eden-Monaro & 0.1109 & 147532 & 16358 & 87.9999\\
-Canberra & 0.0028 & 196037 & 548 & 85.4793\\
-Fenner & 0.0023 & 202955 & 474 & 83.6432\\
+Hume & 0.9654 & 150643 & 145427 & 90.0\\
+Riverina & 0.2511 & 155793 & 39117 & 89.1\\
+Eden-Monaro & 0.1109 & 147532 & 16358 & 88.0\\
+Canberra & 0.0028 & 196037 & 548 & 85.5\\
+Fenner & 0.0023 & 202955 & 474 & 83.6\\
 \addlinespace
-Whitlam & 0.0006 & 152280 & 92 & 89.5173\\
-Gilmore & 0.0006 & 150436 & 86 & 89.0266\\
-Calare & 0.0001 & 161298 & 21 & 87.5603\\
+Whitlam & 0.0006 & 152280 & 92 & 89.5\\
+Gilmore & 0.0006 & 150436 & 86 & 89.0\\
+Calare & 0.0001 & 161298 & 21 & 87.6\\
 \bottomrule
 \end{tabular}}
 \end{table}

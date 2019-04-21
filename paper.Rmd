@@ -449,7 +449,7 @@ hume <- abs2016 %>%
   arrange(desc(Proportion))
 
 hume %>%
-  kable(longtable=FALSE, booktabs=TRUE, digits=4,
+  kable(longtable=FALSE, booktabs=TRUE, digits=c(0,4,0,0,1),
         format='latex',escape=FALSE,
         col.names=c(
           "Source zone (2016)",
