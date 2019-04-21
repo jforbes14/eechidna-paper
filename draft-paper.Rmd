@@ -4,7 +4,7 @@ author:
 - familyname: Forbes
   othernames: Jeremy
   address: Monash University\newline Melbourne, Australia
-  email: jeremy.forbes@monash.edu
+  email: jeremyforbes1995@gmail.com
   correspondingauthor: true
 - familyname: Cook
   othernames: Dianne
