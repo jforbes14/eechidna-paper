@@ -1,9 +1,9 @@
 Jeremy Forbes
 Monash University
-ADDRESS Clayton
-Clayton, VIC, Australia 3187
+Wellington Rd
+Clayton, VIC, Australia 3800
 +61434115453
-jeremy.forbes@monash.edu
+jeremyforbes1995@gmail.com
 
 Dr. James Curran
 Editor-in-Chief
@@ -18,7 +18,7 @@ Please consider my original research article entitled "Spatial modelling of the 
 
 A handful of previous studies that analyze the relationship between aggregate socio-demographic characteristics and voter behaviour in Australian federal elections, although nothing more recent than 2007. These studies have been cited in our paper.
 
-In this paper, we model each of the six federal elections between 2001 and 2016 using a regression framework so that the temporal trends in socio-demographics can be observed over time. As in the existing literature, Census and election data is used. However, unlike the previous studies, we account for the inherent spatial and temporal misalignments between Census and election data. For each of the 2004, 2007, 2010 and 2013 elections, electoral socio-demographics are imputed using data from the Censuses both before and after the election. This is required as a Census does not occur in these election years. Furthermore, we model spatial strucutre of electorates in our regression models so that the political climate (an unobserved influence on two-party preference) in neighbouring electorates can effect an electorate's own voting behaviour. This effect is found to be positive in all elections, although only significant in 2001 and 2016. Over time, the impact of most socio-demographic characteristics do not vary, with industry of work, incomes, household mobility and de facto relationships having consistently strong effects, whilst education and unemployment are amongst those that have varying effects.
+In this paper, we model each of the six federal elections between 2001 and 2016 using a regression framework so that the temporal trends in socio-demographics can be observed over time. As in the existing literature, Census and election data is used. However, unlike the previous studies, we account for the inherent spatial and temporal misalignment between Census and election data. For each of the 2004, 2007, 2010 and 2013 elections, electoral socio-demographics are imputed using data from the Censuses both before and after the election. This is required as a Census does not occur in these election years. Furthermore, we model spatial structure of electorates in our regression models so that the political climate (an unobserved influence on two-party preference) in neighbouring electorates can effect an electorate's own voting behaviour. This effect is found to be positive in all elections, although only significant in 2001 and 2016. Over time, the impact of most socio-demographic characteristics do not vary, with industry of work, incomes, household mobility and de facto relationships having consistently strong effects, whilst education and unemployment are amongst those that have varying effects.
 
 We believe that this paper is appropriate for publication by the Australian and New Zealand Journal of Statistics because it applies statistical techniques to uncover insights in a topical problem, utilizes a method of adjusting for spatial and temporal differences between Census and election data, and also provides a resource for future research as all data featured in this study has been contributed to the `eechidna` `R` package (available on CRAN), so readers are able to access this data.
 
