@@ -436,7 +436,8 @@ ggplot(data = hume_area16) +
   scale_color_manual(values = c("grey50", NA)) +
   theme_map() +
   coord_equal() +
-  guides(alpha = FALSE, col = FALSE)
+  guides(alpha = FALSE, col = FALSE, 
+    fill = guide_legend(override.aes = list(col = c("grey50", NA), alpha = 0.4)))
 ```
 
 The corresponding source zones from the 2016 Census are shown in Figure \@ref(fig:hume16). As can be seen, the Hume boundary from the 2013 election (shaded purple) does not perfectly match any of the source zones.
@@ -778,7 +779,8 @@ all_resids %>%
   geom_boxplot() +
   geom_jitter(alpha = 0.5, shape = 1) +
   guides(col = FALSE, shape = FALSE, DivisionNm = FALSE) +
-  theme_bw()
+  theme_bw() +
+  labs(x = "State", y = "Residuals")
 ```
 
 ### Outlier electorates
