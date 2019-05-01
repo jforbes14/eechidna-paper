@@ -104,6 +104,9 @@ abs2001 <- eechidna::abs2001 %>%
     Buddhism = log(Buddhism)
   )
 
+# Change abs2016 to data frame to prevent error below
+abs2016 <- as.data.frame(abs2016)
+
 # Combine and standardize
 my_df <- bind_rows(
   left_join(eechidna::tpp01,
@@ -138,12 +141,12 @@ my_df <- bind_rows(
   ) %>% mutate(year = "2016")
 ) %>%
   mutate(year = factor(year)) %>%
-  dplyr::select(-c(
+  select(-c(
     starts_with("Age"), StateAb,
     LNP_Votes, ALP_Votes, ALP_Percent, TotalVotes, Swing,
     InternetUse, InternetAccess, EnglishOnly,
     Other_NonChrist, OtherChrist, Catholic, Anglican,
-    Volunteer, EmuneratedElsewhere, UniqueID
+    Volunteer, EmuneratedElsewhere, DivisionID
   ))
 
 # Create final df for modelling
@@ -757,15 +760,15 @@ all_resids <- data.frame(
   Residuals = c(glsmod16$actual_residuals, glsmod13$actual_residuals, glsmod10$actual_residuals, glsmod07$actual_residuals, glsmod04$actual_residuals, glsmod01$actual_residuals),
   gls_residuals = c(glsmod16$residuals, glsmod13$residuals, glsmod10$residuals, glsmod07$residuals, glsmod04$residuals, glsmod01$residuals),
   bind_rows(
-    glsmod16$my_data %>% left_join(tpp16 %>% dplyr::select(DivisionNm, UniqueID, StateAb), by = "DivisionNm"),
-    glsmod13$my_data %>% left_join(tpp13 %>% dplyr::select(DivisionNm, UniqueID, StateAb), by = "DivisionNm"),
-    glsmod10$my_data %>% left_join(tpp10 %>% dplyr::select(DivisionNm, UniqueID, StateAb), by = "DivisionNm"),
-    glsmod07$my_data %>% left_join(tpp07 %>% dplyr::select(DivisionNm, UniqueID, StateAb), by = "DivisionNm"),
-    glsmod04$my_data %>% left_join(tpp04 %>% dplyr::select(DivisionNm, UniqueID, StateAb), by = "DivisionNm"),
-    glsmod01$my_data %>% left_join(tpp01 %>% dplyr::select(DivisionNm, UniqueID, StateAb), by = "DivisionNm")
+    glsmod16$my_data %>% left_join(tpp16 %>% dplyr::select(DivisionNm, DivisionID, StateAb), by = "DivisionNm"),
+    glsmod13$my_data %>% left_join(tpp13 %>% dplyr::select(DivisionNm, DivisionID, StateAb), by = "DivisionNm"),
+    glsmod10$my_data %>% left_join(tpp10 %>% dplyr::select(DivisionNm, DivisionID, StateAb), by = "DivisionNm"),
+    glsmod07$my_data %>% left_join(tpp07 %>% dplyr::select(DivisionNm, DivisionID, StateAb), by = "DivisionNm"),
+    glsmod04$my_data %>% left_join(tpp04 %>% dplyr::select(DivisionNm, DivisionID, StateAb), by = "DivisionNm"),
+    glsmod01$my_data %>% left_join(tpp01 %>% dplyr::select(DivisionNm, StateAb), by = "DivisionNm")
   )
 )
-# %>% dplyr::select(Residuals, DivisionNm, UniqueID, StateAb, year, LNP_Percent, gls_residuals)
+# %>% dplyr::select(Residuals, DivisionNm, DivisionID, StateAb, year, LNP_Percent, gls_residuals)
 ```
 
 ### Residuals by state
@@ -799,12 +802,12 @@ cooksd_df <- data.frame(
   gls_residuals = c(glsmod16$residuals, glsmod13$residuals, glsmod10$residuals, glsmod07$residuals, glsmod04$residuals, glsmod01$residuals),
   cooksd = c(glsmod16$cooksd, glsmod13$cooksd, glsmod10$cooksd, glsmod07$cooksd, glsmod04$cooksd, glsmod01$cooksd),
   bind_rows(
-    glsmod16$my_data %>% left_join(tpp16 %>% dplyr::select(DivisionNm, UniqueID, StateAb), by = "DivisionNm"),
-    glsmod13$my_data %>% left_join(tpp13 %>% dplyr::select(DivisionNm, UniqueID, StateAb), by = "DivisionNm"),
-    glsmod10$my_data %>% left_join(tpp10 %>% dplyr::select(DivisionNm, UniqueID, StateAb), by = "DivisionNm"),
-    glsmod07$my_data %>% left_join(tpp07 %>% dplyr::select(DivisionNm, UniqueID, StateAb), by = "DivisionNm"),
-    glsmod04$my_data %>% left_join(tpp04 %>% dplyr::select(DivisionNm, UniqueID, StateAb), by = "DivisionNm"),
-    glsmod01$my_data %>% left_join(tpp01 %>% dplyr::select(DivisionNm, UniqueID, StateAb), by = "DivisionNm"))
+    glsmod16$my_data %>% left_join(tpp16 %>% dplyr::select(DivisionNm, DivisionID, StateAb), by = "DivisionNm"),
+    glsmod13$my_data %>% left_join(tpp13 %>% dplyr::select(DivisionNm, DivisionID, StateAb), by = "DivisionNm"),
+    glsmod10$my_data %>% left_join(tpp10 %>% dplyr::select(DivisionNm, DivisionID, StateAb), by = "DivisionNm"),
+    glsmod07$my_data %>% left_join(tpp07 %>% dplyr::select(DivisionNm, DivisionID, StateAb), by = "DivisionNm"),
+    glsmod04$my_data %>% left_join(tpp04 %>% dplyr::select(DivisionNm, DivisionID, StateAb), by = "DivisionNm"),
+    glsmod01$my_data %>% left_join(tpp01 %>% dplyr::select(DivisionNm, DivisionID, StateAb), by = "DivisionNm"))
 )
 ```
 

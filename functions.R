@@ -4,7 +4,8 @@ standardise_vars <- function(df) {
   num_cols <- sapply(df, class) == "numeric"
   df[, num_cols] <- lapply(df[, num_cols], scale)
   names(df) <- names(hold)
-  df$LNP_Percent <- hold$LNP_Percent
+  if("LNP_Percent" %in% names(hold))
+    df$LNP_Percent <- hold$LNP_Percent
   return(df)
 }
 
