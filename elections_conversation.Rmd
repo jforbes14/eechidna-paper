@@ -1,5 +1,5 @@
 ---
-title: "Spatial modelling of the two-party preferred vote in Australian federal elections: 2001--2016"
+title: "How who we are affects how we vote"
 author: Rob J Hyndman and Di Cook
 toc: false
 bibliography: references.bib
@@ -281,6 +281,13 @@ coef_df <- bind_rows(
     year = 2001)
 )
 ```
+
+We often hear stereotypes about voting patterns --- people in their 20s without kids are more likely to be left wing, migrants are more conservative, wealthier people tend to favour the conservative parties, and so on. So we thought we would test these ideas by matching census data to election data, to see if we can identify what are the socio-demographic characteristics of an electorate that are most closely related to how they vote.
+
+
+
+# Previous intro
+
 
 Australia has changed in many ways over the last two decades. Rising house prices, country-wide improvements in education, an ageing population, and a decline in religious affiliation, are just a few facets of the country's evolving socio-demographic characteristics. At the same time, political power has moved back and forth between the two major parties. In the 2007 and 2010 federal elections, the Australian Labor Party (Labor) was victorious, whereas the 2001, 2004, 2013 and 2016 elections were won by the Liberal National coalition (Liberal). The two-party preferred vote, a measure of support between these two parties, fluctuated between 47.3% and 53.5% (in favour of the Liberal party) over this period. This study explores how electoral socio-demographic characteristics relate to two-party preference, and whether their effects have changed over time.
 
