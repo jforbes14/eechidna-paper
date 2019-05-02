@@ -1,0 +1,23 @@
+%% Any special functions or other packages can be loaded here.
+
+
+\usepackage{float,bm}
+
+\let\origfigure\figure
+\let\endorigfigure\endfigure
+\renewenvironment{figure}[1][2] {
+    \expandafter\origfigure\expandafter[htbp]
+} {
+    \endorigfigure
+}
+
+\let\origtable\table
+\let\endorigtable\endtable
+\renewenvironment{table}[1][2] {
+    \expandafter\origtable\expandafter[htbp]
+} {
+    \endorigtable
+}
+
+% Don't number subsubsections
+
