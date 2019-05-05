@@ -91,8 +91,7 @@
 
 \usepackage[no-weekday]{eukdate}
 \usepackage{sourcecodepro,sourceserifpro}
-\usepackage{float,bm}
-\usepackage{setspace}
+\usepackage{float,bm,setspace}
 \setstretch{1.2}
 
 %% CAPTIONS
@@ -186,81 +185,82 @@ The Census provides data on electoral socio-demographics, and vote counts in eac
 
 Not only can an electorate change between the last Census and an election, but even the electorate boundaries can change. Some electorates can disappear altogether and new electorates can arise. Electoral boundaries are redistributed regularly by the AEC, meaning that only in the years where both a Census and election occur are all boundaries likely to match --- the case for the 2001 and 2016 elections. So we first had to estimate what the socio-demographic characteristics of an electorate would have been at the time of each election using a complicated method of interpolation over time and geography. This method uses Census information from both before and after the election of interest, and information from neighbouring electorates when boundaries have changed.
 
-A simple way to measure voting patterns is to consider the two-party preferred (2PP) vote, which is based on the tally of preferences for the Labour and Liberal candidates, ignoring all other candidates. By convention, this is recorded as a percentage preference in favour of the Liberal party -- so a 2PP value of 45\% indicates that 45\% of voters preferred a Liberal candidate and 55\% of voters preferred a Labour candidate.
+A simple way to measure voting patterns is to consider the two-party preferred (2PP) vote, which is based on the tally of preferences for the Labor and Liberal candidates, ignoring all other candidates. By convention, this is recorded as a percentage preference in favour of the Liberal party --- for example, a 2PP value of 45\% indicates that 45\% of voters ranked the Liberal candidate higher than the Labor candidate, while the remaining 55\% ranked them in the reverse order.
 
 We consider how various socio-demographic variables obtained from Census data can be used to explain the 2PP values for each of the 150 electorates in each of the federal elections between 2001 and 2016.
 
 \hypertarget{modelling}{%
-\section{Modelling}\label{modelling}}
+\section{2PP Modelling}\label{modelling}}
 
-Following this process, electoral socio-demographic variables are available for each of the six elections and can be joined with their corresponding two-party preferred votes. Before choosing an appropriate model, two issues with the socio-demographic variables need to be addressed. First, variable scales change over the years, making it important to standardize variables. Second, many variables represent similar information and where appropriate, should be combined in some way. Principal component analysis is used to identify variables covary, from which intuitive groupings are selected to be combined into a single variable. This also reduces the dimension of the data. After these steps, a model specification is chosen.
+Many of the socio-demographic variables have changing scales over the years. For example, inflation-adjusted median rental prices increased across almost all electorates, with median rent of 200 dollars per week placing an electorate in the 90th percentile in 2001, but only the 30th percentile in 2016. In order for socio-demographic effects to be comparable across years, all explanatory variables are standardized so they are comparable across years. By standardizing, each variable is reported as a relative measure compared to all other electorates in the same year.
 
-\hypertarget{standardizing-variables}{%
-\subsection{Standardizing variables}\label{standardizing-variables}}
+There are dozens of socio-demographic variables available in the Censuses, with many variables representing similar information about an electorate. So we combined some variables to avoid redundant information. For example, our ``Incomes'' variable is a combination of median personal income, household income and family income. In this way, we reduced the data set to include 30 socio-demographic variables, listed below.
 
-Many of the socio-demographic variables have changing scales over the years. For example, inflation-adjusted median rental prices increased across almost all electorates, with median rent of 200 dollars per week placing an electorate in the 90th percentile in 2001, but only the 30th percentile in 2016. In order for socio-demographic effects to be comparable across years, all explanatory variables are standardized to have mean zero and variance one within each election year. By standardizing, each variable is reported as a relative measure compared to all other electorates in the same year.
+\begin{itemize}
+\tightlist
+\item
+  ``AusCitizen''
+\item
+  ``BornAsia''
+\item
+  ``Born\_MidEast''
+\item
+  ``BornSEEuro''
+\item
+  ``Born\_UK''
+\item
+  ``BornElsewhere''
+\item
+  ``Buddhism''
+\item
+  ``Christianity''
+\item
+  ``CurrentlyStudying''
+\item
+  ``DeFacto''
+\item
+  ``DiffAddress''
+\item
+  ``Distributive''
+\item
+  ``Education''
+\item
+  ``Extractive''
+\item
+  ``FamHouseSize''
+\item
+  ``Incomes''
+\item
+  ``Indigenous''
+\item
+  ``Islam''
+\item
+  ``Judaism''
+\item
+  ``ManagerAdmin''
+\item
+  ``Married''
+\item
+  ``MedianAge''
+\item
+  ``NoReligion''
+\item
+  ``OneParentHouse''
+\item
+  ``OtherLanguage''
+\item
+  ``PropertyOwned''
+\item
+  ``RentLoanPrice''
+\item
+  ``SocialServ''
+\item
+  ``Transformative''
+\item
+  ``Unemployment''
+\end{itemize}
 
-\hypertarget{creating-factors}{%
-\subsection{Creating factors}\label{creating-factors}}
-
-There are only \(N = 150\) observations (electorates) in each election and \(p = 65\) socio-demographic variables in each cross-section, with many variables represent similar information about an electorate. Any model that uses all variables would face serious problems with multi-collinearity and over-fitting, which would likely lead to erroneous conclusions regarding variable significance. To address this, groups of variables that represent similar information are combined into ``factors''\footnote{A preliminary step involved removing all age bands, because age is represented by median age, and to remove variables relating to particular denominations of Christianity.}.
-
-A factor is created from a group of variables if there is an intuitive reason as to why they should represent similar information and if there is evidence to suggest that they covary. For example, a potential group would be variables relating to electoral incomes --- median family, household and personal incomes. To determine which variables covary, principal component analysis is used on a combined dataset of socio-demographic variables from all six elections. It is appropriate to compute principal components in this way because when computed separately for each election, scree plots level off after four components and the loadings of the first four components are similar across the elections.
-
-Only the first four principal components from the combined dataset are considered, as the scree plot corresponding to the combined dataset levels off after the fourth component. Variables that have a large loading in a particular component are deemed to covary, with a loading with magnitude greater than 0.15 being considered large. Six factors are created using this criteria. These are:
-\texttt{Incomes} (median personal, household and family incomes);
-\texttt{Unemployment} (unemployment and labor force participation rates);
-\texttt{ProportyOwned} (rates of housing ownership, mortgages, renting and government housing);
-\texttt{RentLoanPrice} (median rental and loan repayments);
-\texttt{FamHouseSize} (average household size, ratio of people to families and household makeup (single person, couple with kids and couple without kids); and
-\texttt{Education} (high school and university qualifications, jobs requiring higher levels of education as well as vocational course completions and jobs that do not require higher education levels, such as laborer or tradesperson).
-For each of these groups, variables with positive loadings are added and those with negative loadings are subtracted to create a factor. After computing these sums, each factor is standardized to have mean zero and variance one, within each election.
-
-There are \(p=30\) variables in the resultant predictor set, with all of these used in the regression for each election.
-
-\hypertarget{regression-incorporating-spatially-dependent-errors}{%
-\subsection{Regression incorporating spatially dependent errors}\label{regression-incorporating-spatially-dependent-errors}}
-
-An identical model specification is used for each of the six elections, with each election modelled separately. This allows the socio-demographic effects to be estimated separately for each election year, facilitating analysis of temporal changes in variable effects. This approach is preferable to using a single longitudinal model because it avoids any concerns of undue bias stemming from incorrectly imposed time-varying restrictions on any variable. Without such restrictions, a pooled cross-sectional model does not yield any distinct advantage over separate cross-sections. The panel approach is avoided because of how frequently electoral boundaries change, noting that electorates with the same name across elections are not guaranteed to represent the same geographical region. Therefore any fixed or random effects models would be difficult to estimate without implementing consistent boundaries, which would require further imputation.
-
-For each cross-section, let the response \(\bm{y}\) be the vector two-party preferred vote in favour of the Liberal party; for example, \(y_i = 70\) represents a 70\% preference for Liberal, 30\% for Labor, in electorate \(i\). Although \(y_i\) lies in the interval \((0,100)\), observed values are never close to 0 or 100 (minimum \(24.05 \%\) and maximum \(74.90 \%\)), so there is no need to formally impose the constraint of \(y_i \in [0,100]\). Furthermore, the responses are found to be spatially correlated in each election (Moran's I test, \(p \le 7\cdot10^{-15}\)). This is not surprising as electorates are aggregate spatial units, and hence the spatial structure of the data must be modelled appropriately.
-
-The spatial error model \autocite{Anselin88} is chosen because it captures spatial heterogeneity by incorporating a spatially structured random effect vector \autocite{LeSage2009}. In this context, the random effect can be thought of as capturing the unobserved political climate in each electorate, where this climate is correlated with the climate in neighbouring electorates, under the assumption that the climate is independent of electoral socio-demographics.
-
-\begin{table}[!htbp] \centering    \caption{Estimated spatial error model parameters (standard errors) for each of the six election years.}    \label{tab:printmodels}  \scriptsize\tabcolsep=0.35cm \begin{tabular}{@{\extracolsep{1pt}}lrrrrrr} \\[-1.8ex]\hline  \hline \\[-1.8ex]  \\[-1.8ex] & \multicolumn{6}{c}{\vspace{-0.5cm}} \\   & 2001 & 2004 & 2007 & 2010 & 2013 & 2016 \\  \hline \\[-1.8ex]  $\rho$ & 0.46\rlap{$^{***}$} & 0.29\rlap{$^{*}$} & 0.24 & 0.19 & 0.27\rlap{$^{*}$} & 0.50\rlap{$^{***}$}\\  & (0.15\rlap{)} & (0.17\rlap{)} & (0.17\rlap{)} & (0.16\rlap{)} & (0.16\rlap{)} & (0.17\rlap{)}\\  AusCitizen & $-$3.13 & $-$2.64 & $-$2.53 & $-$0.08 & $-$3.40 & $-$1.80 \\    & (2.26\rlap{)} & (2.43\rlap{)} & (2.34\rlap{)} & (2.79\rlap{)} & (2.76\rlap{)} & (2.71\rlap{)} \\    BornAsia & 2.22 & $-$0.95 & $-$1.60 & $-$6.83\rlap{$^{**}$} & $-$3.03 & $-$0.55 \\    & (2.18\rlap{)} & (2.44\rlap{)} & (2.19\rlap{)} & (2.73\rlap{)} & (2.71\rlap{)} & (2.17\rlap{)} \\    Born\_MidEast & $-$1.15 & $-$1.59 & $-$2.01\rlap{$^{*}$} & $-$2.03 & $-$0.92 & $-$1.44 \\    & (1.07\rlap{)} & (1.20\rlap{)} & (1.11\rlap{)} & (1.27\rlap{)} & (1.24\rlap{)} & (1.13\rlap{)} \\    BornSEEuro & $-$3.21\rlap{$^{**}$} & $-$4.24\rlap{$^{***}$} & $-$3.61\rlap{$^{***}$} & $-$4.14\rlap{$^{***}$} & $-$3.69\rlap{$^{***}$} & $-$2.72\rlap{$^{***}$} \\    & (1.42\rlap{)} & (1.46\rlap{)} & (1.02\rlap{)} & (1.19\rlap{)} & (1.07\rlap{)} & (0.97\rlap{)} \\    Born\_UK & 0.25 & $-$0.07 & 0.34 & 0.56 & $-$0.09 & $-$1.32 \\    & (1.00\rlap{)} & (0.98\rlap{)} & (0.90\rlap{)} & (1.07\rlap{)} & (1.04\rlap{)} & (1.04\rlap{)} \\    BornElsewhere & $-$5.04 & $-$4.91 & $-$4.13 & 2.35 & $-$5.23 & $-$4.14 \\    & (3.30\rlap{)} & (3.68\rlap{)} & (3.38\rlap{)} & (4.23\rlap{)} & (4.15\rlap{)} & (3.97\rlap{)} \\    Buddhism & $-$0.49 & $-$0.17 & $-$1.37 & $-$0.83 & $-$0.12 & $-$1.60 \\    & (1.39\rlap{)} & (1.61\rlap{)} & (1.61\rlap{)} & (1.80\rlap{)} & (1.68\rlap{)} & (1.56\rlap{)} \\    Christianity & $-$2.48 & $-$1.23 & 0.38 & 0.50 & 2.41 & 1.68 \\    & (1.73\rlap{)} & (1.85\rlap{)} & (1.83\rlap{)} & (1.99\rlap{)} & (1.85\rlap{)} & (1.78\rlap{)} \\    CurrentlyStudying & $-$2.19\rlap{$^{**}$} & $-$0.13 & 2.06\rlap{$^{*}$} & 2.12\rlap{$^{*}$} & 1.15 & $-$0.16 \\    & (0.99\rlap{)} & (1.13\rlap{)} & (1.17\rlap{)} & (1.25\rlap{)} & (1.26\rlap{)} & (1.18\rlap{)} \\    DeFacto & $-$6.44\rlap{$^{***}$} & $-$5.37\rlap{$^{**}$} & $-$6.43\rlap{$^{***}$} & $-$8.07\rlap{$^{***}$} & $-$6.56\rlap{$^{**}$} & $-$8.53\rlap{$^{***}$} \\    & (1.87\rlap{)} & (2.48\rlap{)} & (2.31\rlap{)} & (3.06\rlap{)} & (3.11\rlap{)} & (2.83\rlap{)} \\    DiffAddress & 3.88\rlap{$^{***}$} & 5.06\rlap{$^{***}$} & 4.22\rlap{$^{***}$} & 5.57\rlap{$^{***}$} & 3.53\rlap{$^{*}$} & 5.67\rlap{$^{***}$} \\    & (0.94\rlap{)} & (1.12\rlap{)} & (0.99\rlap{)} & (1.76\rlap{)} & (1.91\rlap{)} & (1.60\rlap{)} \\    Distributive & 1.27 & 2.01\rlap{$^{*}$} & 1.36 & 1.57 & 2.10\rlap{$^{*}$} & 1.20 \\    & (1.12\rlap{)} & (1.21\rlap{)} & (1.13\rlap{)} & (1.34\rlap{)} & (1.27\rlap{)} & (1.21\rlap{)} \\    Education & 1.08 & 0.52 & $-$5.52\rlap{$^{*}$} & $-$4.08 & $-$4.44 & $-$7.07\rlap{$^{**}$} \\    & (2.38\rlap{)} & (3.12\rlap{)} & (3.27\rlap{)} & (3.95\rlap{)} & (3.78\rlap{)} & (3.55\rlap{)} \\    Extractive & 4.83\rlap{$^{***}$} & 5.45\rlap{$^{***}$} & 5.37\rlap{$^{***}$} & 7.31\rlap{$^{***}$} & 6.71\rlap{$^{***}$} & 7.43\rlap{$^{***}$} \\    & (1.48\rlap{)} & (1.42\rlap{)} & (1.36\rlap{)} & (1.56\rlap{)} & (1.47\rlap{)} & (1.39\rlap{)} \\    FamHouseSize & $-$0.16 & 0.87 & $-$2.40 & $-$2.53 & $-$3.26 & $-$2.91 \\    & (2.19\rlap{)} & (2.72\rlap{)} & (2.69\rlap{)} & (3.25\rlap{)} & (3.28\rlap{)} & (2.90\rlap{)} \\    Incomes & 4.36\rlap{$^{**}$} & 5.03\rlap{$^{*}$} & 9.45\rlap{$^{***}$} & 7.09\rlap{$^{**}$} & 7.97\rlap{$^{***}$} & 12.20\rlap{$^{***}$} \\    & (1.77\rlap{)} & (2.66\rlap{)} & (2.75\rlap{)} & (3.25\rlap{)} & (2.92\rlap{)} & (2.75\rlap{)} \\    Indigenous & 2.91\rlap{$^{*}$} & 1.97 & 2.48 & 2.84 & 0.67 & $-$0.05 \\    & (1.68\rlap{)} & (1.95\rlap{)} & (1.75\rlap{)} & (2.16\rlap{)} & (2.14\rlap{)} & (2.00\rlap{)} \\    Islam & $-$0.92 & $-$0.97 & $-$0.54 & $-$2.50 & $-$0.82 & $-$0.95 \\    & (1.22\rlap{)} & (1.36\rlap{)} & (1.27\rlap{)} & (1.52\rlap{)} & (1.42\rlap{)} & (1.34\rlap{)} \\    Judaism & 1.88\rlap{$^{*}$} & 1.78 & 2.66\rlap{$^{***}$} & 1.97\rlap{$^{*}$} & 2.74\rlap{$^{**}$} & 1.65\rlap{$^{*}$} \\    & (1.05\rlap{)} & (1.13\rlap{)} & (1.01\rlap{)} & (1.15\rlap{)} & (1.10\rlap{)} & (1.00\rlap{)} \\    ManagerAdmin & 2.06\rlap{$^{***}$} & 3.32\rlap{$^{***}$} & 6.00\rlap{$^{***}$} & 5.47\rlap{$^{***}$} & 5.04\rlap{$^{***}$} & 5.78\rlap{$^{***}$} \\    & (0.71\rlap{)} & (0.93\rlap{)} & (0.90\rlap{)} & (1.08\rlap{)} & (1.03\rlap{)} & (1.06\rlap{)} \\    Married & 0.44 & 0.11 & $-$1.22 & $-$0.22 & 0.91 & $-$2.34 \\    & (2.31\rlap{)} & (2.96\rlap{)} & (2.83\rlap{)} & (3.15\rlap{)} & (3.03\rlap{)} & (2.81\rlap{)} \\    MedianAge & 2.32\rlap{$^{*}$} & 4.96\rlap{$^{***}$} & 3.66\rlap{$^{**}$} & 4.00\rlap{$^{*}$} & 2.30 & 2.87 \\    & (1.32\rlap{)} & (1.65\rlap{)} & (1.81\rlap{)} & (2.26\rlap{)} & (2.08\rlap{)} & (1.79\rlap{)} \\    NoReligion & $-$1.57 & $-$0.92 & 0.56 & $-$0.30 & 1.02 & 1.31 \\    & (1.59\rlap{)} & (1.71\rlap{)} & (1.73\rlap{)} & (1.92\rlap{)} & (1.94\rlap{)} & (2.04\rlap{)} \\    OneParentHouse & $-$1.73 & $-$0.45 & $-$0.75 & $-$1.46 & $-$0.77 & $-$0.74 \\    & (1.36\rlap{)} & (1.59\rlap{)} & (1.49\rlap{)} & (1.69\rlap{)} & (1.57\rlap{)} & (1.47\rlap{)} \\    OtherLanguage & $-$0.44 & 5.92 & 9.98\rlap{$^{**}$} & 11.24\rlap{$^{**}$} & 9.00\rlap{$^{*}$} & 9.84\rlap{$^{**}$} \\    & (3.22\rlap{)} & (4.16\rlap{)} & (3.91\rlap{)} & (4.76\rlap{)} & (4.66\rlap{)} & (4.44\rlap{)} \\    PropertyOwned & $-$0.46 & $-$0.53 & 0.67 & $-$0.94 & $-$0.48 & 1.41 \\    & (1.37\rlap{)} & (1.50\rlap{)} & (1.43\rlap{)} & (1.76\rlap{)} & (1.67\rlap{)} & (1.50\rlap{)} \\    RentLoanPrice & $-$1.57 & $-$3.32\rlap{$^{*}$} & $-$4.01\rlap{$^{**}$} & $-$0.97 & $-$0.70 & $-$0.89 \\    & (1.49\rlap{)} & (1.76\rlap{)} & (1.67\rlap{)} & (2.07\rlap{)} & (2.07\rlap{)} & (2.16\rlap{)} \\    SocialServ & 2.51\rlap{$^{*}$} & 1.65 & 2.47\rlap{$^{*}$} & 2.53\rlap{$^{*}$} & 2.35\rlap{$^{*}$} & 4.45\rlap{$^{***}$} \\    & (1.33\rlap{)} & (1.41\rlap{)} & (1.29\rlap{)} & (1.47\rlap{)} & (1.32\rlap{)} & (1.19\rlap{)} \\    Transformative & 3.24\rlap{$^{**}$} & 4.73\rlap{$^{***}$} & 4.84\rlap{$^{***}$} & 4.46\rlap{$^{**}$} & 3.56\rlap{$^{**}$} & 4.58\rlap{$^{***}$} \\    & (1.55\rlap{)} & (1.78\rlap{)} & (1.74\rlap{)} & (1.98\rlap{)} & (1.78\rlap{)} & (1.53\rlap{)} \\    Unemployment & $-$2.45\rlap{$^{*}$} & $-$3.07\rlap{$^{*}$} & 0.29 & 0.08 & 1.67 & 2.79\rlap{$^{**}$} \\    & (1.40\rlap{)} & (1.63\rlap{)} & (1.51\rlap{)} & (1.76\rlap{)} & (1.51\rlap{)} & (1.37\rlap{)} \\    Constant & 50.81\rlap{$^{***}$} & 52.60\rlap{$^{***}$} & 47.31\rlap{$^{***}$} & 49.93\rlap{$^{***}$} & 53.51\rlap{$^{***}$} & 50.49\rlap{$^{***}$} \\    & (0.71\rlap{)} & (0.58\rlap{)} & (0.52\rlap{)} & (0.57\rlap{)} & (0.58\rlap{)} & (0.80\rlap{)} \\   \hline \\[-1.8ex]  Observations & 150 & 150 & 150 & 150 & 150 & 150 \\  Residual Standard Error (GLS) & 4.69 & 5.04 & 4.79 & 5.63 & 5.18 & 4.88\\ \hline  \hline \\[-1.8ex]  \textit{Note:}  & \multicolumn{6}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\  \end{tabular}  \end{table}
-
-Spatial weights are calculated in accordance with the assumption that an electorate is equally correlated with any electorate that shares a part of its boundary. Let \(\rho\) be the spatial autoregressive coefficient, \(\bm{v}\) be a spherical error term, \(\bm{W}\) be a matrix of spatial weights (containing information about the neighbouring regions), \(\bm{X}\) be a matrix of socio-demographic covariates, \(\bm{\beta}\) be a vector of regression coefficients and \(\bm{a}\) be a spatially structured random effect vector.
-\[
-  \bm{y} = \bm{X} \bm{\beta} + \bm{a},
-\]
-and
-\[
-  \bm{a} = \rho \bm{W} \bm{a} + \bm{v},
-\]
-where \(\bm{v} \sim N(\bm{0}, \sigma^2 \bm{I_n})\), and hence
-\[
-  \bm{y} = \bm{X} \bm{\beta} + (\bm{I}_n-\rho \bm{W})^{-1}\bm{v}.
-\]
-Estimation of the above spatial error model is undertaken using feasible generalized least squares.
-
-Table \ref{tab:printmodels} details the estimated model coefficients and their estimated standard errors, for each of the six elections. An interpretation of these estimated values is provided in the next section.
-
-\hypertarget{results}{%
-\section{Results}\label{results}}
-
-\hypertarget{spatial-autoregressive-parameter}{%
-\subsection{Spatial autoregressive parameter}\label{spatial-autoregressive-parameter}}
-
-The spatial autoregressive coefficient \(\rho\) is positive and significant in only the 2001 and 2016 elections (Figure \ref{fig:rhovis}), meaning that in these elections, the political climate of an electorate appears to be affected by the attitudes of its neighbours. Conversely, in the other four elections, the spatial effect weakens to become insignificant. In these years, it appears that the spatial component does not explain anything not already explained by the electoral socio-demographics, meaning electorates effectively voted independently.
-
-\begin{figure}[h]
-
-{\centering \includegraphics[height=0.2\textheight,]{elections_conversation_files/figure-latex/rhovis-1} 
-
-}
-
-\caption{Estimates of the spatial autoregressive parameter for each of the six elections, reported with their individual 95\% confidence intervals. Only in 2001 and 2016 is there a significant spatial component.}\label{fig:rhovis}
-\end{figure}
+Each election was modelled separately, to allow us to see any changes over time, and to account for changing electorate boundaries.
 
 \hypertarget{country-wide-trend}{%
 \subsection{Country-wide trend}\label{country-wide-trend}}
@@ -278,6 +278,24 @@ Since all socio-demographics have been standardized to have a mean of zero and a
 
 \hypertarget{influential-socio-demographics}{%
 \subsection{Influential socio-demographics}\label{influential-socio-demographics}}
+
+\begin{figure}[h]
+
+{\centering \includegraphics{elections_conversation_files/figure-latex/partresplot1-1} 
+
+}
+
+\caption{Partial residual plots by election year for a selection of predictors. Linear model with 95\% confidence bands overlaid. Most predictors have a positive relationship: the larger the value the more likely the electorate preferences the Coalition. The relationship is relatively robust over time, with the exception of Unemployment.}\label{fig:partresplot1}
+\end{figure}
+
+\begin{figure}[h]
+
+{\centering \includegraphics{elections_conversation_files/figure-latex/partresplot2-1} 
+
+}
+
+\caption{Partial residual plots by election year for a selection of predictors. Linear model with 95\% confidence bands overlaid. Several predictors have a negative relationship: with larger values indicating the electorate more likely preferences Labor. Most relationships are relatively stable over elections, except OtherLanguage and Education.}\label{fig:partresplot2}
+\end{figure}
 
 To investigate the socio-demographics that have a strong effect on the two-party preferred vote, partial residual plots are used and shown in Figures \ref{fig:partresplot1} and \ref{fig:partresplot2}. The partial residuals are the residuals from the fitted model with the estimated effect an individual variable added. These show the direction, size and significance of an estimated effect --- the slope of the prediction line matches the estimated coefficient, and the shaded region represents a 95\% confidence band, computed using the method in \textcite{visreg}. If a horizontal line can be drawn through the confidence band, then the effect is insignificant. The estimated intercept is also added to the partial residuals for interpretability. Plots for each election are faceted to compare the effects over time in Figures \ref{fig:partresplot1} and \ref{fig:partresplot2}. Only socio-demographics that have a significant effect in at least one election are displayed in Figures \ref{fig:partresplot1} and \ref{fig:partresplot2}.
 

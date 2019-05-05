@@ -104,129 +104,39 @@ Many of the socio-demographic variables have changing scales over the years. For
 
 There are dozens of socio-demographic variables available in the Censuses, with many variables representing similar information about an electorate. So we combined some variables to avoid redundant information. For example, our "Incomes" variable is a combination of median personal income, household income and family income. In this way, we reduced the data set to include 30 socio-demographic variables, listed below.
 
-```{r models, warning=FALSE, message=FALSE, include=FALSE}
-# Add rho and GLS residual standard error
-regtable <- stargazer::stargazer(
-  glsmod01, glsmod04, glsmod07, glsmod10, glsmod13, glsmod16,
-  header = FALSE,
-  column.sep.width = "1pt",
-  no.space=TRUE,
-  model.numbers=FALSE,
-  keep.stat = c("n","ser"),
-  dep.var.caption="",
-  dep.var.labels="\\vspace{-0.5cm}",
-  title = "Estimated spatial error model parameters (standard errors) for each of the six election years.",
-  #dep.var.labels = "Two-party preferred vote in favor of the Liberal party",
-  font.size = "scriptsize",
-  digits = 2,
-  column.labels = c("2001", "2004", "2007", "2010", "2013", "2016"),
-  label="tab:printmodels"
-  #notes = c("Estimated coefficients for variable named in column one shown for", "election year indicated by column heading, with estimated standard", "deviation for each coefficient shown below in parenthesis. Overall", "summary measures for each regression equation are provided in the", "bottom panel."),
-  #notes.align = "l"
-)
-# Add correlations
-getrho <- function(x, element) {x$rho_df[[element]]}
-rho <- map_dbl(list(glsmod01,glsmod04,glsmod07,glsmod10,glsmod13,glsmod16),
-           getrho, element="estimate")
-rhop <- map_dbl(list(glsmod01,glsmod04,glsmod07,glsmod10,glsmod13,glsmod16),
-           getrho, element="p")
-rhose <- map_dbl(list(glsmod01,glsmod04,glsmod07,glsmod10,glsmod13,glsmod16),
-           getrho, element="se")
-rholine1 <- paste("$\\rho$",
-            paste(" & ",
-                  sprintf("%3.2f",rho),
-                  ifelse(rhop < 0.01, "$^{***}$",
-                  ifelse(rhop < 0.05, "$^{**}$",
-                  ifelse(rhop < 0.10, "$^{*}$",""))),
-              sep="", collapse=""),
-            "\\\\", sep="", collapse="")
-rholine2 <- paste("",
-            paste(" & (",
-                  sprintf("%3.2f",rhose), ")",
-              sep="", collapse=""),
-            "\\\\", sep="", collapse="")
-regtable <- c(regtable[1:11], rholine1, rholine2, regtable[12:length(regtable)])
-# Add residual standard error (GLS)
-getsigma <- function(x, element) {x$sigma}
-sigma <- map_dbl(list(glsmod01,glsmod04,glsmod07,glsmod10,glsmod13,glsmod16),
-           getsigma)
-sigmaline <- paste("Residual Standard Error (GLS)",
-             paste(" & ",
-                   sprintf("%4.2f", sigma),
-                   sep="", collapse=""),
-             "\\\\", sep="", collapse="")
-regtable <- c(regtable[1:77],sigmaline, regtable[78:length(regtable)])
-# Allow alignment on decimal point
-regtable[6] <- "\\begin{tabular}{@{\\extracolsep{1pt}}lrrrrrr}"
-regtable[12:75] <- gsub(")","\\\\rlap{)}",regtable[12:75])
-regtable[12:75] <- gsub("$^{*}$","\\rlap{$^{*}$}", regtable[12:75], fixed=TRUE)
-regtable[12:75] <- gsub("$^{**}$","\\rlap{$^{**}$}", regtable[12:75], fixed=TRUE)
-regtable[12:75] <- gsub("$^{***}$","\\rlap{$^{***}$}", regtable[12:75], fixed=TRUE)
-regtable[5] <- "\\scriptsize\\tabcolsep=0.35cm"
-```
+ * "AusCitizen"
+ * "BornAsia"
+ * "Born_MidEast"
+ * "BornSEEuro"
+ * "Born_UK"
+ * "BornElsewhere"
+ * "Buddhism"
+ * "Christianity"
+ * "CurrentlyStudying"
+ * "DeFacto"
+ * "DiffAddress"
+ * "Distributive"
+ * "Education"
+ * "Extractive"
+ * "FamHouseSize"
+ * "Incomes"
+ * "Indigenous"
+ * "Islam"
+ * "Judaism"
+ * "ManagerAdmin"
+ * "Married"
+ * "MedianAge"
+ * "NoReligion"
+ * "OneParentHouse"
+ * "OtherLanguage"
+ * "PropertyOwned"
+ * "RentLoanPrice"
+ * "SocialServ"
+ * "Transformative"
+ * "Unemployment"
 
-```{r printmodels2, results='asis', dependson='printmodels'}
-cat(regtable)
-```
+Each election was modelled separately, to allow us to see any changes over time, and to account for changing electorate boundaries. 
 
-
-## Regression incorporating spatially dependent errors
-
-An identical model specification is used for each of the six elections, with each election modelled separately. This allows the socio-demographic effects to be estimated separately for each election year, facilitating analysis of temporal changes in variable effects. This approach is preferable to using a single longitudinal model because it avoids any concerns of undue bias stemming from incorrectly imposed time-varying restrictions on any variable. Without such restrictions, a pooled cross-sectional model does not yield any distinct advantage over separate cross-sections. The panel approach is avoided because of how frequently electoral boundaries change, noting that electorates with the same name across elections are not guaranteed to represent the same geographical region. Therefore any fixed or random effects models would be difficult to estimate without implementing consistent boundaries, which would require further imputation.
-
-For each cross-section, let the response $\bm{y}$ be the vector two-party preferred vote in favour of the Liberal party; for example,  $y_i = 70$ represents a 70% preference for Liberal, 30% for Labor, in electorate $i$. Although $y_i$ lies in the interval $(0,100)$, observed values are never close to 0 or 100 (minimum $24.05 \%$ and maximum $74.90 \%$), so there is no need to formally impose the constraint of $y_i \in [0,100]$. Furthermore, the responses are found to be spatially correlated in each election (Moran's I test, $p \le 7\cdot10^{-15}$). This is not surprising as electorates are aggregate spatial units, and hence the spatial structure of the data must be modelled appropriately.
-
-The spatial error model [@Anselin88] is chosen because it captures spatial heterogeneity by incorporating a spatially structured random effect vector [@LeSage2009]. In this context, the random effect can be thought of as capturing the unobserved political climate in each electorate, where this climate is correlated with the climate in neighbouring electorates, under the assumption that the climate is independent of electoral socio-demographics.
-
-
-Spatial weights are calculated in accordance with the assumption that an electorate is equally correlated with any electorate that shares a part of its boundary. Let $\rho$ be the spatial autoregressive coefficient, $\bm{v}$ be a spherical error term, $\bm{W}$ be a matrix of spatial weights (containing information about the neighbouring regions), $\bm{X}$ be a matrix of socio-demographic covariates, $\bm{\beta}$ be a vector of regression coefficients and $\bm{a}$ be a spatially structured random effect vector.
-$$
-  \bm{y} = \bm{X} \bm{\beta} + \bm{a},
-$$
-and
-$$
-  \bm{a} = \rho \bm{W} \bm{a} + \bm{v},
-$$
-where $\bm{v} \sim N(\bm{0}, \sigma^2 \bm{I_n})$, and hence
-$$
-  \bm{y} = \bm{X} \bm{\beta} + (\bm{I}_n-\rho \bm{W})^{-1}\bm{v}.
-$$
-Estimation of the above spatial error model is undertaken using feasible generalized least squares.
-
-Table \@ref(tab:printmodels) details the estimated model coefficients and their estimated standard errors, for each of the six elections. An interpretation of these estimated values is provided in the next section.
-
-# Results
-
-## Spatial autoregressive parameter
-
-The spatial autoregressive coefficient $\rho$ is positive and significant in only the 2001 and 2016 elections (Figure \@ref(fig:rhovis)), meaning that in these elections, the political climate of an electorate appears to be affected by the attitudes of its neighbours. Conversely, in the other four elections, the spatial effect weakens to become insignificant. In these years, it appears that the spatial component does not explain anything not already explained by the electoral socio-demographics, meaning electorates effectively voted independently.
-
-```{r rhovis, fig.cap="Estimates of the spatial autoregressive parameter for each of the six elections, reported with their individual 95\\% confidence intervals. Only in 2001 and 2016 is there a significant spatial component.", out.height='20%', out.extra = ''}
-rho_df <- bind_rows(
-  glsmod16$rho_df %>% mutate(year = "2016"),
-  glsmod13$rho_df %>% mutate(year = "2013"),
-  glsmod10$rho_df %>% mutate(year = "2010"),
-  glsmod07$rho_df %>% mutate(year = "2007"),
-  glsmod04$rho_df %>% mutate(year = "2004"),
-  glsmod01$rho_df %>% mutate(year = "2001")
-) %>%
-  mutate(
-    upper95 = estimate + 1.96 * se,
-    lower95 = estimate - 1.96 * se
-  )
-
-rho_df %>%
-  ggplot() +
-  geom_point(aes(x = year, y = estimate), size = 3) +
-  geom_linerange(aes(x = year, ymin = lower95, ymax = upper95), size = 1.2) +
-  geom_hline(aes(yintercept = 0), alpha = 0.5, size = 1) +
-  scale_color_manual(values = c("grey50", "black")) +
-  labs(x = "Election year", y = "Estimate of spatial autoregressive parameter") +
-  lims(y = c(-1, 1)) +
-  guides(col = FALSE) +
-  coord_fixed(ratio = 1) +
-  theme_bw()
-```
 
 ## Country-wide trend
 
@@ -260,7 +170,7 @@ Since all socio-demographics have been standardized to have a mean of zero and a
 
 ## Influential socio-demographics
 
-```{r prepplot, include = FALSE}
+```{r prepplot, echo = FALSE}
 p1 <- grid_visreg("Extractive", top = TRUE)
 p2 <- grid_visreg("DiffAddress")
 p3 <- grid_visreg("ManagerAdmin")
@@ -280,11 +190,11 @@ p13 <- grid_visreg("DeFacto")
 
 
 ```{r partresplot1, fig.cap = "Partial residual plots by election year for a selection of predictors. Linear model with 95\\% confidence bands overlaid. Most predictors have a positive relationship: the larger the value the more likely the electorate preferences the Coalition. The relationship is relatively robust over time, with the exception of Unemployment.", fig.height = 8.5, fig.width = 6, warning = FALSE, fig.pos = 'h'}
-#(p1 / p2 / (p3 + ylab("Two-party preferred vote (%)                     ")) / p4 / p5 / p6)
+(p1 / p2 / (p3 + ylab("Two-party preferred vote (%)                     ")) / p4 / p5 / p6)
 ```
 
 ```{r partresplot2, fig.cap = "Partial residual plots by election year for a selection of predictors. Linear model with 95\\% confidence bands overlaid. Several predictors have a negative relationship: with larger values indicating the electorate more likely preferences Labor. Most relationships are relatively stable over elections, except OtherLanguage and Education.", fig.height = 8.5,  fig.width = 6, warning = FALSE, fig.pos = 'h'}
-#(p7 / p8 / (p9 + ylab("Two-party preferred vote (%)                     ")) / p10 / p11 / p12 / p13)
+(p7 / p8 / (p9 + ylab("Two-party preferred vote (%)                     ")) / p10 / p11 / p12 / p13)
 ```
 
 To investigate the socio-demographics that have a strong effect on the two-party preferred vote, partial residual plots are used and shown in Figures \@ref(fig:partresplot1) and \@ref(fig:partresplot2). The partial residuals are the residuals from the fitted model with the estimated effect an individual variable added. These show the direction, size and significance of an estimated effect --- the slope of the prediction line matches the estimated coefficient, and the shaded region represents a 95% confidence band, computed using the method in @visreg. If a horizontal line can be drawn through the confidence band, then the effect is insignificant. The estimated intercept is also added to the partial residuals for interpretability. Plots for each election are faceted to compare the effects over time in Figures \@ref(fig:partresplot1) and \@ref(fig:partresplot2). Only socio-demographics that have a significant effect in at least one election are displayed in Figures \@ref(fig:partresplot1) and \@ref(fig:partresplot2).
