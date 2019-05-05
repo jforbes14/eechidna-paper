@@ -40,247 +40,9 @@ library(patchwork)
 #library(grid)
 library(predictmeans)
 source("functions.R")
+source("wrangle.R")
 ```
 
-```{r wrangle, include = FALSE}
-# Take log of indigenous, judaism, islam, buddhism
-abs2016 <- eechidna::abs2016 %>%
-  mutate(
-    Indigenous = log(Indigenous),
-    Judaism = log(Judaism),
-    Islam = log(Islam),
-    Buddhism = log(Buddhism)
-  )
-abs2013 <- eechidna::abs2013 %>%
-  mutate(
-    Indigenous = log(Indigenous),
-    Judaism = log(Judaism),
-    Islam = log(Islam),
-    Buddhism = log(Buddhism)
-  )
-abs2010 <- eechidna::abs2010 %>%
-  mutate(
-    Indigenous = log(Indigenous),
-    Judaism = log(Judaism),
-    Islam = log(Islam),
-    Buddhism = log(Buddhism)
-  )
-abs2007 <- eechidna::abs2007 %>%
-  mutate(
-    Indigenous = log(Indigenous),
-    Judaism = log(Judaism),
-    Islam = log(Islam),
-    Buddhism = log(Buddhism)
-  )
-abs2004 <- eechidna::abs2004 %>%
-  mutate(
-    Indigenous = log(Indigenous),
-    Judaism = log(Judaism),
-    Islam = log(Islam),
-    Buddhism = log(Buddhism)
-  )
-abs2001 <- eechidna::abs2001 %>%
-  mutate(
-    Indigenous = log(Indigenous),
-    Judaism = log(Judaism),
-    Islam = log(Islam),
-    Buddhism = log(Buddhism)
-  )
-
-# Change abs2016 to data frame to prevent error below
-abs2016 <- as.data.frame(abs2016)
-
-# Combine and standardize
-my_df <- bind_rows(
-  left_join(eechidna::tpp01,
-    standardise_vars(abs2001) %>%
-      dplyr::select(-c(UniqueID, Area, ends_with("NS"), Population)),
-    by = c("DivisionNm", "StateAb" = "State")
-  ) %>% mutate(year = "2001"),
-  left_join(eechidna::tpp04,
-    standardise_vars(abs2004) %>%
-      dplyr::select(-UniqueID),
-    by = c("DivisionNm")
-  ) %>% mutate(year = "2004"),
-  left_join(eechidna::tpp07,
-    standardise_vars(abs2007) %>%
-      dplyr::select(-UniqueID),
-    by = c("DivisionNm")
-  ) %>% mutate(year = "2007"),
-  left_join(eechidna::tpp10,
-    standardise_vars(abs2010) %>%
-      dplyr::select(-UniqueID),
-    by = c("DivisionNm")
-  ) %>% mutate(year = "2010"),
-  left_join(eechidna::tpp13,
-    standardise_vars(abs2013) %>%
-      dplyr::select(-UniqueID),
-    by = c("DivisionNm")
-  ) %>% mutate(year = "2013"),
-  left_join(eechidna::tpp16,
-    standardise_vars(abs2016) %>%
-      dplyr::select(-c(UniqueID, Area, ends_with("NS"), Population)),
-    by = c("DivisionNm", "StateAb" = "State")
-  ) %>% mutate(year = "2016")
-) %>%
-  mutate(year = factor(year)) %>%
-  select(-c(
-    starts_with("Age"), StateAb,
-    LNP_Votes, ALP_Votes, ALP_Percent, TotalVotes, Swing,
-    InternetUse, InternetAccess, EnglishOnly,
-    Other_NonChrist, OtherChrist, Catholic, Anglican,
-    Volunteer, EmuneratedElsewhere, DivisionID
-  ))
-
-# Create final df for modelling
-
-factors_df <- my_df %>%
-  mutate(
-    Education = BachelorAbv + HighSchool + Professional + Finance - Laborer - Tradesperson - DipCert,
-    FamHouseSize = FamilyRatio + AverageHouseholdSize + Couple_WChild_House - Couple_NoChild_House - SP_House,
-    PropertyOwned = Owned + Mortgage - Renting - PublicHousing,
-    RentLoanPrice = MedianRent + MedianLoanPay,
-    Incomes = MedianFamilyIncome + MedianHouseholdIncome + MedianPersonalIncome,
-    Unemployment = Unemployed - LFParticipation
-  ) %>%
-  dplyr::select(-c(
-    BachelorAbv, HighSchool, Professional, Finance, Laborer, Tradesperson, DipCert, FamilyRatio,
-    AverageHouseholdSize, Couple_WChild_House, Couple_NoChild_House, SP_House, Owned, Mortgage, Renting,
-    PublicHousing, MedianFamilyIncome, MedianHouseholdIncome, MedianPersonalIncome, MedianRent,
-    MedianLoanPay, Unemployed, LFParticipation
-  ))
-
-# Now standardize factors
-
-small_df <- bind_rows(
-  factors_df %>% filter(year == "2001") %>% standardise_vars(),
-  factors_df %>% filter(year == "2004") %>% standardise_vars(),
-  factors_df %>% filter(year == "2007") %>% standardise_vars(),
-  factors_df %>% filter(year == "2010") %>% standardise_vars(),
-  factors_df %>% filter(year == "2013") %>% standardise_vars(),
-  factors_df %>% filter(year == "2016") %>% standardise_vars()
-)
-
-# Order electorates in alphabetical order to match spatial matrix
-model_df <- small_df %>%
-  arrange(year, DivisionNm) %>%
-  dplyr::select(order(colnames(.))) %>%
-  rename(
-    ManagerAdmin = ManagerAdminClericalSales,
-    OtherLanguage = OtherLanguageHome,
-    BornSEEuro = Born_SE_Europe,
-    BornAsia = Born_Asia,
-    OneParentHouse = OneParent_House
-  )
-```
-
-```{r spatialweights, eval = FALSE}
-# Get spatial weights
-# This is not run, as weights are pulled from github, but this can be run to get them from scratch.
-sF_16 <- sF_download(2016)
-sF_13 <- sF_download(2013)
-sF_10 <- sF_download(2010)
-sF_07 <- sF_download(2007)
-sF_04 <- sF_download(2004)
-sF_01 <- sF_download(2001)
-
-sp_weights_16 <- sp_weights_matrix(sF_16)
-sp_weights_13 <- sp_weights_matrix(sF_13)
-sp_weights_10 <- sp_weights_matrix(sF_10)
-sp_weights_07 <- sp_weights_matrix(sF_07)
-sp_weights_04 <- sp_weights_matrix(sF_04)
-sp_weights_01 <- sp_weights_matrix(sF_01)
-```
-
-```{r FGLS, include = FALSE}
-# Instead of running spatial weights, load from github
-load("data/sp_weights_01.rda")
-load("data/sp_weights_04.rda")
-load("data/sp_weights_07.rda")
-load("data/sp_weights_10.rda")
-load("data/sp_weights_13.rda")
-load("data/sp_weights_16.rda")
-
-## Run full models for each year
-full_formula <- "LNP_Percent ~ ."
-
-# 2016
-glsmod16 <- my_fgls(full_formula,
-  my_data = model_df %>% filter(year == "2016"),
-  sp_weights = sp_weights_16
-)
-
-# 2013
-glsmod13 <- my_fgls(full_formula,
-  my_data = model_df %>% filter(year == "2013"),
-  sp_weights = sp_weights_13
-)
-
-# 2010
-glsmod10 <- my_fgls(full_formula,
-  my_data = model_df %>% filter(year == "2010"),
-  sp_weights = sp_weights_10
-)
-
-# 2007
-glsmod07 <- my_fgls(full_formula,
-  my_data = model_df %>% filter(year == "2007"),
-  sp_weights = sp_weights_07
-)
-
-# 2004
-glsmod04 <- my_fgls(full_formula,
-  my_data = model_df %>% filter(year == "2004"),
-  sp_weights = sp_weights_04
-)
-
-# 2001
-glsmod01 <- my_fgls(full_formula,
-  my_data = model_df %>% filter(year == "2001"),
-  sp_weights = sp_weights_01
-)
-
-## Visualise coefficients and significance
-
-coef_df <- bind_rows(
-  data.frame(
-    variable = glsmod16$coefficients %>% names(),
-    estimate = glsmod16$coefficients %>% unname(),
-    se = summary(glsmod16)$tTable[, "Std.Error"] %>% unname(),
-    p = summary(glsmod16)$tTable[, "p-value"] %>% unname(),
-    year = 2016),
-  data.frame(
-    variable = glsmod13$coefficients %>% names(),
-    estimate = glsmod13$coefficients %>% unname(),
-    se = summary(glsmod13)$tTable[, "Std.Error"] %>% unname(),
-    p = summary(glsmod13)$tTable[, "p-value"] %>% unname(),
-    year = 2013),
-  data.frame(
-    variable = glsmod10$coefficients %>% names(),
-    estimate = glsmod10$coefficients %>% unname(),
-    se = summary(glsmod10)$tTable[, "Std.Error"] %>% unname(),
-    p = summary(glsmod10)$tTable[, "p-value"] %>% unname(),
-    year = 2010),
-  data.frame(
-    variable = glsmod07$coefficients %>% names(),
-    estimate = glsmod07$coefficients %>% unname(),
-    se = summary(glsmod07)$tTable[, "Std.Error"] %>% unname(),
-    p = summary(glsmod07)$tTable[, "p-value"] %>% unname(),
-    year = 2007),
-  data.frame(
-    variable = glsmod04$coefficients %>% names(),
-    estimate = glsmod04$coefficients %>% unname(),
-    se = summary(glsmod04)$tTable[, "Std.Error"] %>% unname(),
-    p = summary(glsmod04)$tTable[, "p-value"] %>% unname(),
-    year = 2004),
-  data.frame(
-    variable = glsmod01$coefficients %>% names(),
-    estimate = glsmod01$coefficients %>% unname(),
-    se = summary(glsmod01)$tTable[, "Std.Error"] %>% unname(),
-    p = summary(glsmod01)$tTable[, "p-value"] %>% unname(),
-    year = 2001)
-)
-```
 
 # Introduction {#intro}
 
@@ -332,46 +94,17 @@ ggplot(timeline, aes(x = year_vis, y = measure)) +
 
 Not only can an electorate change between the last Census and an election, but even the electorate boundaries can change. Some electorates can disappear altogether and new electorates can arise. Electoral boundaries are redistributed regularly by the AEC, meaning that only in the years where both a Census and election occur are all boundaries likely to match --- the case for the 2001 and 2016 elections. So we first had to estimate what the socio-demographic characteristics of an electorate would have been at the time of each election using a complicated method of interpolation over time and geography. This method uses Census information from both before and after the election of interest, and information from neighbouring electorates when boundaries have changed.
 
-A simple way to measure voting patterns is to consider the two-party preferred (2PP) vote, which is based on the tally of preferences for the Labour and Liberal candidates, ignoring all other candidates. By convention, this is recorded as a percentage preference in favour of the Liberal party -- so a 2PP value of 45% indicates that 45% of voters preferred a Liberal candidate and 55% of voters preferred a Labour candidate.
+A simple way to measure voting patterns is to consider the two-party preferred (2PP) vote, which is based on the tally of preferences for the Labor and Liberal candidates, ignoring all other candidates. By convention, this is recorded as a percentage preference in favour of the Liberal party --- for example, a 2PP value of 45% indicates that 45% of voters ranked the Liberal candidate higher than the Labor candidate, while the remaining 55% ranked them in the reverse order.
 
 We consider how various socio-demographic variables obtained from Census data can be used to explain the 2PP values for each of the 150 electorates in each of the federal elections between 2001 and 2016.
 
-# Modelling {#modelling}
+# 2PP Modelling {#modelling}
 
-Following this process, electoral socio-demographic variables are available for each of the six elections and can be joined with their corresponding two-party preferred votes. Before choosing an appropriate model, two issues with the socio-demographic variables need to be addressed. First, variable scales change over the years, making it important to standardize variables. Second, many variables represent similar information and where appropriate, should be combined in some way. Principal component analysis is used to identify variables covary, from which intuitive groupings are selected to be combined into a single variable. This also reduces the dimension of the data. After these steps, a model specification is chosen.
+Many of the socio-demographic variables have changing scales over the years. For example, inflation-adjusted median rental prices increased across almost all electorates, with median rent of 200 dollars per week placing an electorate in the 90th percentile in 2001, but only the 30th percentile in 2016. In order for socio-demographic effects to be comparable across years, all explanatory variables are standardized so they are comparable across years. By standardizing, each variable is reported as a relative measure compared to all other electorates in the same year.
 
-## Standardizing variables
+There are dozens of socio-demographic variables available in the Censuses, with many variables representing similar information about an electorate. So we combined some variables to avoid redundant information. For example, our "Incomes" variable is a combination of median personal income, household income and family income. In this way, we reduced the data set to include 30 socio-demographic variables, listed below.
 
-Many of the socio-demographic variables have changing scales over the years. For example, inflation-adjusted median rental prices increased across almost all electorates, with median rent of 200 dollars per week placing an electorate in the 90th percentile in 2001, but only the 30th percentile in 2016. In order for socio-demographic effects to be comparable across years, all explanatory variables are standardized to have mean zero and variance one within each election year. By standardizing, each variable is reported as a relative measure compared to all other electorates in the same year.
-
-## Creating factors
-
-There are only $N = 150$ observations (electorates) in each election and $p = 65$ socio-demographic variables in each cross-section, with many variables represent similar information about an electorate. Any model that uses all variables would face serious problems with multi-collinearity and over-fitting, which would likely lead to erroneous conclusions regarding variable significance. To address this, groups of variables that represent similar information are combined into "factors"[^2].
-
-[^2]: A preliminary step involved removing all age bands, because age is represented by median age, and to remove variables relating to particular denominations of Christianity.
-
-A factor is created from a group of variables if there is an intuitive reason as to why they should represent similar information and if there is evidence to suggest that they covary. For example, a potential group would be variables relating to electoral incomes --- median family, household and personal incomes. To determine which variables covary, principal component analysis is used on a combined dataset of socio-demographic variables from all six elections. It is appropriate to compute principal components in this way because when computed separately for each election, scree plots level off after four components and the loadings of the first four components are similar across the elections.
-
-Only the first four principal components from the combined dataset are considered, as the scree plot corresponding to the combined dataset levels off after the fourth component. Variables that have a large loading in a particular component are deemed to covary, with a loading with magnitude greater than 0.15 being considered large. Six factors are created using this criteria. These are:
-`Incomes` (median personal, household and family incomes);
-`Unemployment` (unemployment and labor force participation rates);
-`ProportyOwned` (rates of housing ownership, mortgages, renting and government housing);
-`RentLoanPrice` (median rental and loan repayments);
-`FamHouseSize` (average household size, ratio of people to families and household makeup (single person, couple with kids and couple without kids); and
-`Education` (high school and university qualifications, jobs requiring higher levels of education as well as vocational course completions and jobs that do not require higher education levels, such as laborer or tradesperson).
-For each of these groups, variables with positive loadings are added and those with negative loadings are subtracted to create a factor. After computing these sums, each factor is standardized to have mean zero and variance one, within each election.
-
-There are $p=30$ variables in the resultant predictor set, with all of these used in the regression for each election.
-
-## Regression incorporating spatially dependent errors
-
-An identical model specification is used for each of the six elections, with each election modelled separately. This allows the socio-demographic effects to be estimated separately for each election year, facilitating analysis of temporal changes in variable effects. This approach is preferable to using a single longitudinal model because it avoids any concerns of undue bias stemming from incorrectly imposed time-varying restrictions on any variable. Without such restrictions, a pooled cross-sectional model does not yield any distinct advantage over separate cross-sections. The panel approach is avoided because of how frequently electoral boundaries change, noting that electorates with the same name across elections are not guaranteed to represent the same geographical region. Therefore any fixed or random effects models would be difficult to estimate without implementing consistent boundaries, which would require further imputation.
-
-For each cross-section, let the response $\bm{y}$ be the vector two-party preferred vote in favour of the Liberal party; for example,  $y_i = 70$ represents a 70% preference for Liberal, 30% for Labor, in electorate $i$. Although $y_i$ lies in the interval $(0,100)$, observed values are never close to 0 or 100 (minimum $24.05 \%$ and maximum $74.90 \%$), so there is no need to formally impose the constraint of $y_i \in [0,100]$. Furthermore, the responses are found to be spatially correlated in each election (Moran's I test, $p \le 7\cdot10^{-15}$). This is not surprising as electorates are aggregate spatial units, and hence the spatial structure of the data must be modelled appropriately.
-
-The spatial error model [@Anselin88] is chosen because it captures spatial heterogeneity by incorporating a spatially structured random effect vector [@LeSage2009]. In this context, the random effect can be thought of as capturing the unobserved political climate in each electorate, where this climate is correlated with the climate in neighbouring electorates, under the assumption that the climate is independent of electoral socio-demographics.
-
-```{r printmodels, warning=FALSE, message=FALSE, include=FALSE}
+```{r models, warning=FALSE, message=FALSE, include=FALSE}
 # Add rho and GLS residual standard error
 regtable <- stargazer::stargazer(
   glsmod01, glsmod04, glsmod07, glsmod10, glsmod13, glsmod16,
@@ -435,6 +168,16 @@ regtable[5] <- "\\scriptsize\\tabcolsep=0.35cm"
 ```{r printmodels2, results='asis', dependson='printmodels'}
 cat(regtable)
 ```
+
+
+## Regression incorporating spatially dependent errors
+
+An identical model specification is used for each of the six elections, with each election modelled separately. This allows the socio-demographic effects to be estimated separately for each election year, facilitating analysis of temporal changes in variable effects. This approach is preferable to using a single longitudinal model because it avoids any concerns of undue bias stemming from incorrectly imposed time-varying restrictions on any variable. Without such restrictions, a pooled cross-sectional model does not yield any distinct advantage over separate cross-sections. The panel approach is avoided because of how frequently electoral boundaries change, noting that electorates with the same name across elections are not guaranteed to represent the same geographical region. Therefore any fixed or random effects models would be difficult to estimate without implementing consistent boundaries, which would require further imputation.
+
+For each cross-section, let the response $\bm{y}$ be the vector two-party preferred vote in favour of the Liberal party; for example,  $y_i = 70$ represents a 70% preference for Liberal, 30% for Labor, in electorate $i$. Although $y_i$ lies in the interval $(0,100)$, observed values are never close to 0 or 100 (minimum $24.05 \%$ and maximum $74.90 \%$), so there is no need to formally impose the constraint of $y_i \in [0,100]$. Furthermore, the responses are found to be spatially correlated in each election (Moran's I test, $p \le 7\cdot10^{-15}$). This is not surprising as electorates are aggregate spatial units, and hence the spatial structure of the data must be modelled appropriately.
+
+The spatial error model [@Anselin88] is chosen because it captures spatial heterogeneity by incorporating a spatially structured random effect vector [@LeSage2009]. In this context, the random effect can be thought of as capturing the unobserved political climate in each electorate, where this climate is correlated with the climate in neighbouring electorates, under the assumption that the climate is independent of electoral socio-demographics.
+
 
 Spatial weights are calculated in accordance with the assumption that an electorate is equally correlated with any electorate that shares a part of its boundary. Let $\rho$ be the spatial autoregressive coefficient, $\bm{v}$ be a spherical error term, $\bm{W}$ be a matrix of spatial weights (containing information about the neighbouring regions), $\bm{X}$ be a matrix of socio-demographic covariates, $\bm{\beta}$ be a vector of regression coefficients and $\bm{a}$ be a spatially structured random effect vector.
 $$
