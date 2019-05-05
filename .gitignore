@@ -20,3 +20,4 @@ old_book_files/
 *.out
 *.run.xml
 *.synctex.gz
+.directory
