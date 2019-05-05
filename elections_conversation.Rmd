@@ -336,21 +336,11 @@ A simple way to measure voting patterns is to consider the two-party preferred (
 
 We consider how various socio-demographic variables obtained from Census data can be used to explain the 2PP values for each of the 150 electorates in each of the federal elections between 2001 and 2016.
 
-# Modelling {#modelling}
-
-Following this process, electoral socio-demographic variables are available for each of the six elections and can be joined with their corresponding two-party preferred votes. Before choosing an appropriate model, two issues with the socio-demographic variables need to be addressed. First, variable scales change over the years, making it important to standardize variables. Second, many variables represent similar information and where appropriate, should be combined in some way. Principal component analysis is used to identify variables covary, from which intuitive groupings are selected to be combined into a single variable. This also reduces the dimension of the data. After these steps, a model specification is chosen.
-
-## Standardizing variables
-
 Many of the socio-demographic variables have changing scales over the years. For example, inflation-adjusted median rental prices increased across almost all electorates, with median rent of 200 dollars per week placing an electorate in the 90th percentile in 2001, but only the 30th percentile in 2016. In order for socio-demographic effects to be comparable across years, all explanatory variables are standardized to have mean zero and variance one within each election year. By standardizing, each variable is reported as a relative measure compared to all other electorates in the same year.
 
-## Creating factors
+# Modelling {#modelling}
 
-There are only $N = 150$ observations (electorates) in each election and $p = 65$ socio-demographic variables in each cross-section, with many variables represent similar information about an electorate. Any model that uses all variables would face serious problems with multi-collinearity and over-fitting, which would likely lead to erroneous conclusions regarding variable significance. To address this, groups of variables that represent similar information are combined into "factors"[^2].
-
-[^2]: A preliminary step involved removing all age bands, because age is represented by median age, and to remove variables relating to particular denominations of Christianity.
-
-A factor is created from a group of variables if there is an intuitive reason as to why they should represent similar information and if there is evidence to suggest that they covary. For example, a potential group would be variables relating to electoral incomes --- median family, household and personal incomes. To determine which variables covary, principal component analysis is used on a combined dataset of socio-demographic variables from all six elections. It is appropriate to compute principal components in this way because when computed separately for each election, scree plots level off after four components and the loadings of the first four components are similar across the elections.
+There are dozens of socio-demographic variables available in each Census, with many variables representing similar information about an electorate. To reduce the numbers of variables, we combine variables with similar information. For example, a potential group would be variables relating to electoral incomes --- median family, household and personal incomes. To determine which variables covary, principal component analysis is used on a combined dataset of socio-demographic variables from all six elections. It is appropriate to compute principal components in this way because when computed separately for each election, scree plots level off after four components and the loadings of the first four components are similar across the elections.
 
 Only the first four principal components from the combined dataset are considered, as the scree plot corresponding to the combined dataset levels off after the fourth component. Variables that have a large loading in a particular component are deemed to covary, with a loading with magnitude greater than 0.15 being considered large. Six factors are created using this criteria. These are:
 `Incomes` (median personal, household and family incomes);
