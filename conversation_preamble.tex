@@ -1,7 +1,8 @@
 %% Any special functions or other packages can be loaded here.
 
 \usepackage[no-weekday]{eukdate}
-\usepackage{sourcecodepro,sourceserifpro}
+%\usepackage{sourceserifpro}
+%\usepackage[scaled=0.86]{DejaVuSansMono}
 \usepackage{float,bm,setspace}
 \setstretch{1.2}
 
@@ -11,23 +12,6 @@
  {labelfont={bf},textfont={it},labelsep=colon}
 \captionsetup[figure]{style=italic,format=hang,singlelinecheck=true}
 \captionsetup[table]{style=italic,format=hang,singlelinecheck=true}
-
-
-\let\origfigure\figure
-\let\endorigfigure\endfigure
-\renewenvironment{figure}[1][2] {
-    \expandafter\origfigure\expandafter[htbp]
-} {
-    \endorigfigure
-}
-
-\let\origtable\table
-\let\endorigtable\endtable
-\renewenvironment{table}[1][2] {
-    \expandafter\origtable\expandafter[htbp]
-} {
-    \endorigtable
-}
 
 %% GRAPHICS
 \RequirePackage{graphicx}

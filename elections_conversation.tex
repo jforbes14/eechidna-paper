@@ -1,4 +1,4 @@
-\documentclass[12pt,a4paper,]{article}
+\documentclass[11pt,a4paper,]{article}
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
 \usepackage{ifxetex,ifluatex}
@@ -90,7 +90,8 @@
 %% Any special functions or other packages can be loaded here.
 
 \usepackage[no-weekday]{eukdate}
-\usepackage{sourcecodepro,sourceserifpro}
+%\usepackage{sourceserifpro}
+%\usepackage[scaled=0.86]{DejaVuSansMono}
 \usepackage{float,bm,setspace}
 \setstretch{1.2}
 
@@ -100,23 +101,6 @@
  {labelfont={bf},textfont={it},labelsep=colon}
 \captionsetup[figure]{style=italic,format=hang,singlelinecheck=true}
 \captionsetup[table]{style=italic,format=hang,singlelinecheck=true}
-
-
-\let\origfigure\figure
-\let\endorigfigure\endfigure
-\renewenvironment{figure}[1][2] {
-    \expandafter\origfigure\expandafter[htbp]
-} {
-    \endorigfigure
-}
-
-\let\origtable\table
-\let\endorigtable\endtable
-\renewenvironment{table}[1][2] {
-    \expandafter\origtable\expandafter[htbp]
-} {
-    \endorigtable
-}
 
 %% GRAPHICS
 \RequirePackage{graphicx}
@@ -167,14 +151,14 @@
 
 We often hear stereotypes about voting patterns --- people in their 20s without kids are more likely to be left wing, migrants are more conservative, wealthier people tend to favour the conservative parties, and so on. So we thought we would test these ideas by matching census data to election data, to see if we can identify what are the socio-demographic characteristics of an electorate that are most closely related to how they vote.
 
-It is also interesing to see how this might have changed over time. For example, if wealth was a good predictor of voting patterns in the 2001 election, is it still a good predictor in 2019? Australia has changed in many ways over the last two decades. Rising house prices, country-wide improvements in education, an ageing population, and a decline in religious affiliation, are just some of the ways we have changed. At the same time, political power has moved back and forth between the two major parties. How much can we attribute changes in political power to changes in who we are?
+It is also interesting to see how this might have changed over time. For example, if wealth was a good predictor of voting patterns in the 2001 election, is it still a good predictor in 2019? Australia has changed in many ways over the last two decades. Rising house prices, country-wide improvements in education, an ageing population, and a decline in religious affiliation, are just some of the ways we have changed. At the same time, political power has moved back and forth between the two major parties. How much can we attribute changes in political power to changes in who we are?
 
 \hypertarget{census-and-electoral-data}{%
 \section{Census and electoral data}\label{census-and-electoral-data}}
 
 The Census provides data on electoral socio-demographics, and vote counts in each electorate can be obtained from Australian federal elections. However, joining these two data sources is difficult because the Censuses are not held at the same time as the elections. Between 2001 and 2016 there were six elections and four Censuses, as shown in the timeline below.
 
-\begin{figure}[h]
+\begin{figure}[H]
 
 {\centering \includegraphics[width=0.9\linewidth]{elections_conversation_files/figure-latex/timeline-1} 
 
@@ -185,117 +169,67 @@ The Census provides data on electoral socio-demographics, and vote counts in eac
 
 Not only can an electorate change between the last Census and an election, but even the electorate boundaries can change. Some electorates can disappear altogether and new electorates can arise. Electoral boundaries are redistributed regularly by the AEC, meaning that only in the years where both a Census and election occur are all boundaries likely to match --- the case for the 2001 and 2016 elections. So we first had to estimate what the socio-demographic characteristics of an electorate would have been at the time of each election using a complicated method of interpolation over time and geography. This method uses Census information from both before and after the election of interest, and information from neighbouring electorates when boundaries have changed.
 
+\hypertarget{modelling}{%
+\section{2PP Modelling}\label{modelling}}
+
 A simple way to measure voting patterns is to consider the two-party preferred (2PP) vote, which is based on the tally of preferences for the Labor and Liberal candidates, ignoring all other candidates. By convention, this is recorded as a percentage preference in favour of the Liberal party --- for example, a 2PP value of 45\% indicates that 45\% of voters ranked the Liberal candidate higher than the Labor candidate, while the remaining 55\% ranked them in the reverse order.
 
 We consider how various socio-demographic variables obtained from Census data can be used to explain the 2PP values for each of the 150 electorates in each of the federal elections between 2001 and 2016.
 
-\hypertarget{modelling}{%
-\section{2PP Modelling}\label{modelling}}
+Many of the socio-demographic variables have changing scales over the years. For example, inflation-adjusted median rental prices increased across almost all electorates, with median rent of 200 dollars per week placing an electorate in the 90th percentile in 2001, but only the 30th percentile in 2016. In order for socio-demographic effects to be comparable across years, all socio-demographic variables were standardized.
 
-Many of the socio-demographic variables have changing scales over the years. For example, inflation-adjusted median rental prices increased across almost all electorates, with median rent of 200 dollars per week placing an electorate in the 90th percentile in 2001, but only the 30th percentile in 2016. In order for socio-demographic effects to be comparable across years, all explanatory variables are standardized so they are comparable across years. By standardizing, each variable is reported as a relative measure compared to all other electorates in the same year.
+There are dozens of socio-demographic variables available in the Censuses, with many variables representing similar information about an electorate. So we combined some variables to avoid redundant information. For example, our ``Incomes'' variable is a combination of median personal income, household income and family income.
 
-There are dozens of socio-demographic variables available in the Censuses, with many variables representing similar information about an electorate. So we combined some variables to avoid redundant information. For example, our ``Incomes'' variable is a combination of median personal income, household income and family income. In this way, we reduced the data set to include 30 socio-demographic variables, listed below.
-
-\begin{itemize}
-\tightlist
-\item
-  ``AusCitizen''
-\item
-  ``BornAsia''
-\item
-  ``Born\_MidEast''
-\item
-  ``BornSEEuro''
-\item
-  ``Born\_UK''
-\item
-  ``BornElsewhere''
-\item
-  ``Buddhism''
-\item
-  ``Christianity''
-\item
-  ``CurrentlyStudying''
-\item
-  ``DeFacto''
-\item
-  ``DiffAddress''
-\item
-  ``Distributive''
-\item
-  ``Education''
-\item
-  ``Extractive''
-\item
-  ``FamHouseSize''
-\item
-  ``Incomes''
-\item
-  ``Indigenous''
-\item
-  ``Islam''
-\item
-  ``Judaism''
-\item
-  ``ManagerAdmin''
-\item
-  ``Married''
-\item
-  ``MedianAge''
-\item
-  ``NoReligion''
-\item
-  ``OneParentHouse''
-\item
-  ``OtherLanguage''
-\item
-  ``PropertyOwned''
-\item
-  ``RentLoanPrice''
-\item
-  ``SocialServ''
-\item
-  ``Transformative''
-\item
-  ``Unemployment''
-\end{itemize}
-
-Each election was modelled separately, to allow us to see any changes over time, and to account for changing electorate boundaries.
+Each election was modelled separately, to allow us to see any changes over time, and to account for changing electorate boundaries. In this article, we highlight the variables with the strongest relationship to the two-party preferred vote, or which have had substantial changes over time. The full analysis is available at \url{https://robjhyndman.com/publications/elections/}.
 
 \hypertarget{country-wide-trend}{%
 \subsection{Country-wide trend}\label{country-wide-trend}}
 
-\begin{figure}[h]
+\begin{figure}[H]
 
-{\centering \includegraphics[height=0.2\textheight,]{elections_conversation_files/figure-latex/plotintercept-1} 
+{\centering \includegraphics{elections_conversation_files/figure-latex/plotintercept-1} 
 
 }
 
-\caption{Estimated intercept for each election, which represents the two-party preferred vote for an electorate with mean characteristics.}\label{fig:plotintercept}
+\caption{Estimated intercept for each election, which represents the two-party preferred vote for an electorate with average characteristics.}\label{fig:plotintercept}
 \end{figure}
 
-Since all socio-demographics have been standardized to have a mean of zero and a variance of one, the intercept in each model can be interpreted as the estimated two-party preferred vote for an electorate with mean characteristics\footnote{Mean of all variables aside from Judaism, Indigenous, Islam and Buddhism, where it assumes the mean of the log value.}. Figure \ref{fig:plotintercept} shows that the baseline of party preference has varied over the elections, with the biggest swing occurring in the 2007 election where the mean electorate shifted more than five percentage points in favour of the Labor party.
+Since all socio-demographics have been standardized, the intercept in each model can be interpreted as the estimated two-party preferred vote for an ``average'' electorate. Figure \ref{fig:plotintercept} shows that the baseline of party preference has varied over the elections, with the biggest swing occurring in the 2007 election where the mean electorate shifted more than five percentage points in favour of the Labor party. The dots represent the estimated 2PP value, and the lines indicate a 95\% confidence interval providing a guide to the uncertainty in the estimate.
 
 \hypertarget{influential-socio-demographics}{%
 \subsection{Influential socio-demographics}\label{influential-socio-demographics}}
 
-\begin{figure}[h]
+\begin{center}\includegraphics{elections_conversation_files/figure-latex/prepplot-1} \end{center}
 
-{\centering \includegraphics{elections_conversation_files/figure-latex/partresplot1-1} 
+\begin{center}\includegraphics{elections_conversation_files/figure-latex/prepplot-2} \end{center}
 
-}
+\begin{center}\includegraphics{elections_conversation_files/figure-latex/prepplot-3} \end{center}
 
-\caption{Partial residual plots by election year for a selection of predictors. Linear model with 95\% confidence bands overlaid. Most predictors have a positive relationship: the larger the value the more likely the electorate preferences the Coalition. The relationship is relatively robust over time, with the exception of Unemployment.}\label{fig:partresplot1}
-\end{figure}
+\begin{center}\includegraphics{elections_conversation_files/figure-latex/prepplot-4} \end{center}
 
-\begin{figure}[h]
+\begin{center}\includegraphics{elections_conversation_files/figure-latex/prepplot-5} \end{center}
 
-{\centering \includegraphics{elections_conversation_files/figure-latex/partresplot2-1} 
+\begin{center}\includegraphics{elections_conversation_files/figure-latex/prepplot-6} \end{center}
 
-}
+\begin{center}\includegraphics{elections_conversation_files/figure-latex/prepplot-7} \end{center}
 
-\caption{Partial residual plots by election year for a selection of predictors. Linear model with 95\% confidence bands overlaid. Several predictors have a negative relationship: with larger values indicating the electorate more likely preferences Labor. Most relationships are relatively stable over elections, except OtherLanguage and Education.}\label{fig:partresplot2}
-\end{figure}
+\begin{center}\includegraphics{elections_conversation_files/figure-latex/prepplot-8} \end{center}
+
+\begin{center}\includegraphics{elections_conversation_files/figure-latex/prepplot-9} \end{center}
+
+\begin{center}\includegraphics{elections_conversation_files/figure-latex/prepplot-10} \end{center}
+
+\begin{center}\includegraphics{elections_conversation_files/figure-latex/prepplot-11} \end{center}
+
+\begin{center}\includegraphics{elections_conversation_files/figure-latex/prepplot-12} \end{center}
+
+\begin{center}\includegraphics{elections_conversation_files/figure-latex/prepplot-13} \end{center}
+
+\begin{center}\includegraphics{elections_conversation_files/figure-latex/prepplot-14} \end{center}
+
+Partial residual plots by election year for a selection of predictors. Linear model with 95\textbackslash{}\% confidence bands overlaid. Most predictors have a positive relationship: the larger the value the more likely the electorate preferences the Coalition. The relationship is relatively robust over time, with the exception of Unemployment.
+
+Several predictors have a negative relationship: with larger values indicating the electorate more likely preferences Labor. Most relationships are relatively stable over elections, except OtherLanguage and Education.
 
 To investigate the socio-demographics that have a strong effect on the two-party preferred vote, partial residual plots are used and shown in Figures \ref{fig:partresplot1} and \ref{fig:partresplot2}. The partial residuals are the residuals from the fitted model with the estimated effect an individual variable added. These show the direction, size and significance of an estimated effect --- the slope of the prediction line matches the estimated coefficient, and the shaded region represents a 95\% confidence band, computed using the method in \textcite{visreg}. If a horizontal line can be drawn through the confidence band, then the effect is insignificant. The estimated intercept is also added to the partial residuals for interpretability. Plots for each election are faceted to compare the effects over time in Figures \ref{fig:partresplot1} and \ref{fig:partresplot2}. Only socio-demographics that have a significant effect in at least one election are displayed in Figures \ref{fig:partresplot1} and \ref{fig:partresplot2}.
 
@@ -337,11 +271,6 @@ Since 2007, electorates with higher education levels are associated with support
 \subsubsection{Diversity}\label{diversity}}
 
 Larger migrant populations from Asia, the Middle East, South-Eastern Europe, the United Kingdom and elsewhere, are either associated with Labor support, or have no effect. Of these areas, only South-Eastern European populations appear significant in each election, with the proportion of Asian migrants also being significant in 2010. Speaking other languages (aside from English) however, appears to have a far stronger effect, as observed through the \texttt{OtherLanguage} variable. Electorates with more diverse speech are associated with higher support for the Liberal party from 2004 onwards, with this effect being significant in 2007, 2010 and 2016. Furthermore, of the variables relating to religion, only Judaism shows a consistent effect, with electorates with relatively large Jewish populations more likely to vote Liberal.
-
-\hypertarget{a-note-on-similar-variables}{%
-\subsubsection{A note on similar variables}\label{a-note-on-similar-variables}}
-
-Many of the Census variables represent similar information, which is why factors were created and some variables were removed. However, some variables remain which are closely related. For example, an electorate's income level (via \texttt{Incomes}) is likely to be related to electoral unemployment and labor force participation (via \texttt{Unemployment}). In 2001, the coefficient estimate for \texttt{Unemployment} is negative but not significant, whilst the \texttt{Incomes} variables is significant. If the \texttt{Incomes} variable is removed from the model in 2001, \texttt{Unemployment} absorbs the negative effect, becoming significant (\(p = 0.0056\)).
 
 \hypertarget{a-closer-look-at-the-residuals}{%
 \subsection{A closer look at the residuals}\label{a-closer-look-at-the-residuals}}
@@ -389,6 +318,54 @@ This paper was produced using \texttt{RMarkdown} \autocite{rmarkdown} and \textt
 All election and Census datasets, along with electoral maps and more, are available in the \texttt{eechidna} (Exploring Election and Census Highly Informative Data Nationally for Australia) \texttt{R} package, which can be downloaded from CRAN. The \texttt{eechidna} package makes it easy to look at the data from the Australian Federal elections and Censuses that occurred between 2001 and 2016. This study contributed a large revision to the \texttt{eechidna} package, which included the addition of election and Census data for 2001--2010, voting outcomes for polling booths and imputed Census data for election years. For more details on using \texttt{eechidna}, please see the articles (vignettes) on the github page \href{https://ropenscilabs.github.io/eechidna/}{ropenscilabs.github.io/eechidna/}.
 
 The authors would like to sincerely thank Anthony Ebert, Heike Hofmann, Thomas Lumley, Ben Marwick, Carson Sievert, Mingzhu Sun, Dilini Talagala, Nicholas Tierney, Nathaniel Tomasetti, Earo Wang and Fang Zhou, all of whom have contributed to the \texttt{eechidna} package.
+
+\hypertarget{from-emil}{%
+\section{From Emil}\label{from-emil}}
+
+In terms of structure, start with a brief paragraph or two on what the research is, and what the reader can expect to find below.
+
+Then, break the article into small sections for each of the factors that have an effect (a short paragraph or two for each factor). And it would be great to include examples of specific seats where the relationship was strong, or interesting for other reasons.
+
+So the sections will be:
+
+\begin{itemize}
+\tightlist
+\item
+  Age
+\item
+  Income
+\item
+  Unemployment
+\item
+  Industry and type of work
+\item
+  Education
+\item
+  Diversity
+\item
+  Household mobility
+\item
+  Relationships
+\end{itemize}
+
+An example of this structure can be seen here:
+\url{https://theconversation.com/confused-about-aged-care-in-the-home-these-10-charts-explain-how-it-works-113923}
+
+Questions on particular factors:
+
+Incomes:
+- Was this correlation stronger in 2016? (and increasingly influential?)
+
+Household mobility
+- In the report, you say: ````Having controlled for characteristics of house ownership and rental prices'', whis effect is somewhat surprising''. Why is this surprising to you? (I would have expected this to support Labor more)
+
+Age
+- Would it be possible to show how the correlation changes for different age brackets (ie. younger voters = more Labor, and this swings more to Liberal as the age brackets gets older)?
+- If not, can you go into more detail specific age brackets? Eg. Is it the over-65s that skew Liberal?
+
+Diversity
+- Migrant population: Would it possible to break this out into particular groups? eg. Seats with higher Chinese population correlates with Liberal, seats with higher SEAsia pop correlates with Labor, etc?
+- The same for languages?
 
 \printbibliography
 
