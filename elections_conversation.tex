@@ -90,8 +90,8 @@
 %% Any special functions or other packages can be loaded here.
 
 \usepackage[no-weekday]{eukdate}
-%\usepackage{sourceserifpro}
-%\usepackage[scaled=0.86]{DejaVuSansMono}
+\usepackage{sourceserifpro}
+\usepackage[scaled=0.86]{DejaVuSansMono}
 \usepackage{float,bm,setspace}
 \setstretch{1.2}
 
@@ -194,7 +194,29 @@ Each election was modelled separately, to allow us to see any changes over time,
 \caption{Estimated intercept for each election, which represents the two-party preferred vote for an electorate with average characteristics.}\label{fig:plotintercept}
 \end{figure}
 
+\begin{figure}[H]
+
+{\centering \includegraphics{elections_conversation_files/figure-latex/intercept2-1} 
+
+}
+
+\caption{Estimated intercept for each election, which represents the two-party preferred vote for an electorate with average characteristics.}\label{fig:intercept2}
+\end{figure}
+
 Since all socio-demographics have been standardized, the intercept in each model can be interpreted as the estimated two-party preferred vote for an ``average'' electorate. Figure \ref{fig:plotintercept} shows that the baseline of party preference has varied over the elections, with the biggest swing occurring in the 2007 election where the mean electorate shifted more than five percentage points in favour of the Labor party. The dots represent the estimated 2PP value, and the lines indicate a 95\% confidence interval providing a guide to the uncertainty in the estimate.
+
+\hypertarget{age}{%
+\subsection{Age}\label{age}}
+
+\begin{itemize}
+\tightlist
+\item
+  Would it be possible to show how the correlation changes for different age brackets (ie. younger voters = more Labor, and this swings more to Liberal as the age brackets gets older)?
+\item
+  If not, can you go into more detail specific age brackets? Eg. Is it the over-65s that skew Liberal?
+\end{itemize}
+
+\begin{center}\includegraphics{elections_conversation_files/figure-latex/age-1} \end{center}
 
 \hypertarget{influential-socio-demographics}{%
 \subsection{Influential socio-demographics}\label{influential-socio-demographics}}
@@ -257,8 +279,8 @@ In each of the six elections, electorates with a higher proportion of people tha
 
 De facto relationships, but not marriages, are found to be an important (and significant) predictor of the two-party preferred vote in all six elections, with more de facto relationships associated with higher support for the Labor party. The proportion of individuals who are married however, is insignificant (not shown).
 
-\hypertarget{age}{%
-\subsubsection{Age}\label{age}}
+\hypertarget{age-1}{%
+\subsubsection{Age}\label{age-1}}
 
 Regions comprising more older people are often believed to be more conservative, and indeed it found that electorates with a higher median age are more likely to support the Liberal party --- although this effect is significant only in 2007 and 2010 (see row 2 in Figure \ref{fig:partresplot2}).
 

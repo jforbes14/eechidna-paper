@@ -97,62 +97,80 @@ There are dozens of socio-demographic variables available in the Censuses, with 
 
 Each election was modelled separately, to allow us to see any changes over time, and to account for changing electorate boundaries. In this article, we highlight the variables with the strongest relationship to the two-party preferred vote, or which have had substantial changes over time. The full analysis is available at https://robjhyndman.com/publications/elections/.
 
+```{r coefficients}
+coefs <- bind_rows(
+    data.frame(summary(glsmod16)$tTable) %>% 
+      rownames_to_column("variable") %>%
+      mutate(year = 2016),
+    data.frame(summary(glsmod13)$tTable) %>% 
+      rownames_to_column("variable") %>%
+      mutate(year = 2013),
+    data.frame(summary(glsmod10)$tTable) %>% 
+      rownames_to_column("variable") %>%
+      mutate(year = 2010),
+    data.frame(summary(glsmod07)$tTable) %>% 
+      rownames_to_column("variable") %>%
+      mutate(year = 2007),
+    data.frame(summary(glsmod04)$tTable) %>% 
+      rownames_to_column("variable") %>%
+      mutate(year = 2004),
+    data.frame(summary(glsmod01)$tTable) %>% 
+      rownames_to_column("variable") %>%
+      mutate(year = 2001)
+  ) %>%
+  as_tibble() %>%
+  rename(se = `Std.Error`, estimate = Value, p = `p.value`) %>%
+  mutate(upper95 = estimate + 1.96 * se, lower95 = estimate - 1.96 * se)
+```
 
 ## Country-wide trend
 
 ```{r plotintercept, fig.cap = "Estimated intercept for each election, which represents the two-party preferred vote for an electorate with average characteristics.", fig.pos="H"}
-intercept_df <- bind_rows(
-  data.frame(summary(glsmod16)$tTable)[1, ] %>% mutate(year = "2016"),
-  data.frame(summary(glsmod13)$tTable)[1, ] %>% mutate(year = "2013"),
-  data.frame(summary(glsmod10)$tTable)[1, ] %>% mutate(year = "2010"),
-  data.frame(summary(glsmod07)$tTable)[1, ] %>% mutate(year = "2007"),
-  data.frame(summary(glsmod04)$tTable)[1, ] %>% mutate(year = "2004"),
-  data.frame(summary(glsmod01)$tTable)[1, ] %>% mutate(year = "2001")
-) %>%
-  rename(se = `Std.Error`, estimate = Value, p = `p.value`) %>%
-  mutate(upper95 = estimate + 1.96 * se, lower95 = estimate - 1.96 * se)
-
-intercept_df %>%
+coefs %>% filter(variable=="Intercept") %>%
   ggplot() +
-  geom_point(aes(x = year, y = estimate), size = 3) +
+  geom_point(aes(x = year, y = estimate), size = 2) +
   geom_linerange(aes(x = year, ymin = lower95, ymax = upper95), size = 1.2) +
   geom_hline(aes(yintercept = 50), alpha = 0.5, size = 1) +
-  labs(x = "Election year", y = "Estimate of 2PP vote in average electorate") +
-  coord_fixed(ratio = 0.2) +
-  ylim(45.3, 54.7)
+  labs(x = "Election year", y = "2PP percentage") +
+  coord_fixed(ratio = 0.25) +
+  scale_x_continuous(breaks=seq(2001,2016,by=3), minor_breaks=NULL) +
+  scale_y_continuous(breaks=seq(46,54,by=2), minor_breaks=45:55)
 ```
 
 Since all socio-demographics have been standardized, the intercept in each model can be interpreted as the estimated two-party preferred vote for an "average" electorate. Figure \@ref(fig:plotintercept) shows that the baseline of party preference has varied over the elections, with the biggest swing occurring in the 2007 election where the mean electorate shifted more than five percentage points in favour of the Labor party. The dots represent the estimated 2PP value, and the lines indicate a 95% confidence interval providing a guide to the uncertainty in the estimate.
 
-## Influential socio-demographics
-
-```{r prepplot, echo = FALSE}
-grid_visreg("Extractive", top = TRUE)
-grid_visreg("DiffAddress")
-grid_visreg("ManagerAdmin")
-grid_visreg("Transformative")
-grid_visreg("Incomes")
-grid_visreg("Unemployment")
-grid_visreg("MedianAge", top = TRUE)
-grid_visreg("Judaism")
-grid_visreg("OtherLanguage")
-grid_visreg("OtherLanguage")
-grid_visreg("BornAsia")
-grid_visreg("Education")
-grid_visreg("BornSEEuro")
-grid_visreg("DeFacto")
-```
-
-
-Partial residual plots by election year for a selection of predictors. Linear model with 95\\% confidence bands overlaid. Most predictors have a positive relationship: the larger the value the more likely the electorate preferences the Coalition. The relationship is relatively robust over time, with the exception of Unemployment.
-
-Several predictors have a negative relationship: with larger values indicating the electorate more likely preferences Labor. Most relationships are relatively stable over elections, except OtherLanguage and Education.
-
-To investigate the socio-demographics that have a strong effect on the two-party preferred vote, partial residual plots are used and shown in Figures \@ref(fig:partresplot1) and \@ref(fig:partresplot2). The partial residuals are the residuals from the fitted model with the estimated effect an individual variable added. These show the direction, size and significance of an estimated effect --- the slope of the prediction line matches the estimated coefficient, and the shaded region represents a 95% confidence band, computed using the method in @visreg. If a horizontal line can be drawn through the confidence band, then the effect is insignificant. The estimated intercept is also added to the partial residuals for interpretability. Plots for each election are faceted to compare the effects over time in Figures \@ref(fig:partresplot1) and \@ref(fig:partresplot2). Only socio-demographics that have a significant effect in at least one election are displayed in Figures \@ref(fig:partresplot1) and \@ref(fig:partresplot2).
-
 It is important here to note the ecological fallacy: insights are being drawn at the electorate level, and cannot be inferred for another disaggregate level (e.g. individual voters).
 
+## Age
+
+- Would it be possible to show how the correlation changes for different age brackets (ie. younger voters = more Labor, and this swings more to Liberal as the age brackets gets older)?
+- If not, can you go into more detail specific age brackets? Eg. Is it the over-65s that skew Liberal?
+
+```{r age, fig.cap = "Estimated age effect for each election, which represents the impact of electorate median age on the two-party preferred vote. Higher values indicate a ", fig.pos="H"}
+coefs %>% filter(variable=="MedianAge") %>%
+  ggplot(aes(x=year)) +
+  geom_hline(aes(yintercept = 0), col='gray', size = 1) +
+  geom_point(aes(x = year, y = estimate), size = 2) +
+  geom_linerange(aes(x = year, ymin = lower95, ymax = upper95), size = 1.2) +
+  labs(x = "Election year", y = "2PP impact") +
+  coord_fixed(ratio = 0.25) + 
+  scale_x_continuous(breaks=seq(2001,2016,by=3), minor_breaks=NULL)
+```
+
 ### Income and unemployment
+
+
+```{r age, fig.cap = "Estimated age effect for each election, which represents the impact of electorate median age on the two-party preferred vote. Higher values indicate a ", fig.pos="H"}
+coefs %>% filter(variable=="MedianAge") %>%
+  ggplot(aes(x=year)) +
+  geom_hline(aes(yintercept = 0), col='gray', size = 1) +
+  geom_point(aes(x = year, y = estimate), size = 2) +
+  geom_linerange(aes(x = year, ymin = lower95, ymax = upper95), size = 1.2) +
+  labs(x = "Election year", y = "2PP impact") +
+  coord_fixed(ratio = 0.25) + 
+  scale_x_continuous(breaks=seq(2001,2016,by=3), minor_breaks=NULL)
+```
+
 
 Typically the Labor party campaigns on more progressive policies, which often include tax reform that adversely affects higher income earners, and more generous social assistance programs. Perhaps it is due to these policies that higher income electorates appear more likely to support the Liberal party, as the `Incomes` factor has a positive effect on Liberal preference (see row 1 in Figure \@ref(fig:partresplot1)). This effect is significant in every election aside from 2004, where it is only marginally insignificant ($p = 0.0613$). Unemployment however, is not as influential. In 2001 and 2004, electorates with higher unemployment align with Labor, but over time this shifts towards support for the Liberal party, culminating in a significantly positive effect in 2016.
 
