@@ -160,8 +160,8 @@ coefs %>% filter(variable=="MedianAge") %>%
 ### Income and unemployment
 
 
-```{r age, fig.cap = "Estimated age effect for each election, which represents the impact of electorate median age on the two-party preferred vote. Higher values indicate a ", fig.pos="H"}
-coefs %>% filter(variable=="MedianAge") %>%
+```{r income, fig.cap = "Estimated age effect for each election, which represents the impact of electorate median age on the two-party preferred vote. Higher values indicate a ", fig.pos="H"}
+coefs %>% filter(variable=="Income") %>%
   ggplot(aes(x=year)) +
   geom_hline(aes(yintercept = 0), col='gray', size = 1) +
   geom_point(aes(x = year, y = estimate), size = 2) +
