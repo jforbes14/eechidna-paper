@@ -84,7 +84,7 @@ my_df <- bind_rows(
     LNP_Votes, ALP_Votes, ALP_Percent, TotalVotes, Swing,
     InternetUse, InternetAccess, EnglishOnly,
     Other_NonChrist, OtherChrist, Catholic, Anglican,
-    Volunteer, EmuneratedElsewhere, DivisionID
+    Volunteer, EmuneratedElsewhere #, DivisionID
   ))
 
 # Create final df for modelling

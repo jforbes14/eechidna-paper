@@ -149,9 +149,9 @@
 \hypertarget{intro}{%
 \section{Introduction}\label{intro}}
 
-We often hear stereotypes about voting patterns --- people in their 20s without kids are more likely to be left wing, migrants are more conservative, wealthier people tend to favour the conservative parties, and so on. So we thought we would test these ideas by matching census data to election data, to see if we can identify what are the socio-demographic characteristics of an electorate that are most closely related to how they vote.
+We often hear commentary about voting patterns --- people in their 20s without kids are more likely to be left wing, migrants are more conservative, wealthier people tend to favour the conservative parties, and so on. These might be built on myth and stereotypes. There is open data available from each election and from regular national census that can be used to examine, just what are the indicators for voting tendency.
 
-It is also interesting to see how this might have changed over time. For example, if wealth was a good predictor of voting patterns in the 2001 election, is it still a good predictor in 2019? Australia has changed in many ways over the last two decades. Rising house prices, country-wide improvements in education, an ageing population, and a decline in religious affiliation, are just some of the ways we have changed. At the same time, political power has moved back and forth between the two major parties. How much can we attribute changes in political power to changes in who we are?
+Voting tendencies can chang over time. For example, if wealth was a good predictor of conservative voting in the 2001 election, is it still a good predictor in 2019? Australia has changed in many ways over the last two decades. Rising house prices, country-wide improvements in education, an ageing population, and a decline in religious affiliation, are just some of the ways we have changed. At the same time, political power has moved back and forth between the two major parties. How much can we attribute changes in political power to changes in who we are?
 
 \hypertarget{census-and-electoral-data}{%
 \section{Census and electoral data}\label{census-and-electoral-data}}
@@ -194,16 +194,9 @@ Each election was modelled separately, to allow us to see any changes over time,
 \caption{Estimated intercept for each election, which represents the two-party preferred vote for an electorate with average characteristics.}\label{fig:plotintercept}
 \end{figure}
 
-\begin{figure}[H]
-
-{\centering \includegraphics{elections_conversation_files/figure-latex/intercept2-1} 
-
-}
-
-\caption{Estimated intercept for each election, which represents the two-party preferred vote for an electorate with average characteristics.}\label{fig:intercept2}
-\end{figure}
-
 Since all socio-demographics have been standardized, the intercept in each model can be interpreted as the estimated two-party preferred vote for an ``average'' electorate. Figure \ref{fig:plotintercept} shows that the baseline of party preference has varied over the elections, with the biggest swing occurring in the 2007 election where the mean electorate shifted more than five percentage points in favour of the Labor party. The dots represent the estimated 2PP value, and the lines indicate a 95\% confidence interval providing a guide to the uncertainty in the estimate.
+
+It is important here to note the ecological fallacy: insights are being drawn at the electorate level, and cannot be inferred for another disaggregate level (e.g.~individual voters).
 
 \hypertarget{age}{%
 \subsection{Age}\label{age}}
@@ -216,49 +209,26 @@ Since all socio-demographics have been standardized, the intercept in each model
   If not, can you go into more detail specific age brackets? Eg. Is it the over-65s that skew Liberal?
 \end{itemize}
 
-\begin{center}\includegraphics{elections_conversation_files/figure-latex/age-1} \end{center}
+\begin{figure}[H]
 
-\hypertarget{influential-socio-demographics}{%
-\subsection{Influential socio-demographics}\label{influential-socio-demographics}}
+{\centering \includegraphics{elections_conversation_files/figure-latex/age-1} 
 
-\begin{center}\includegraphics{elections_conversation_files/figure-latex/prepplot-1} \end{center}
+}
 
-\begin{center}\includegraphics{elections_conversation_files/figure-latex/prepplot-2} \end{center}
-
-\begin{center}\includegraphics{elections_conversation_files/figure-latex/prepplot-3} \end{center}
-
-\begin{center}\includegraphics{elections_conversation_files/figure-latex/prepplot-4} \end{center}
-
-\begin{center}\includegraphics{elections_conversation_files/figure-latex/prepplot-5} \end{center}
-
-\begin{center}\includegraphics{elections_conversation_files/figure-latex/prepplot-6} \end{center}
-
-\begin{center}\includegraphics{elections_conversation_files/figure-latex/prepplot-7} \end{center}
-
-\begin{center}\includegraphics{elections_conversation_files/figure-latex/prepplot-8} \end{center}
-
-\begin{center}\includegraphics{elections_conversation_files/figure-latex/prepplot-9} \end{center}
-
-\begin{center}\includegraphics{elections_conversation_files/figure-latex/prepplot-10} \end{center}
-
-\begin{center}\includegraphics{elections_conversation_files/figure-latex/prepplot-11} \end{center}
-
-\begin{center}\includegraphics{elections_conversation_files/figure-latex/prepplot-12} \end{center}
-
-\begin{center}\includegraphics{elections_conversation_files/figure-latex/prepplot-13} \end{center}
-
-\begin{center}\includegraphics{elections_conversation_files/figure-latex/prepplot-14} \end{center}
-
-Partial residual plots by election year for a selection of predictors. Linear model with 95\textbackslash{}\% confidence bands overlaid. Most predictors have a positive relationship: the larger the value the more likely the electorate preferences the Coalition. The relationship is relatively robust over time, with the exception of Unemployment.
-
-Several predictors have a negative relationship: with larger values indicating the electorate more likely preferences Labor. Most relationships are relatively stable over elections, except OtherLanguage and Education.
-
-To investigate the socio-demographics that have a strong effect on the two-party preferred vote, partial residual plots are used and shown in Figures \ref{fig:partresplot1} and \ref{fig:partresplot2}. The partial residuals are the residuals from the fitted model with the estimated effect an individual variable added. These show the direction, size and significance of an estimated effect --- the slope of the prediction line matches the estimated coefficient, and the shaded region represents a 95\% confidence band, computed using the method in \textcite{visreg}. If a horizontal line can be drawn through the confidence band, then the effect is insignificant. The estimated intercept is also added to the partial residuals for interpretability. Plots for each election are faceted to compare the effects over time in Figures \ref{fig:partresplot1} and \ref{fig:partresplot2}. Only socio-demographics that have a significant effect in at least one election are displayed in Figures \ref{fig:partresplot1} and \ref{fig:partresplot2}.
-
-It is important here to note the ecological fallacy: insights are being drawn at the electorate level, and cannot be inferred for another disaggregate level (e.g.~individual voters).
+\caption{Estimated age effect for each election, which represents the impact of electorate median age on the two-party preferred vote. Higher values indicate a }\label{fig:age}
+\end{figure}
 
 \hypertarget{income-and-unemployment}{%
 \subsubsection{Income and unemployment}\label{income-and-unemployment}}
+
+\begin{figure}[H]
+
+{\centering \includegraphics{elections_conversation_files/figure-latex/income-1} 
+
+}
+
+\caption{Estimated age effect for each election, which represents the impact of electorate median age on the two-party preferred vote. Higher values indicate a }\label{fig:income}
+\end{figure}
 
 Typically the Labor party campaigns on more progressive policies, which often include tax reform that adversely affects higher income earners, and more generous social assistance programs. Perhaps it is due to these policies that higher income electorates appear more likely to support the Liberal party, as the \texttt{Incomes} factor has a positive effect on Liberal preference (see row 1 in Figure \ref{fig:partresplot1}). This effect is significant in every election aside from 2004, where it is only marginally insignificant (\(p = 0.0613\)). Unemployment however, is not as influential. In 2001 and 2004, electorates with higher unemployment align with Labor, but over time this shifts towards support for the Liberal party, culminating in a significantly positive effect in 2016.
 

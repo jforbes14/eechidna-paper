@@ -45,9 +45,9 @@ source("wrangle.R")
 
 # Introduction {#intro}
 
-We often hear stereotypes about voting patterns --- people in their 20s without kids are more likely to be left wing, migrants are more conservative, wealthier people tend to favour the conservative parties, and so on. So we thought we would test these ideas by matching census data to election data, to see if we can identify what are the socio-demographic characteristics of an electorate that are most closely related to how they vote.
+We often hear commentary about voting patterns --- people in their 20s without kids are more likely to be left wing, migrants are more conservative, wealthier people tend to favour the conservative parties, and so on. These might be built on myth and stereotypes. There is open data available from each election and from regular national census that can be used to examine, just what are the indicators for voting tendency. <!-- So we thought we would test these ideas by matching census data to election data, to see if we can identify what are the socio-demographic characteristics of an electorate that are most closely related to how they vote.--> 
 
-It is also interesting to see how this might have changed over time. For example, if wealth was a good predictor of voting patterns in the 2001 election, is it still a good predictor in 2019? Australia has changed in many ways over the last two decades. Rising house prices, country-wide improvements in education, an ageing population, and a decline in religious affiliation, are just some of the ways we have changed. At the same time, political power has moved back and forth between the two major parties. How much can we attribute changes in political power to changes in who we are?
+Voting tendencies can chang over time. For example, if wealth was a good predictor of conservative voting in the 2001 election, is it still a good predictor in 2019? Australia has changed in many ways over the last two decades. Rising house prices, country-wide improvements in education, an ageing population, and a decline in religious affiliation, are just some of the ways we have changed. At the same time, political power has moved back and forth between the two major parties. How much can we attribute changes in political power to changes in who we are?
 
 # Census and electoral data
 
@@ -207,11 +207,11 @@ all_resids <- data.frame(
   Residuals = c(glsmod16$actual_residuals, glsmod13$actual_residuals, glsmod10$actual_residuals, glsmod07$actual_residuals, glsmod04$actual_residuals, glsmod01$actual_residuals),
   gls_residuals = c(glsmod16$residuals, glsmod13$residuals, glsmod10$residuals, glsmod07$residuals, glsmod04$residuals, glsmod01$residuals),
   bind_rows(
-    glsmod16$my_data %>% left_join(tpp16 %>% dplyr::select(DivisionNm, DivisionID, StateAb), by = "DivisionNm"),
-    glsmod13$my_data %>% left_join(tpp13 %>% dplyr::select(DivisionNm, DivisionID, StateAb), by = "DivisionNm"),
-    glsmod10$my_data %>% left_join(tpp10 %>% dplyr::select(DivisionNm, DivisionID, StateAb), by = "DivisionNm"),
-    glsmod07$my_data %>% left_join(tpp07 %>% dplyr::select(DivisionNm, DivisionID, StateAb), by = "DivisionNm"),
-    glsmod04$my_data %>% left_join(tpp04 %>% dplyr::select(DivisionNm, DivisionID, StateAb), by = "DivisionNm"),
+    glsmod16$my_data %>% left_join(tpp16 %>% dplyr::select(DivisionNm, UniqueID, StateAb), by = "DivisionNm"),
+    glsmod13$my_data %>% left_join(tpp13 %>% dplyr::select(DivisionNm, UniqueID, StateAb), by = "DivisionNm"),
+    glsmod10$my_data %>% left_join(tpp10 %>% dplyr::select(DivisionNm, UniqueID, StateAb), by = "DivisionNm"),
+    glsmod07$my_data %>% left_join(tpp07 %>% dplyr::select(DivisionNm, UniqueID, StateAb), by = "DivisionNm"),
+    glsmod04$my_data %>% left_join(tpp04 %>% dplyr::select(DivisionNm, UniqueID, StateAb), by = "DivisionNm"),
     glsmod01$my_data %>% left_join(tpp01 %>% dplyr::select(DivisionNm, StateAb), by = "DivisionNm")
   )
 )
@@ -249,12 +249,12 @@ cooksd_df <- data.frame(
   gls_residuals = c(glsmod16$residuals, glsmod13$residuals, glsmod10$residuals, glsmod07$residuals, glsmod04$residuals, glsmod01$residuals),
   cooksd = c(glsmod16$cooksd, glsmod13$cooksd, glsmod10$cooksd, glsmod07$cooksd, glsmod04$cooksd, glsmod01$cooksd),
   bind_rows(
-    glsmod16$my_data %>% left_join(tpp16 %>% dplyr::select(DivisionNm, DivisionID, StateAb), by = "DivisionNm"),
-    glsmod13$my_data %>% left_join(tpp13 %>% dplyr::select(DivisionNm, DivisionID, StateAb), by = "DivisionNm"),
-    glsmod10$my_data %>% left_join(tpp10 %>% dplyr::select(DivisionNm, DivisionID, StateAb), by = "DivisionNm"),
-    glsmod07$my_data %>% left_join(tpp07 %>% dplyr::select(DivisionNm, DivisionID, StateAb), by = "DivisionNm"),
-    glsmod04$my_data %>% left_join(tpp04 %>% dplyr::select(DivisionNm, DivisionID, StateAb), by = "DivisionNm"),
-    glsmod01$my_data %>% left_join(tpp01 %>% dplyr::select(DivisionNm, DivisionID, StateAb), by = "DivisionNm"))
+    glsmod16$my_data %>% left_join(tpp16 %>% dplyr::select(DivisionNm, UniqueID, StateAb), by = "DivisionNm"),
+    glsmod13$my_data %>% left_join(tpp13 %>% dplyr::select(DivisionNm, UniqueID, StateAb), by = "DivisionNm"),
+    glsmod10$my_data %>% left_join(tpp10 %>% dplyr::select(DivisionNm, UniqueID, StateAb), by = "DivisionNm"),
+    glsmod07$my_data %>% left_join(tpp07 %>% dplyr::select(DivisionNm, UniqueID, StateAb), by = "DivisionNm"),
+    glsmod04$my_data %>% left_join(tpp04 %>% dplyr::select(DivisionNm, UniqueID, StateAb), by = "DivisionNm"),
+    glsmod01$my_data %>% left_join(tpp01 %>% dplyr::select(DivisionNm, UniqueID, StateAb), by = "DivisionNm"))
 )
 ```
 
