@@ -149,9 +149,9 @@
 \hypertarget{intro}{%
 \section{Introduction}\label{intro}}
 
-We often hear commentary about voting patterns --- people in their 20s without kids are more likely to be left wing, migrants are more conservative, wealthier people tend to favour the conservative parties, and so on. These might be built on myth and stereotypes. There is open data available from each election and from regular national census that can be used to examine, just what are the indicators for voting tendency.
+We often hear commentary about voting patterns --- people in their 20s without kids are more likely to be left wing, migrants are more conservative, wealthier people tend to favour the conservative parties, and so on. These might be built on myth and stereotypes. There is open data available from each election and from regular national censuses; this data can be used to examine just what are the indicators for voting tendency.
 
-Voting tendencies can chang over time. For example, if wealth was a good predictor of conservative voting in the 2001 election, is it still a good predictor in 2019? Australia has changed in many ways over the last two decades. Rising house prices, country-wide improvements in education, an ageing population, and a decline in religious affiliation, are just some of the ways we have changed. At the same time, political power has moved back and forth between the two major parties. How much can we attribute changes in political power to changes in who we are?
+Voting tendencies can change over time. For example, if wealth was a good predictor of conservative voting in the 2001 election, is it still a good predictor in 2019? Australia has changed in many ways over the last two decades. Rising house prices, country-wide improvements in education, an ageing population, and a decline in religious affiliation, are just some of the ways we have changed. At the same time, political power has moved back and forth between the two major parties. How much can we attribute changes in political power to changes in who we are?
 
 \hypertarget{census-and-electoral-data}{%
 \section{Census and electoral data}\label{census-and-electoral-data}}
@@ -167,7 +167,7 @@ The Census provides data on electoral socio-demographics, and vote counts in eac
 \caption{Timeline of Australian elections and Censuses. They do not always occur in the same year.}\label{fig:timeline}
 \end{figure}
 
-Not only can an electorate change between the last Census and an election, but even the electorate boundaries can change. Some electorates can disappear altogether and new electorates can arise. Electoral boundaries are redistributed regularly by the AEC, meaning that only in the years where both a Census and election occur are all boundaries likely to match --- the case for the 2001 and 2016 elections. So we first had to estimate what the socio-demographic characteristics of an electorate would have been at the time of each election using a complicated method of interpolation over time and geography. This method uses Census information from both before and after the election of interest, and information from neighbouring electorates when boundaries have changed.
+Not only can an electorate change between the last Census and an election, but even the electorate boundaries can change. Some electorates can disappear altogether and new electorates can arise. Electoral boundaries are redistributed regularly by the AEC, meaning that only in the years where both a Census and an election occur are all boundaries likely to match --- the case for the 2001 and 2016 elections. So we first had to estimate what the socio-demographic characteristics of an electorate would have been at the time of each election using a complicated method of interpolation over time and geography. This method uses Census information from both before and after the election of interest, and information from neighbouring electorates when boundaries have changed.
 
 \hypertarget{modelling}{%
 \section{2PP Modelling}\label{modelling}}
@@ -180,10 +180,13 @@ Many of the socio-demographic variables have changing scales over the years. For
 
 There are dozens of socio-demographic variables available in the Censuses, with many variables representing similar information about an electorate. So we combined some variables to avoid redundant information. For example, our ``Incomes'' variable is a combination of median personal income, household income and family income.
 
+We are using data at the electorate level. The results do not directly address the voting intentions of individuals.
+
 Each election was modelled separately, to allow us to see any changes over time, and to account for changing electorate boundaries. In this article, we highlight the variables with the strongest relationship to the two-party preferred vote, or which have had substantial changes over time. The full analysis is available at \url{https://robjhyndman.com/publications/elections/}.
 
 \hypertarget{country-wide-trend}{%
-\subsection{Country-wide trend}\label{country-wide-trend}}
+\subsection*{Country-wide trend}\label{country-wide-trend}}
+\addcontentsline{toc}{subsection}{Country-wide trend}
 
 \begin{figure}[H]
 
@@ -194,20 +197,11 @@ Each election was modelled separately, to allow us to see any changes over time,
 \caption{Estimated intercept for each election, which represents the two-party preferred vote for an electorate with average characteristics.}\label{fig:plotintercept}
 \end{figure}
 
-Since all socio-demographics have been standardized, the intercept in each model can be interpreted as the estimated two-party preferred vote for an ``average'' electorate. Figure \ref{fig:plotintercept} shows that the baseline of party preference has varied over the elections, with the biggest swing occurring in the 2007 election where the mean electorate shifted more than five percentage points in favour of the Labor party. The dots represent the estimated 2PP value, and the lines indicate a 95\% confidence interval providing a guide to the uncertainty in the estimate.
-
-It is important here to note the ecological fallacy: insights are being drawn at the electorate level, and cannot be inferred for another disaggregate level (e.g.~individual voters).
+First, we show the estimated two-party preferred vote for an ``average'' electorate. Figure \ref{fig:plotintercept} shows that the baseline of party preference has varied over the elections, with the biggest swing occurring in the 2007 election where the mean electorate shifted more than five percentage points in favour of the Labor party. The dots represent the estimated 2PP value, and the lines indicate a 95\% confidence interval providing a guide to the uncertainty in the estimate.
 
 \hypertarget{age}{%
-\subsection{Age}\label{age}}
-
-\begin{itemize}
-\tightlist
-\item
-  Would it be possible to show how the correlation changes for different age brackets (ie. younger voters = more Labor, and this swings more to Liberal as the age brackets gets older)?
-\item
-  If not, can you go into more detail specific age brackets? Eg. Is it the over-65s that skew Liberal?
-\end{itemize}
+\subsection*{Age}\label{age}}
+\addcontentsline{toc}{subsection}{Age}
 
 \begin{figure}[H]
 
@@ -218,8 +212,21 @@ It is important here to note the ecological fallacy: insights are being drawn at
 \caption{Estimated age effect for each election, which represents the impact of electorate median age on the two-party preferred vote. Higher values indicate a }\label{fig:age}
 \end{figure}
 
+Regions comprising more older people are often believed to be more conservative, and indeed we found that electorates with a higher median age are more likely to support the Liberal party --- although this effect is significant only in 2007 and 2010.
+
+Figure \ref{fig:age} shows the effect of median age on the 2PP vote. The vertical scale can be interpreted as a score measuring how much the 2PP vote differs between an average electorate, and an electorate with median age in the top third of all electorates.
+
+\begin{itemize}
+\tightlist
+\item
+  Would it be possible to show how the correlation changes for different age brackets (ie. younger voters = more Labor, and this swings more to Liberal as the age brackets gets older)?
+\item
+  If not, can you go into more detail specific age brackets? Eg. Is it the over-65s that skew Liberal?
+\end{itemize}
+
 \hypertarget{income-and-unemployment}{%
-\subsubsection{Income and unemployment}\label{income-and-unemployment}}
+\subsection*{Income and unemployment}\label{income-and-unemployment}}
+\addcontentsline{toc}{subsection}{Income and unemployment}
 
 \begin{figure}[H]
 
@@ -233,42 +240,42 @@ It is important here to note the ecological fallacy: insights are being drawn at
 Typically the Labor party campaigns on more progressive policies, which often include tax reform that adversely affects higher income earners, and more generous social assistance programs. Perhaps it is due to these policies that higher income electorates appear more likely to support the Liberal party, as the \texttt{Incomes} factor has a positive effect on Liberal preference (see row 1 in Figure \ref{fig:partresplot1}). This effect is significant in every election aside from 2004, where it is only marginally insignificant (\(p = 0.0613\)). Unemployment however, is not as influential. In 2001 and 2004, electorates with higher unemployment align with Labor, but over time this shifts towards support for the Liberal party, culminating in a significantly positive effect in 2016.
 
 \hypertarget{industry-and-type-of-work}{%
-\subsubsection{Industry and type of work}\label{industry-and-type-of-work}}
+\subsection*{Industry and type of work}\label{industry-and-type-of-work}}
+\addcontentsline{toc}{subsection}{Industry and type of work}
 
 Electorates with higher proportions of workers in mining, gas, water, agriculture, waste and electricity (grouped as \texttt{Extractive} industries) are consistently linked with higher support for the Liberal party, with the magnitude of this effect slightly increasing over the years (see row 3 in Figure \ref{fig:partresplot1}). This is unsurprising, as the Liberal party has close ties with these traditional energy industries, and typically present policies to reduce taxation on energy production. Furthermore, electorates with more workers in construction or manufacturing industries (\texttt{Transformative}) are also more likely to support the Liberal party (see row 4 in Figure \ref{fig:partresplot1}).
 
 Similarly, the proportion of workers in managerial, administrative, clerical and sales roles (\texttt{ManagerAdmin}) is also a significant predictor of two-party preference vote across all six elections, with a higher proportion of people working these jobs increasing Liberal support. The magnitude of this effect also seems to increase over the years.
 
 \hypertarget{household-mobility}{%
-\subsubsection{Household mobility}\label{household-mobility}}
+\subsection*{Household mobility}\label{household-mobility}}
+\addcontentsline{toc}{subsection}{Household mobility}
 
 In each of the six elections, electorates with a higher proportion of people that have recently (in the past five years) moved house (\texttt{DiffAddress}) are more likely to support the Liberal party, although this effect was marginally insignificant in 2013 (see row 6 in Figure \ref{fig:partresplot1}. Having controlled for characteristics of house ownership and rental prices (via the factors \texttt{PropertyOwned} and \texttt{RentLoan} respectively), this effect is somewhat surprising.
 
 \hypertarget{relationships}{%
-\subsubsection{Relationships}\label{relationships}}
+\subsection*{Relationships}\label{relationships}}
+\addcontentsline{toc}{subsection}{Relationships}
 
 De facto relationships, but not marriages, are found to be an important (and significant) predictor of the two-party preferred vote in all six elections, with more de facto relationships associated with higher support for the Labor party. The proportion of individuals who are married however, is insignificant (not shown).
 
-\hypertarget{age-1}{%
-\subsubsection{Age}\label{age-1}}
-
-Regions comprising more older people are often believed to be more conservative, and indeed it found that electorates with a higher median age are more likely to support the Liberal party --- although this effect is significant only in 2007 and 2010 (see row 2 in Figure \ref{fig:partresplot2}).
-
 \hypertarget{education}{%
-\subsubsection{Education}\label{education}}
+\subsection*{Education}\label{education}}
+\addcontentsline{toc}{subsection}{Education}
 
 Since 2007, electorates with higher education levels are associated with supporting the Labor party, although this effect is significant only in 2016. Before 2007, education has an almost zero effect (see row 3 in Figure \ref{fig:partresplot1}).
 
 \hypertarget{diversity}{%
-\subsubsection{Diversity}\label{diversity}}
+\subsection*{Diversity}\label{diversity}}
+\addcontentsline{toc}{subsection}{Diversity}
 
 Larger migrant populations from Asia, the Middle East, South-Eastern Europe, the United Kingdom and elsewhere, are either associated with Labor support, or have no effect. Of these areas, only South-Eastern European populations appear significant in each election, with the proportion of Asian migrants also being significant in 2010. Speaking other languages (aside from English) however, appears to have a far stronger effect, as observed through the \texttt{OtherLanguage} variable. Electorates with more diverse speech are associated with higher support for the Liberal party from 2004 onwards, with this effect being significant in 2007, 2010 and 2016. Furthermore, of the variables relating to religion, only Judaism shows a consistent effect, with electorates with relatively large Jewish populations more likely to vote Liberal.
 
 \hypertarget{a-closer-look-at-the-residuals}{%
-\subsection{A closer look at the residuals}\label{a-closer-look-at-the-residuals}}
+\section{A closer look at the residuals}\label{a-closer-look-at-the-residuals}}
 
 \hypertarget{residuals-by-state}{%
-\subsubsection{Residuals by state}\label{residuals-by-state}}
+\subsection{Residuals by state}\label{residuals-by-state}}
 
 It is often hypothesized that states have systematic differences that cause their electorates to vote differently. Boxplots of residuals grouped by state (Figure \ref{fig:resstate}) reveal that the data reflects this -- there appears to be a state-specific effect not captured by the models. Tasmania and the Australian Capital Territory appear to have a bias towards Labor, whereas the Northern Territory tends towards voting Liberal. However, there are relatively few electorates in each of these states (five, two and two respectively), so this apparent result may be due to incumbent effects rather than an actual state-specific bias.
 
@@ -282,7 +289,7 @@ It is often hypothesized that states have systematic differences that cause thei
 \end{figure}
 
 \hypertarget{outlier-electorates}{%
-\subsubsection{Outlier electorates}\label{outlier-electorates}}
+\subsection{Outlier electorates}\label{outlier-electorates}}
 
 Based on the distribution of the Cook's distance values, a Cook's distance greater than \(0.1\) is considered to be influential and a potential outlier. The electorate of Sydney (NSW) has a large Cook's distance from 2001 to 2013, due to its diverse population (language, birthplace and religion), high number of defacto relationships, high income, high household mobility and small amount of workers in extractive and transformative jobs. It has remained a strong supporter of the Labor party and the Liberal vote is severely overpredicted by the model, making it an outlier. Nearby in metropolitan NSW, the electorate of Wentworth is found to be an outlier in all but the 2007 election. Although historically Liberal, its two-party vote jumped by over 10 percentage points in 2010 without experiencing any notable changes in its socio-demographic makeup --- implying that this may be the direct effect of its Liberal member, Malcolm Turnbull, becoming the leader of the Liberal party. Liberal support in Wentworth is underpredicted by the model in each year, and more so with Turnbull as Liberal leader.
 
