@@ -132,6 +132,7 @@ my_fgls <- function(my_formula, my_data, sp_weights) {
   gls_model$gls_data <- gls_data
   gls_model$my_data <- my_data
   gls_model$actual_residuals <- solve(trans_mat) %*% gls_model$residuals
+  gls_model$predictions <- fitted(ols_model) # Use OLS predictions later
 
   return(gls_model)
 }
