@@ -9,7 +9,7 @@ papersize: a4
 output:
   bookdown::pdf_document2:
     fig_caption: yes
-    fig_height: 5
+    fig_height: 3
     fig_width: 8
     includes:
       in_header: conversation_preamble.tex
@@ -23,7 +23,7 @@ knitr::opts_chunk$set(
   echo = FALSE,
   fig.pos = "H",
   fig.align = "center",
-  cache = TRUE,
+  cache = FALSE,
   message = FALSE
 )
 library(tidyverse)
@@ -42,7 +42,6 @@ source("functions.R")
 source("wrangle.R")
 ```
 
-
 # Introduction {#intro}
 
 We often hear commentary about voting patterns --- people in their 20s without kids are more likely to be left wing, migrants are more conservative, wealthier people tend to favour the conservative parties, and so on. These might be built on myth and stereotypes. There is open data available from each election and from regular national censuses; this data can be used to examine just what are the indicators for voting tendency.
@@ -53,33 +52,31 @@ Voting tendencies can change over time. For example, if wealth was a good predic
 
 The Census provides data on electoral socio-demographics, and vote counts in each electorate can be obtained from Australian federal elections. However, joining these two data sources is difficult because the Censuses are not held at the same time as the elections. Between 2001 and 2016 there were six elections and four Censuses, as shown in the timeline below.
 
-```{r timeline, echo = FALSE, fig.cap="Timeline of Australian elections and Censuses. Censuses happen regularly, elections not quite regularly, which means data needs to be interpolated by time.", out.width = "90%", fig.align="center"}
-timeline <- data.frame(year = c(2001:2016)) %>%
+```{r timeline, echo = FALSE, fig.cap="Timeline of Australian elections and Censuses. Censuses happen regularly, elections not quite regularly, which means data needs to be interpolated by time."}
+data.frame(year = c(2001:2016)) %>%
   mutate(
     Election = ifelse(year %in% c(2001, 2004, 2007, 2010, 2013, 2016), 1, 0),
     Census = ifelse(year %in% c(2001, 2006, 2011, 2016), 1.4, 0)
   ) %>%
   gather(c(Election, Census), key = event, value = measure) %>%
   filter(measure != 0) %>%
-  mutate(year_vis = ifelse(event == "Census", year + 0.1, year))
-
-
-ggplot(timeline, aes(x = year_vis, y = measure)) +
-  geom_point(aes(color = as.factor(event), shape = as.factor(event)), size = 4) +
-  labs(color = "Event", shape = "Event", x = "Year") +
-  geom_hline(yintercept = 0, size = 1, color = "grey", show.legend = FALSE) +
-  geom_segment(x = 2001, xend = 2001, y = 1, yend = 0, color = "#1B9E77") +
-  geom_segment(x = 2004, xend = 2004, y = 1, yend = 0, color = "#1B9E77") +
-  geom_segment(x = 2007, xend = 2007, y = 1, yend = 0, color = "#1B9E77") +
-  geom_segment(x = 2010, xend = 2010, y = 1, yend = 0, color = "#1B9E77") +
-  geom_segment(x = 2013, xend = 2013, y = 1, yend = 0, color = "#1B9E77") +
-  geom_segment(x = 2016, xend = 2016, y = 1, yend = 0, color = "#1B9E77") +
-  geom_segment(x = 2001.1, xend = 2001.1, y = 1.4, yend = 0, color = "#D95F02") +
-  geom_segment(x = 2006.1, xend = 2006.1, y = 1.4, yend = 0, color = "#D95F02") +
-  geom_segment(x = 2011.1, xend = 2011.1, y = 1.4, yend = 0, color = "#D95F02") +
-  geom_segment(x = 2016.1, xend = 2016.1, y = 1.4, yend = 0, color = "#D95F02") +
-  scale_x_discrete(limits = c(2001:2016)) +
-  coord_fixed(ratio = 2)
+  mutate(year_vis = ifelse(event == "Census", year + 0.1, year)) %>%
+  ggplot(aes(x = year_vis, y = measure)) +
+    geom_point(aes(color = as.factor(event), shape = as.factor(event)), size = 4) +
+    labs(color = "Event", shape = "Event", x = "Year") +
+    geom_hline(yintercept = 0, size = 1, color = "grey", show.legend = FALSE) +
+    geom_segment(x = 2001, xend = 2001, y = 1, yend = 0, color = "#1B9E77") +
+    geom_segment(x = 2004, xend = 2004, y = 1, yend = 0, color = "#1B9E77") +
+    geom_segment(x = 2007, xend = 2007, y = 1, yend = 0, color = "#1B9E77") +
+    geom_segment(x = 2010, xend = 2010, y = 1, yend = 0, color = "#1B9E77") +
+    geom_segment(x = 2013, xend = 2013, y = 1, yend = 0, color = "#1B9E77") +
+    geom_segment(x = 2016, xend = 2016, y = 1, yend = 0, color = "#1B9E77") +
+    geom_segment(x = 2001.1, xend = 2001.1, y = 1.4, yend = 0, color = "#D95F02") +
+    geom_segment(x = 2006.1, xend = 2006.1, y = 1.4, yend = 0, color = "#D95F02") +
+    geom_segment(x = 2011.1, xend = 2011.1, y = 1.4, yend = 0, color = "#D95F02") +
+    geom_segment(x = 2016.1, xend = 2016.1, y = 1.4, yend = 0, color = "#D95F02") +
+    scale_x_discrete(limits = c(2001:2016)) +
+    coord_fixed(ratio = 2)
 ```
 
 Not only can an electorate change between the last Census and an election, but even the electorate boundaries can change. Some electorates can disappear altogether and new electorates can arise. Electoral boundaries are redistributed regularly by the AEC, meaning that only in the years where both a Census and an election occur are all boundaries likely to match --- the case for the 2001 and 2016 elections. So we first had to estimate what the socio-demographic characteristics of an electorate would have been at the time of each election using a complicated method of interpolation over time and geography. This method uses Census information from both before and after the election of interest, and information from neighbouring electorates when boundaries have changed.
@@ -126,80 +123,216 @@ coefs <- bind_rows(
 
 ## Country-wide trend {-}
 
-```{r plotintercept, fig.cap = "Estimated intercept for each election, which represents the two-party preferred vote for an electorate with average characteristics.", fig.pos="H"}
-coefs %>% filter(variable=="Intercept") %>%
+First, we show the estimated two-party preferred vote for an "average" electorate.
+
+```{r plotintercept, fig.cap = "Estimated two-party preferred vote for an electorate with average characteristics at each election."}
+coefs %>%
+  filter(variable=="Intercept") %>%
   ggplot() +
-  geom_point(aes(x = year, y = estimate), size = 2) +
-  geom_linerange(aes(x = year, ymin = lower95, ymax = upper95), size = 1.2) +
-  geom_hline(aes(yintercept = 50), alpha = 0.5, size = 1) +
-  labs(x = "Election year", y = "2PP percentage") +
-  coord_fixed(ratio = 0.25) +
-  scale_x_continuous(breaks=seq(2001,2016,by=3), minor_breaks=NULL) +
-  scale_y_continuous(breaks=seq(46,54,by=2), minor_breaks=45:55)
+    geom_hline(aes(yintercept = 50), col='gray', size = 1) +
+    geom_point(aes(x = year, y = estimate), size = 2) +
+    geom_linerange(aes(x = year, ymin = lower95, ymax = upper95), size = .7) +
+    labs(x = "Election year", y = "2PP percentage") +
+    scale_x_continuous(breaks=seq(2001,2016,by=3), minor_breaks=NULL) +
+    scale_y_continuous(breaks=seq(44,56,by=2), minor_breaks=NULL, limits=50 + c(-1,1)*4.66)
 ```
 
-First, we show the estimated two-party preferred vote for an "average" electorate. Figure \@ref(fig:plotintercept) shows that the baseline of party preference has varied over the elections, with the biggest swing occurring in the 2007 election where the mean electorate shifted more than five percentage points in favour of the Labor party. The dots represent the estimated 2PP value, and the lines indicate a 95% confidence interval providing a guide to the uncertainty in the estimate.
+This shows that the baseline of party preference has varied over the elections, with the biggest swing occurring in the 2007 election where the mean electorate shifted more than five percentage points in favour of the Labor party. The dots represent the estimated 2PP value, and the lines indicate a 95% confidence interval providing a guide to the uncertainty in the estimate. Where the vertical lines corresponding to each election cross the 50% horizontal line, the 2PP vote for an average electorate is not statistically distinguishable from 50% for that election.
+
+```{r scaling}
+# For the remaining graphics, we will rescale the coefficients to allow easier interpretation
+coefs <- coefs %>%
+  mutate(
+    estimate = estimate * qnorm(.9),
+    lower95 = lower95 * qnorm(.9),
+    upper95 = upper95 * qnorm(.9),
+  )
+
+yrange <- coefs %>%
+  filter(variable %in% c(
+      "MedianAge",
+      "Incomes",
+      "Unemployment",
+      "Education",
+      "Extractive",
+      "Transformative",
+      "ManagerAdmin",
+      "DiffAddress",
+      "DeFacto",
+      "Education",
+      "OtherLanguage"
+    )) %>%
+  summarise(
+    upper = max(upper95),
+    lower = min(lower95)
+  )
+yscale <- scale_y_continuous(
+  breaks=seq(-50,50,by=5),
+  minor_breaks=NULL,
+  limits=c(yrange$lower,yrange$upper))
+```
 
 ## Age {-}
 
-```{r age, fig.cap = "Estimated age effect for each election, which represents the impact of electorate median age on the two-party preferred vote. Higher values indicate a ", fig.pos="H"}
-coefs %>% filter(variable=="MedianAge") %>%
+Regions comprising more older people are often believed to be more conservative, and indeed we found that electorates with a higher median age are more likely to support the Liberal party --- although this effect is significant only in 2004 and 2007.
+
+```{r age, fig.cap = "Estimated impact of electorate median age on the two-party preferred vote."}
+coefs %>%
+  filter(variable=="MedianAge") %>%
   ggplot(aes(x=year)) +
-  geom_hline(aes(yintercept = 0), col='gray', size = 1) +
-  geom_point(aes(x = year, y = estimate), size = 2) +
-  geom_linerange(aes(x = year, ymin = lower95, ymax = upper95), size = 1.2) +
-  labs(x = "Election year", y = "2PP impact") +
-  coord_fixed(ratio = 0.25) +
-  scale_x_continuous(breaks=seq(2001,2016,by=3), minor_breaks=NULL)
+    geom_hline(aes(yintercept = 0), col='gray', size = 1) +
+    geom_point(aes(x = year, y = estimate), size = 2) +
+    geom_linerange(aes(x = year, ymin = lower95, ymax = upper95), size = .7) +
+    labs(x = "Election year", y = "2PP impact") +
+    scale_x_continuous(breaks=seq(2001,2016,by=3), minor_breaks=NULL) + yscale
 ```
 
-Regions comprising more older people are often believed to be more conservative, and indeed we found that electorates with a higher median age are more likely to support the Liberal party --- although this effect is significant only in 2007 and 2010.
+This graph shows the effect of median age on the 2PP vote. The vertical scale can be interpreted as a score measuring how much the 2PP vote differs between an average electorate, and an electorate with median age in the top 10% of all electorates (with all other socio-demographic variables unchanged). The reverse is true for young electorates --- the score can be interpreted as how much the 2PP vote would be reduced if an average electorate kept all socio-demographic variables fixed but median age was reduced to be in the bottom 10% of all eletorates.
 
-Figure \@ref(fig:age) shows the effect of median age on the 2PP vote. The vertical scale can be interpreted as a score measuring how much the 2PP vote differs between an average electorate, and an electorate with median age in the top third of all electorates.
+## Income {-}
 
+Typically the Labor party campaigns on more progressive policies, which often include tax reform that adversely affects higher income earners, and more generous social assistance programs. Perhaps it is due to these policies that higher income electorates appear more likely to support the Liberal party, as the `Incomes` factor has a positive effect on Liberal preference. The effect also seems to have been increasing over time.
 
-- Would it be possible to show how the correlation changes for different age brackets (ie. younger voters = more Labor, and this swings more to Liberal as the age brackets gets older)?
-- If not, can you go into more detail specific age brackets? Eg. Is it the over-65s that skew Liberal?
-
-## Income and unemployment {-}
-
-
-```{r income, fig.cap = "Estimated age effect for each election, which represents the impact of electorate median age on the two-party preferred vote. Higher values indicate a ", fig.pos="H"}
-coefs %>% filter(variable=="Income") %>%
+```{r income, fig.cap = "Estimated impact of electorate income on the two-party preferred vote."}
+coefs %>%
+  filter(variable=="Incomes") %>%
   ggplot(aes(x=year)) +
-  geom_hline(aes(yintercept = 0), col='gray', size = 1) +
-  geom_point(aes(x = year, y = estimate), size = 2) +
-  geom_linerange(aes(x = year, ymin = lower95, ymax = upper95), size = 1.2) +
-  labs(x = "Election year", y = "2PP impact") +
-  coord_fixed(ratio = 0.25) +
-  scale_x_continuous(breaks=seq(2001,2016,by=3), minor_breaks=NULL)
+    geom_hline(aes(yintercept = 0), col='gray', size = 1) +
+    geom_point(aes(x = year, y = estimate), size = 2) +
+    geom_linerange(aes(x = year, ymin = lower95, ymax = upper95), size = .7) +
+    labs(x = "Election year", y = "2PP impact") +
+    scale_x_continuous(breaks=seq(2001,2016,by=3), minor_breaks=NULL) + yscale
 ```
 
-Typically the Labor party campaigns on more progressive policies, which often include tax reform that adversely affects higher income earners, and more generous social assistance programs. Perhaps it is due to these policies that higher income electorates appear more likely to support the Liberal party, as the `Incomes` factor has a positive effect on Liberal preference (see row 1 in Figure \@ref(fig:partresplot1)). This effect is significant in every election aside from 2004, where it is only marginally insignificant ($p = 0.0613$). Unemployment however, is not as influential. In 2001 and 2004, electorates with higher unemployment align with Labor, but over time this shifts towards support for the Liberal party, culminating in a significantly positive effect in 2016.
+As before, the vertical scale can be interpreted as a score measuring how much the 2PP vote differs between an average electorate, and an electorate with income in the top 10% of all electorates (with all other socio-demographic variables unchanged).
+
+## Unemployment {-}
+
+Unemployment however, is not as influential. In 2001 and 2004, electorates with higher unemployment align with Labor, but over time this shifts towards support for the Liberal party, culminating in a significantly positive (but small) effect in 2016.
+
+```{r unemployment, fig.cap = "Estimated impact of electorate unemployment on the two-party preferred vote."}
+coefs %>%
+  filter(variable=="Unemployment") %>%
+  ggplot(aes(x=year)) +
+    geom_hline(aes(yintercept = 0), col='gray', size = 1) +
+    geom_point(aes(x = year, y = estimate), size = 2) +
+    geom_linerange(aes(x = year, ymin = lower95, ymax = upper95), size = .7) +
+    labs(x = "Election year", y = "2PP impact") +
+    scale_x_continuous(breaks=seq(2001,2016,by=3), minor_breaks=NULL) + yscale
+```
+
+The vertical scale can be interpreted as a score measuring how much the 2PP vote differs between an average electorate, and an electorate with unemployment in the top 10% of all electorates (with all other socio-demographic variables unchanged)
 
 ## Industry and type of work {-}
 
-Electorates with higher proportions of workers in mining, gas, water, agriculture, waste and electricity (grouped as `Extractive` industries) are consistently linked with higher support for the Liberal party, with the magnitude of this effect slightly increasing over the years (see row 3 in Figure \@ref(fig:partresplot1)). This is unsurprising, as the Liberal party has close ties with these traditional energy industries, and typically present policies to reduce taxation on energy production. Furthermore, electorates with more workers in construction or manufacturing industries (`Transformative`) are also more likely to support the Liberal party (see row 4 in Figure \@ref(fig:partresplot1)).
+Electorates with higher proportions of workers in extractive industries (mining, gas, water, agriculture, waste and electricity) are consistently linked with higher support for the Liberal party, with the magnitude of this effect slightly increasing over the years.
 
-Similarly, the proportion of workers in managerial, administrative, clerical and sales roles (`ManagerAdmin`) is also a significant predictor of two-party preference vote across all six elections, with a higher proportion of people working these jobs increasing Liberal support. The magnitude of this effect also seems to increase over the years.
+```{r extractive, fig.cap = "Estimated impact of employment in the extractive industries on the two-party preferred vote."}
+coefs %>%
+  filter(variable=="Extractive") %>%
+  ggplot(aes(x=year)) +
+    geom_hline(aes(yintercept = 0), col='gray', size = 1) +
+    geom_point(aes(x = year, y = estimate), size = 2) +
+    geom_linerange(aes(x = year, ymin = lower95, ymax = upper95), size = .7) +
+    labs(x = "Election year", y = "2PP impact") +
+    scale_x_continuous(breaks=seq(2001,2016,by=3), minor_breaks=NULL) + yscale
+```
+
+This is unsurprising, as the Liberal party has close ties with these traditional energy industries, and typically present policies to reduce taxation on energy production.
+
+Electorates with more workers in transformative industries (construction or manufacturing) are also more likely to support the Liberal party.
+
+```{r transformative, fig.cap = "Estimated impact of employment in the transformative industries on the two-party preferred vote."}
+coefs %>%
+  filter(variable=="Transformative") %>%
+  ggplot(aes(x=year)) +
+    geom_hline(aes(yintercept = 0), col='gray', size = 1) +
+    geom_point(aes(x = year, y = estimate), size = 2) +
+    geom_linerange(aes(x = year, ymin = lower95, ymax = upper95), size = .7) +
+    labs(x = "Election year", y = "2PP impact") +
+    scale_x_continuous(breaks=seq(2001,2016,by=3), minor_breaks=NULL) + yscale
+```
+
+The proportion of workers in managerial, administrative, clerical and sales roles is also a significant predictor of two-party preference vote across all six elections, with a higher proportion of people working these jobs increasing Liberal support.
+
+```{r manager, fig.cap = "Estimated impact of employment in management or administration on the two-party preferred vote."}
+coefs %>%
+  filter(variable=="ManagerAdmin") %>%
+  ggplot(aes(x=year)) +
+    geom_hline(aes(yintercept = 0), col='gray', size = 1) +
+    geom_point(aes(x = year, y = estimate), size = 2) +
+    geom_linerange(aes(x = year, ymin = lower95, ymax = upper95), size = .7) +
+    labs(x = "Election year", y = "2PP impact") +
+    scale_x_continuous(breaks=seq(2001,2016,by=3), minor_breaks=NULL) + yscale
+```
 
 ## Household mobility {-}
 
-In each of the six elections, electorates with a higher proportion of people that have recently (in the past five years) moved house (`DiffAddress`) are more likely to support the Liberal party, although this effect was marginally insignificant in 2013 (see row 6 in Figure \@ref(fig:partresplot1). Having controlled for characteristics of house ownership and rental prices (via the factors `PropertyOwned` and `RentLoan` respectively), this effect is somewhat surprising.
+In each of the six elections, electorates with a higher proportion of people that have recently (in the past five years) moved house are more likely to support the Liberal party.
+
+```{r mobility, fig.cap = "Estimated impact of household mobility on the two-party preferred vote."}
+coefs %>%
+  filter(variable=="DiffAddress") %>%
+  ggplot(aes(x=year)) +
+    geom_hline(aes(yintercept = 0), col='gray', size = 1) +
+    geom_point(aes(x = year, y = estimate), size = 2) +
+    geom_linerange(aes(x = year, ymin = lower95, ymax = upper95), size = .7) +
+    labs(x = "Election year", y = "2PP impact") +
+    scale_x_continuous(breaks=seq(2001,2016,by=3), minor_breaks=NULL) + yscale
+```
+
+Our analysis controls for characteristics of home ownership and rental prices, so this effect is not simply due to electorates having low rates of home ownership, or due to electorates having high rental prices. Instead, it suggests that people who are more transient are also more likely to be conservative voters, regardless of their home ownership or rental status. (This would need further study, as we do not have individual level voting data.)
 
 ## Relationships {-}
 
 De facto relationships, but not marriages, are found to be an important (and significant) predictor of the two-party preferred vote in all six elections, with more de facto relationships associated with higher support for the Labor party. The proportion of individuals who are married however, is insignificant (not shown).
 
+```{r defacto, fig.cap = "Estimated impact of de facto relationships on the two-party preferred vote."}
+coefs %>%
+  filter(variable=="DeFacto") %>%
+  ggplot(aes(x=year)) +
+    geom_hline(aes(yintercept = 0), col='gray', size = 1) +
+    geom_point(aes(x = year, y = estimate), size = 2) +
+    geom_linerange(aes(x = year, ymin = lower95, ymax = upper95), size = .7) +
+    labs(x = "Election year", y = "2PP impact") +
+    scale_x_continuous(breaks=seq(2001,2016,by=3), minor_breaks=NULL) + yscale
+```
+
 ## Education {-}
 
-Since 2007, electorates with higher education levels are associated with supporting the Labor party, although this effect is significant only in 2016. Before 2007, education has an almost zero effect (see row 3 in Figure \@ref(fig:partresplot1)).
+Since 2007, electorates with higher education levels are associated with supporting the Labor party, although this effect is significant only in 2016. Before 2007, education had a negligible effect.
+
+```{r education, fig.cap = "Estimated impact of education on the two-party preferred vote."}
+coefs %>%
+  filter(variable=="Education") %>%
+  ggplot(aes(x=year)) +
+    geom_hline(aes(yintercept = 0), col='gray', size = 1) +
+    geom_point(aes(x = year, y = estimate), size = 2) +
+    geom_linerange(aes(x = year, ymin = lower95, ymax = upper95), size = .7) +
+    labs(x = "Election year", y = "2PP impact") +
+    scale_x_continuous(breaks=seq(2001,2016,by=3), minor_breaks=NULL) + yscale
+```
 
 ## Diversity {-}
 
-Larger migrant populations from Asia, the Middle East, South-Eastern Europe, the United Kingdom and elsewhere, are either associated with Labor support, or have no effect. Of these areas, only South-Eastern European populations appear significant in each election, with the proportion of Asian migrants also being significant in 2010. Speaking other languages (aside from English) however, appears to have a far stronger effect, as observed through the `OtherLanguage` variable. Electorates with more diverse speech are associated with higher support for the Liberal party from 2004 onwards, with this effect being significant in 2007, 2010 and 2016. Furthermore, of the variables relating to religion, only Judaism shows a consistent effect, with electorates with relatively large Jewish populations more likely to vote Liberal.
+Larger migrant populations from Asia, the Middle East, South-Eastern Europe, the United Kingdom and elsewhere, are either associated with Labor support, or have no effect. Of these areas, only differences in South-Eastern European populations appear to have had a significant impact in each election, with the proportion of Asian migrants also being significant in 2010.
 
-# A closer look at the residuals
+Speaking languages other than English however, appears to have a far stronger effect. Electorates with more diverse languages are associated with higher support for the Liberal party from 2004 onwards, with this effect being significant in 2007, 2010 and 2016.
+
+```{r otherlanguage, fig.cap = "Estimated impact of ethnic diversity on the two-party preferred vote."}
+coefs %>%
+  filter(variable=="OtherLanguage") %>%
+  ggplot(aes(x=year)) +
+    geom_hline(aes(yintercept = 0), col='gray', size = 1) +
+    geom_point(aes(x = year, y = estimate), size = 2) +
+    geom_linerange(aes(x = year, ymin = lower95, ymax = upper95), size = .7) +
+    labs(x = "Election year", y = "2PP impact") +
+    scale_x_continuous(breaks=seq(2001,2016,by=3), minor_breaks=NULL) + yscale
+```
+
+Of the variables relating to religion, only Judaism shows a consistent effect, with electorates with relatively large Jewish populations more likely to vote Liberal.
+
+# State effects
 
 ```{r resids, include = FALSE}
 all_resids <- data.frame(
@@ -217,11 +350,9 @@ all_resids <- data.frame(
 # %>% dplyr::select(Residuals, DivisionNm, DivisionID, StateAb, year, LNP_Percent, gls_residuals)
 ```
 
-## Residuals by state
+It is often suggested that states have systematic differences that cause their electorates to vote differently. We can explore this effect by looking at the difference between the actual 2PP vote in each electorate and what our modelling would predict based only on electorate characteristics. We found a bias toward Labor in the ACT, and to a smaller extent in Tasmania, and a bias toward the Liberals in the Northern Territory. No other states showed a significantly different voting pattern from what you would expect using only socio-demographic information. That suggests that any differences between Queensland and Victoria (for example) are due to different voter socio-demographics.
 
-It is often hypothesized that states have systematic differences that cause their electorates to vote differently. Boxplots of residuals grouped by state (Figure \@ref(fig:resstate)) reveal that the data reflects this -- there appears to be a state-specific effect not captured by the models. Tasmania and the Australian Capital Territory appear to have a bias towards Labor, whereas the Northern Territory tends towards voting Liberal. However, there are relatively few electorates in each of these states (five, two and two respectively), so this apparent result may be due to incumbent effects rather than an actual state-specific bias.
-
-```{r resstate, fig.cap = "Boxplot of residuals by state with jittered points. States ordered by median residual. A state-specific bias not captured by the model is evident.", fig.asp=0.6, out.width="70%", fig.pos = 'h', out.extra = ''}
+```{r resstate, fig.cap = "Boxplot of residuals by state with jittered points. States ordered by median residual. A state-specific bias not captured by the model is evident.", fig.asp=0.6, out.width="70%", fig.pos = 'h', out.extra = '', eval=FALSE}
 all_resids %>%
   ggplot(aes(x = fct_reorder(StateAb, Residuals), y = Residuals)) +
   geom_hline(aes(yintercept = 0), col = "grey50") +
@@ -232,7 +363,10 @@ all_resids %>%
   labs(x = "State", y = "Residuals")
 ```
 
-## Outlier electorates
+# Against the tide
+
+As well as looking at whether some states have results different from what is predicted, we can also look at individual electorates. That is, when does an electorate vote very differently from what their socio-demographics would suggest? This suggests something is going on beyond the effect of socio-demographics. For example, a very good (or bad) local member could lead to voting patterns that are very different from what is predicted.
+
 
 ```{r readcooksd, eval = FALSE}
 read_chunk('cooksd.R')
@@ -316,40 +450,3 @@ All election and Census datasets, along with electoral maps and more, are availa
 
 The authors would like to sincerely thank Anthony Ebert, Heike Hofmann, Thomas Lumley, Ben Marwick, Carson Sievert, Mingzhu Sun, Dilini Talagala, Nicholas Tierney, Nathaniel Tomasetti, Earo Wang and Fang Zhou, all of whom have contributed to the `eechidna` package.
 
-
-
-# From Emil
-
-In terms of structure, start with a brief paragraph or two on what the research is, and what the reader can expect to find below.
-
-Then, break the article into small sections for each of the factors that have an effect (a short paragraph or two for each factor). And it would be great to include examples of specific seats where the relationship was strong, or interesting for other reasons.
-
-So the sections will be:
-
-- Age
-- Income
-- Unemployment
-- Industry and type of work
-- Education
-- Diversity
-- Household mobility
-- Relationships
-
-An example of this structure can be seen here:
-https://theconversation.com/confused-about-aged-care-in-the-home-these-10-charts-explain-how-it-works-113923
-
-Questions on particular factors:
-
-Incomes:
-- Was this correlation stronger in 2016? (and increasingly influential?)
-
-Household mobility
-- In the report, you say: "“Having controlled for characteristics of house ownership and rental prices”, whis effect is somewhat surprising”. Why is this surprising to you? (I would have expected this to support Labor more)
-
-Age
-- Would it be possible to show how the correlation changes for different age brackets (ie. younger voters = more Labor, and this swings more to Liberal as the age brackets gets older)?
-- If not, can you go into more detail specific age brackets? Eg. Is it the over-65s that skew Liberal?
-
-Diversity
-- Migrant population: Would it possible to break this out into particular groups? eg. Seats with higher Chinese population correlates with Liberal, seats with higher SEAsia pop correlates with Labor, etc?
-- The same for languages?
