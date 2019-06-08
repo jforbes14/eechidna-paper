@@ -1,0 +1,38 @@
+%% Any special functions or other packages can be loaded here.
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+
+\usepackage{float, bm}
+\usepackage{moreverb}
+\usepackage{url}
+\usepackage{grffile}
+\usepackage{lineno}
+\usepackage[UKenglish]{isodate}
+
+\let\origfigure\figure
+\let\endorigfigure\endfigure
+\renewenvironment{figure}[1][2] {
+    \expandafter\origfigure\expandafter[htbp]
+} {
+    \endorigfigure
+}
+
+\let\origtable\table
+\let\endorigtable\endtable
+\renewenvironment{table}[1][2] {
+    \expandafter\origtable\expandafter[htbp]
+} {
+    \endorigtable
+}
+
+\runningheads{Spatial modelling of Australian federal elections: 2001--2016}{FORBES, COOK and HYNDMAN}
+
+\def\volumeyear{2019}
+\let\oldmaketitle\maketitle
+\def\maketitle{\cleanlookdateon\oldmaketitle}
+\linenumbers
+
+\pretitle{\begin{center}\Large\bfseries}
+\posttitle{\end{center}\vspace{0.5cm}}
+\preauthor{\begin{center}\large}
+\postauthor{\end{center}\begin{center}\emph{Department of Econometrics \& Business Statistics, Monash University, Australia}\footnotetext{$^*$Corresponding author. Email: \texttt{jeremyforbes1995@gmail.com}}\end{center}}
