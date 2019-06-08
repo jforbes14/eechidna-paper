@@ -253,6 +253,7 @@
   \addspace\&\space}
 
 
+\wp{08/19}
 \jel{C31, C33, D72}
 
 \RequirePackage[absolute,overlay]{textpos}
@@ -261,7 +262,7 @@
 \def\placefig#1#2#3#4{\begin{textblock}{.1}(#1,#2)\rlap{\includegraphics[#3]{#4}}\end{textblock}}
 
 
-\nocover
+
 
 \author{Jeremy~Forbes, Dianne~Cook, Rob J~Hyndman}
 \addresses{\textbf{Jeremy Forbes}\newline
@@ -321,7 +322,7 @@ federal election, Census, Australia, spatial modelling, imputation, data science
 
 Australia has changed in many ways over the last two decades. Rising house prices, country-wide improvements in education, an ageing population, and a decline in religious affiliation, are just a few facets of the country's evolving socio-demographic characteristics. At the same time, political power has moved back and forth between the two major parties. In the 2007 and 2010 federal elections, the Australian Labor Party (Labor) was victorious, whereas the 2001, 2004, 2013 and 2016 elections were won by the Liberal National coalition (Liberal). The two-party preferred vote, a measure of support between these two parties, fluctuated between 47.3\% and 53.5\% (in favour of the Liberal party) over this period. This study explores how electoral socio-demographic characteristics relate to two-party preference, and whether their effects have changed over time.
 
-Electoral socio-demographics are derived from the Australian Census, and vote counts are obtained from Australian federal elections. Joining these two data sources is problematic as there is an inherent asynchronicity in the two types of events. A Census is conducted by the Australian Bureau of Statistics (ABS) every five years, whereas federal elections, conducted by the Australian Electoral Commission (AEC), usually occur every three years or so. The first problem addressed is that of constructing appropriate Census data for the 2004, 2007, 2010 and 2013 elections --- election years in which a Census does not occur. The predominant approach in previous studies was to join voting outcomes to the nearest Census, without accounting for any temporal differences \autocites[see][]{DavisStimson98}{Stimson06}{Liao09}{Stimson09}. Furthermore, electoral boundaries change regularly, so spatial discrepancies also arise when matching with electoral data. To obtain appropriate ``Census-like'' data for these four elections, electoral socio-demographics are constructed using a spatio-temporal imputation that combines areal interpolation \autocite{Goodchild1993} and linear time-interpolation. Collecting and wrangling the raw data, along with the imputation process, are detailed in Section \ref{data}. All data and associated documentation relating to this procedure are available in the \texttt{eechidna} \texttt{R} package \autocite{eechidna}, providing a resource for future analysis.
+Data on electoral socio-demographics are derived from the Australian Census, and vote counts are obtained from Australian federal elections. Joining these two data sources is problematic as there is an inherent asynchronicity in the two types of events. A Census is conducted by the Australian Bureau of Statistics (ABS) every five years, whereas federal elections, conducted by the Australian Electoral Commission (AEC), usually occur every three years or so. The first problem addressed is that of constructing appropriate Census data for the 2004, 2007, 2010 and 2013 elections --- election years in which a Census does not occur. The predominant approach in previous studies was to join voting outcomes to the nearest Census, without accounting for any temporal differences \autocites[see][]{DavisStimson98}{Stimson06}{Liao09}{Stimson09}. Furthermore, electoral boundaries change regularly, so spatial discrepancies also arise when matching with electoral data. To obtain appropriate ``Census-like'' data for these four elections, electoral socio-demographics are constructed using a spatio-temporal imputation that combines areal interpolation \autocite{Goodchild1993} and linear time-interpolation. Collecting and wrangling the raw data, along with the imputation process, are detailed in Section \ref{data}. All data and associated documentation relating to this procedure are available in the \texttt{eechidna} \texttt{R} package \autocite{eechidna}, providing a resource for future analysis.
 
 Previous work on modelling Australian federal elections has found that aggregate socio-demographics are relatively good predictors of voting outcomes. \textcite{Forrest01} used multiple regression to model the Liberal and Labor primary vote for polling booths in the Farrer electorate in 1998 as a function of Census variables from 1996. \textcite{Stimson06}, \textcite{Stimson09} and \textcite{Stimson12} used principal component analysis of polling booths in the 2001, 2004 and 2007 elections respectively, also finding that socio-demographic characteristics of polling booths are linked to their two-party preferred vote. In contrast, \textcite{Stimson09} models the polling booth swing vote (change in the two-party preferred vote) in the 2007 election, finding that little of the swing vote can be explained by Census data.
 
@@ -352,7 +353,7 @@ Between 2001 and 2016 there were six elections and four Censuses (see Figure \re
 
 \begin{figure}[h]
 
-{\centering \includegraphics[width=0.9\linewidth]{draft-paper_files/figure-latex/timeline-1} 
+{\centering \includegraphics[width=0.9\linewidth]{elections_files/figure-latex/timeline-1} 
 
 }
 
@@ -398,7 +399,7 @@ Census data is publicly available at different levels of aggregation, ranging fr
 
 \begin{figure}[h]
 
-{\centering \includegraphics[height=0.28\textheight]{draft-paper_files/figure-latex/hume13-1} 
+{\centering \includegraphics[height=0.28\textheight]{elections_files/figure-latex/hume13-1} 
 
 }
 
@@ -407,7 +408,7 @@ Census data is publicly available at different levels of aggregation, ranging fr
 
 \begin{figure}[h]
 
-{\centering \includegraphics[height=0.28\textheight]{draft-paper_files/figure-latex/hume16-1} 
+{\centering \includegraphics[height=0.28\textheight]{elections_files/figure-latex/hume16-1} 
 
 }
 
@@ -483,7 +484,7 @@ There are \(p=30\) variables in the resultant predictor set, with all of these u
 
 An identical model specification is used for each of the six elections, with each election modelled separately. This allows the socio-demographic effects to be estimated separately for each election year, facilitating analysis of temporal changes in variable effects. This approach is preferable to using a single longitudinal model because it avoids any concerns of undue bias stemming from incorrectly imposed time-varying restrictions on any variable. Without such restrictions, a pooled cross-sectional model does not yield any distinct advantage over separate cross-sections. The panel approach is avoided because of how frequently electoral boundaries change, noting that electorates with the same name across elections are not guaranteed to represent the same geographical region. Therefore any fixed or random effects models would be difficult to estimate without implementing consistent boundaries, which would require further imputation.
 
-For each cross-section, let the response \(\bm{y}\) be the vector two-party preferred vote in favour of the Liberal party; for example, \(y_i = 70\) represents a 70\% preference for Liberal, 30\% for Labor, in electorate \(i\). Although \(y_i\) lies in the interval \((0,100)\), observed values are never close to 0 or 100 (minimum \(24.05 \%\) and maximum \(74.90 \%\)), so there is no need to formally impose the constraint of \(y_i \in [0,100]\). Furthermore, the responses are found to be spatially correlated in each election (Moran's I test, \(p \le 7\cdot10^{-15}\)). This is not surprising as electorates are aggregate spatial units, and hence the spatial structure of the data must modelled appropriately.
+For each cross-section, let the response \(\bm{y}\) be the vector two-party preferred vote in favour of the Liberal party; for example, \(y_i = 70\) represents a 70\% preference for Liberal, 30\% for Labor, in electorate \(i\). Although \(y_i\) lies in the interval \((0,100)\), observed values are never close to 0 or 100 (minimum \(24.05 \%\) and maximum \(74.90 \%\)), so there is no need to formally impose the constraint of \(y_i \in [0,100]\). Furthermore, the responses are found to be spatially correlated in each election (Moran's I test, \(p \le 7\cdot10^{-15}\)). This is not surprising as electorates are aggregate spatial units, and hence the spatial structure of the data must be modelled appropriately.
 
 The spatial error model \autocite{Anselin88} is chosen because it captures spatial heterogeneity by incorporating a spatially structured random effect vector \autocite{LeSage2009}. In this context, the random effect can be thought of as capturing the unobserved political climate in each electorate, where this climate is correlated with the climate in neighbouring electorates, under the assumption that the climate is independent of electoral socio-demographics.
 
@@ -515,7 +516,7 @@ The spatial autoregressive coefficient \(\rho\) is positive and significant in o
 
 \begin{figure}[h]
 
-{\centering \includegraphics[height=0.2\textheight,]{draft-paper_files/figure-latex/rhovis-1} 
+{\centering \includegraphics[height=0.2\textheight,]{elections_files/figure-latex/rhovis-1} 
 
 }
 
@@ -527,7 +528,7 @@ The spatial autoregressive coefficient \(\rho\) is positive and significant in o
 
 \begin{figure}[h]
 
-{\centering \includegraphics[height=0.2\textheight,]{draft-paper_files/figure-latex/plotintercept-1} 
+{\centering \includegraphics[height=0.2\textheight,]{elections_files/figure-latex/plotintercept-1} 
 
 }
 
@@ -541,7 +542,7 @@ Since all socio-demographics have been standardized to have a mean of zero and a
 
 \begin{figure}[h]
 
-{\centering \includegraphics{draft-paper_files/figure-latex/partresplot1-1} 
+{\centering \includegraphics{elections_files/figure-latex/partresplot1-1} 
 
 }
 
@@ -550,7 +551,7 @@ Since all socio-demographics have been standardized to have a mean of zero and a
 
 \begin{figure}[h]
 
-{\centering \includegraphics{draft-paper_files/figure-latex/partresplot2-1} 
+{\centering \includegraphics{elections_files/figure-latex/partresplot2-1} 
 
 }
 
@@ -586,12 +587,12 @@ De facto relationships, but not marriages, are found to be an important (and sig
 \hypertarget{age}{%
 \subsubsection{Age}\label{age}}
 
-Regions comprising more older people are often believed to be more conservative, and indeed it found that electorates with a higher median age are more likely to support the Liberal party --- although this effect is only significant in 2007 and 2010 (see row 2 in Figure \ref{fig:partresplot2}).
+Regions comprising more older people are often believed to be more conservative, and indeed it found that electorates with a higher median age are more likely to support the Liberal party --- although this effect is significant only in 2007 and 2010 (see row 2 in Figure \ref{fig:partresplot2}).
 
 \hypertarget{education}{%
 \subsubsection{Education}\label{education}}
 
-Since 2007, electorates with higher education levels are associated with supporting the Labor party, although this effect is only significant in 2016. Before 2007, education has an almost zero effect (see row 3 in Figure \ref{fig:partresplot1}).
+Since 2007, electorates with higher education levels are associated with supporting the Labor party, although this effect is significant only in 2016. Before 2007, education has an almost zero effect (see row 3 in Figure \ref{fig:partresplot1}).
 
 \hypertarget{diversity}{%
 \subsubsection{Diversity}\label{diversity}}
@@ -613,7 +614,7 @@ It is often hypothesized that states have systematic differences that cause thei
 
 \begin{figure}[h]
 
-{\centering \includegraphics[width=0.7\linewidth,]{draft-paper_files/figure-latex/resstate-1} 
+{\centering \includegraphics[width=0.7\linewidth,]{elections_files/figure-latex/resstate-1} 
 
 }
 
@@ -632,7 +633,7 @@ Lingiari, an electorate taking up almost all of the Northern Territory, is an ou
 
 This paper explores the effects of electoral socio-demographic characteristics on the two-party preferred vote in the 2001--2016 elections, using information from the corresponding Australian federal elections and Censuses. As a Census does not always occur in the same year as an election, Census data for the 2004--2013 elections are generated by employing a method of spatio-temporal imputation. This imputes electoral socio-demographics for the electoral boundaries in place at the time of the election --- an approach that is distinctly different from previous work on modelling election outcomes, where Census and election data are typically joined without addressing their temporal differences. Before estimating a model, these socio-demographic variables are standardized (to adjust for changing variable scales) and many variables (representing similar information) are combined into factors, resulting in a reduced predictor set. A spatial error model is then estimated for each election, accounting for the inherent spatial structure of the data.
 
-Across the past six elections, most of the socio-demographics that drive the electoral two-party preferred vote are found to remain steady, whilst a few (typically weaker) effects vary over time. Industry and type of work are particularly influential, with energy-related and manufacturing/construction jobs, as well as administrative roles being strongly linked with the Liberal party in all elections. Incomes have a similarly consistent effect, with higher income areas supporting Liberal. Higher levels of unemployment shift from weak association with Labor to a significant Liberal effect over the years, and higher education levels are associated with Labor from 2007 (although only significant in 2016). It is also found that electorates with higher household mobility support Liberal, birthplace diversity favours Labor and more de facto relationships align with Labor preference --- although marriages, family and household sizes have no material influence. Furthermore, the neighbourhood (spatial) effects are found to be positive in all elections, although only significant in 2001 and 2016, meaning that in the 2004--2013 elections, electorates effectively voted independently.
+Across the past six elections, most of the socio-demographics that drive the electoral two-party preferred vote are found to remain steady, whilst a few (typically weaker) effects vary over time. Industry and type of work are particularly influential, with energy-related and manufacturing/construction jobs, as well as administrative roles being strongly linked with the Liberal party in all elections. Incomes have a similarly consistent effect, with higher income areas supporting Liberal. Higher levels of unemployment shift from weak association with Labor to a significant Liberal effect over the years, and higher education levels are associated with Labor from 2007 (although significant only in 2016). It is also found that electorates with higher household mobility support Liberal, birthplace diversity favours Labor and more de facto relationships align with Labor preference --- although marriages, family and household sizes have no material influence. Furthermore, the neighbourhood (spatial) effects are found to be positive in all elections, although significant only in 2001 and 2016, meaning that in the 2004--2013 elections, electorates effectively voted independently.
 
 The findings in this paper complement the existing literature by modelling temporal trends, which as far as the authors are aware, has not been done previously for Australian elections using a regression framework. It is also the first study to model any Australian election since 2010 using Census information.
 

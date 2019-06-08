@@ -4,7 +4,8 @@ standardise_vars <- function(df) {
   num_cols <- sapply(df, class) == "numeric"
   df[, num_cols] <- lapply(df[, num_cols], scale)
   names(df) <- names(hold)
-  df$LNP_Percent <- hold$LNP_Percent
+  if("LNP_Percent" %in% names(hold))
+    df$LNP_Percent <- hold$LNP_Percent
   return(df)
 }
 
@@ -131,6 +132,7 @@ my_fgls <- function(my_formula, my_data, sp_weights) {
   gls_model$gls_data <- gls_data
   gls_model$my_data <- my_data
   gls_model$actual_residuals <- solve(trans_mat) %*% gls_model$residuals
+  gls_model$predictions <- fitted(ols_model) # Use OLS predictions later
 
   return(gls_model)
 }
