@@ -5,20 +5,22 @@ date: "08/06/2019"
 output: html_document
 ---
 
-## Editor's comments
+## Editor's comments (A)
 
 *1. Address reviewer 1's question about why spatial imputation is required given that the census is reported at a low level of aggregation (lines 150-151) that could presumably be clumped to give a good approximation to electorate boundaries.*
 
-...
+Impute using Census SA1
+
+-- Re-write the imputation section to use this method. See other paper for terminology.
 
 *2. I note that you do mention the ecological fallacy (lines 285-286) but reviewer 1's reaction suggests that you should expand your remarks here.*
 
 ...
 
+-- Be more explicit in the introduction and/or the results section. "Study aims to see how the aggregate region of electorates behave, rather than make inferences about individual voters."
+
 *3. It appears that your approach to variable selection has confused everybody. My understanding of what you have done is that:*
 *- You begin with 65 variables (are they all the available census data or a subset?).* 
-
-...
 
 *- Then you standardise the variables.* 
 
@@ -26,9 +28,17 @@ output: html_document
 
 ...
 
+Don't even refer to any variables that aren't included.
+Use three age bands instead of MedianAge (effectively becomes two because of multicollinearity)
+
+-- Be concise about which variables are included to begin with. 
+
 *- Then you use the PCA to identify variables that covary. If variables appear together in a PC with loading higher than 0.15 they are combined together into a factor, e.g. a new variable Income replaces two previously existing variables. (In the description of this it is unclear how many variables are being combined in each factor,  the 'ands' and commas make things tricky, .e.g  is 'renting and government housing' one variable or two? Do the factors use the loading weights or just the signs?)*
 
 ...
+More of an explanation of why and how we are using PCA. Then more details of exactly what the resultant factors are.
+
+-- Provide the logic for why a procedure like PCA is used here. A large number of candidate covariates. Many of which represent similar information. Group similar variables. This will also help reduce the dimension of the data. PCA is used to inform the selection of these groups, as it will reveal which variables co-vary in the direction of maximal variance within the observed data.
 
 *- The steps above get you from 65 variables down to 30 (I can count 10 variables that  get accounted for via the creation of factors, but that doesn't get from 65 to 30 so presumably some other variables have been removed? Or is this difference all in the age bands and variants of Christianity? More clarity is required)*
 
@@ -37,101 +47,115 @@ output: html_document
 *4. As you note in the paper, it seems likely that there are still issues with multi-collinearity. Figs 6 and 7 show the variables with significant effects, do the results change much if you fit a model with just these 13 variables instead of the 30?*
 
 ...
+With the final variables, use TOUR to see if there are associations.
 
-## Associate Editor's comments
+-- Fit model with significant effects for each year. Comment on sign of effects and if coefficients are within confidence bands.
+
+## Associate Editor's comments (B)
 *Some conceptually simple imputation methods are used to align polling and census data to investigate associations between census variables and voting behaviour at electoral division level.*
 
-...
+... A
 
 *The main thing I found confusing about this paper was the variable selection procedure. It seems to be heading in the direction of four PCs, then it veers into six factors before ending with 30 variables. This all requires greater clarity and justification.*
 
-...
+... A
 
 *The authors opt for “visualization” of the fixed effects rather than the usual table of estimated parameters. Perhaps this is a good choice given that there are so many. But then spatial parameters are exhibited in a huge table. This seems inconsistent.*
 
 ...
+Explain what the difference between the table and plots are. Keep both. 'Estimated model parameters' instead of 'spatial model'.
 
 *I found the writing unclear in a few places. What are the “time-varying restrictions” on a variable (line228)? And the description of a partial residual (line 276) doesn’t make sense to me.*
 
 ...
+Refine description of partial residuals. Explain what a time-varying restriction means.
 
 *Some of the interpretations of results seem a little naïve. For example, does Figure 4 really justify concluding that “electorates effectively voted independently” except for 2001 and 2016? (Is it a coincidence that the spatial autoregression is greatest in 2001 and 2016 where there is no need for imputation?)*
 
 ...
+With SA1s we should be able to answer this. Less spatial blurring in imputation, so the spatial effect could become clearer.
 
-## Reviewer 1's comments
+-- Re-write spatial effect section. Effects are significant in 2001, 2004 and 2016. Do not claim that electorates voted independently, rather just say the effect is always positive, and significant in those years.
+
+## Reviewer 1's comments (C)
 
 *Its goal is to account for – though the word ‘explain’ is used! – patterns of voting at Australian federal elections, using ecological data, but with no reference to the ecological fallacy.*
 
 ...
+Be more explicit about what the conclusions will be - electorate level.
 
 *The paper is written in virtual total ignorance of the large amount of work done on Australian voting patterns; apart from reference to a few papers by geographers there is not a single mention of work by political scientists – of which there is a great deal. As a consequence there is no theoretical background whatsoever, let alone hypotheses to be tested. It is banal empiricism: throw a lot of data (what are called ‘electoral socio-demographic variables’) at something and see what comes out.*
 
 ...
+NA
 
 *The banality of this approach is illustrated by the finding that ‘more de facto relationships’ are associated with greater support for Labor. No rationale for this is offered – why should people in such relationships be more likely to vote Labor? And while there may be a statistically significant relationship (i.e. slope coefficient) it may be substantively trivial – a fact hidden because the data are transformed. If there is a small SD then the ‘real’ difference between a place with many de facto relationships and another with few will be small and will not account for much of the absolute variation in Labour support at all. Further, since all of the relationships with individual variables are partial, it may well be that when ‘all other variables are held constant’ the difference in Labour support is trivial.*
 
 ...
+Check the SD of the original variables and see how it compares to their estimated effects. If there are variables with small SDs but big effects, we should look into this further. This implies that we need to take the log of the variable. (question to answer: should logs be taken before PCA?)
 
 *Much is done – unnecessarily in my view – in preparing the data through imputation. This has two components. First there is the creation of census data for the 150 constituencies because boundaries of the large census reporting areas may not coincide with the constituencies’ at the time of an election. Imputation is deployed by assuming that if 50% of area A is in district X then 50% of A’s population is allocated to X without any recognition that area A may be internally heterogeneous. But that is in any case unnecessary. Australian census data are reported – as the authors note – for very small areas with populations of only a few hundred each, and there are shape files associated with these areas. It is thus a straightforward task to amalgamate the small areas into the electoral districts and get the ‘real’ data for each without any (or at best a very, very small amount of) imputation.*
 
 ...
+A
 
 *The second component involves imputing the values for each Census variable at the date of the election, which can never be more than three years – at most – distant from the nearest Census (either before or after the election). This seems totally unnecessary; the likelihood of any substantial change in the relative position of any district on any variable sufficient to impact on the regression outcomes is so minimal that a lot of effort could have been saved. It just wasn’t worth doing.*
 
-...
+... A
 
 *The authors recognise that there is likely to be collinearity among 65 Census variables – why those; we are never told?  And so, as others do, they did a pca of the data matrix, reducing it to four components – we are not told what rotation was employed to achieve simple structure. We are not given the results of this analysis, merely a naming of the six factors identified – how do you get six ‘factors’ from four components? That naming was based on the loadings and, we are told, that any loading greater than 0.15 (presumably either positive or negative) was ‘considered large’. Since loadings are the equivalent of correlations then a loading of 0.15 means that the component accounts for just 2.25 per cent of the variation in that variable. This is – quite frankly – ludicrous.*
 
-...
+... A
 
 *My expectation was that they would then fit a model using the four components as the independent variables, thus avoiding any collinearity and confounding. But they didn’t. Instead they selected 30 of the 65 variables – which must still be collinear; the resulting equation in Table 2 clearly implies this given the large number of (a) insignificant relations (normal with collinearity – see a recent paper in Quality and Quantity), (b) unreasonably large coefficients (-8.07 for de facto, for example), and (c) very large standard errors for many of the variables.*
 
-...
+...A
 
 *The authors fit a spatial autoregressive model, on the assumption that neighbouring places are more likely to be similar than distant places (the ‘first law of geography’). This is only a significant finding at two of the elections and is wrongly interpreted: it does not necessarily show that then ‘the political climate of an electorate appears to be affected by the attitudes of its neighbours’ but, much more likely, that neighbouring places share characteristics in common that affect voting behaviour but are not captured by the independent variables included in the model. Spatial autocorrelation may reflect spatial diffusion processes – but in which direction? – but is much more likely to reflect an under-specified model.*
 
-...
+...Think about this - are there omitted variables? How might this be captured in the spatial effect?
 
 *Having fitted the model we than get two pages of ‘interpretation’, which is inductivism of the worst kind – we’ve found some relationships, how do we account for them?*
 
 ...
 
-## Reviewer 2's comments
+## Reviewer 2's comments (D)
 
 *1. It seems very strange to assume that population is uniform within electorates (line 133) so that weighting is proportional to area, and not to the number of people in an area of intersection. An electorate on the urban fringe may be strongly affected by loss of a relatively small but highly populated area but little affected by incorporating a large rural area. A simple indirect way to get at this might be to address the question: Would the results change much if A_{s,t} was log area, for each s,t ?*
 
-...
+...A
 
 *2. It seems to me that the use of Principal Components analysis is unclear.*
 *a. PC appears to have been used as a model selection criterion, with the variables related to the first four PCs included into the model in Table 2. However typically when principal components are computed they only involve the explanatory variables, not the response, and so there is no guarantee that all the first four PCs (and only them) will be related to the response. For example using the eechidna data for 2016 I found the fifth PC was extremely significant. But this is a minor point.*
 
-...
+...A
 
 *b. The variables which load highly on a PC are likely to be highly correlated, and so if these high-loading variables are used together in the regression model we may again have multicollinearity. I found this was the case when applying the author’s regression model to the 2016 data. This may be why several of the predictors in Table 2 are never related significantly related to the response in any of the years.*
 
-...
+... ?
 
 *c. Conversely there could be a variable which is independent of the other variables (so representing 1 / 65th of the explanatory information) but by dint of that fact not be included in the first four PCs. In short, the narrative leaves me unconvinced that all the variables included are necessary or that all the relevant variables are included in the regression.*
 
-...
+... Are there more variables we should get? I think no. 
 
 *d. I presume the “factors” referred to lines 210-220 were created as the first principal component of the constituent raw variables?*
 
-...
+... A
 
 *e. The description of the variables included in “Education” is not clear.*
 
-...
+... Be more precise in explaning the factors created.
 
 *f. I could not get the variable ‘OtherLanguageHome’ in 2016 to be significant, but it also had a high VIF with other explanatory variables. Please check this.* 
 
-...
+... TOUR - ask Di for help.
 
 *3. I am not convinced it is reasonable to summarise the effect of age by median age. Perhaps age effects are more at the edges of the age distribution than in the middle? I would have thought the percentage of the population in different age bands e.g. 20-34 years and Over 65years, might be significant. For 2016 the % aged 20-34 years was highly significant and removed median age.*
 
-...
+... A
 
 *4. Is there any tendency for the vote in an election to depend on how long the incumbent has been in power? In your cross-sectional models this would be confounded with any other effects in the intercept, but a comment would be nice to know. It would help in terms of interpreting the variations in intercept, and setting a reader’s mind to rest that the issue has been considered. Perhaps a something like a simple regression of average vote (or the intercept) on length of incumbency could address the issue.*
 
-...
+...  Don't include incumbent in model, but do plot residuals against incumbency to see if there is an effect. We want the model to only capture the socio-demographic effects.
+
+-- Section on incumbent effect (need to get winners each year from 1998, 2001 to do this)
