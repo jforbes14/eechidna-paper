@@ -371,7 +371,29 @@ ggplot(timeline, aes(x = year_vis, y = measure)) +
 
 For each election, neighbouring Census information has to be combined in some way so that it represents the boundaries in place at the time of the election. This is done by taking the electoral boundaries and imputing the corresponding socio-demographic characteristics for each of neighbouring Censuses, thereby addressing the spatial aspect. Next, to deal with the temporal component, characteristics at the time of the election are constructed using linear interpolation between the spatially imputed neighbouring Census variables.
 
-The finest level of disaggregation available for Census data is the region classification called Statistical Area 1 (SA1). In 2016, Australia was divded into over 55,000 SA1s. Consider each of these SA1 regions as a source zone, $s = 1,\dots,S$, for which socio-demographic information is available. For simplicity, let each source zone be wholly summarised by its centroid. A set of target zones, $t = 1,\dots,T$, are defined as regions for which information is to be imputed - these are the electoral boundaries for a particular election. This is described in the context of a single election, and a single neighbouring Census. Let $I_{s,t}$ be an indicator variable, for which $I_{s,t} = 1$ if the centroid of source zone $s$ falls within target zone $t$, and $0$ otherwise. Additionally, let the population of the source zone $s$ be $U_s$ and the population of target zone $t$ be $P_{t}$. 
+The finest level of disaggregation available for Census data is the region classification called Statistical Area 1 (SA1). In 2016, Australia was divded into over 55,000 SA1s. Consider each of these SA1 regions as a source zone, $s = 1,\dots,S$, for which socio-demographic information is available. For simplicity, let each source zone be wholly summarised by its centroid. A set of target zones, $t = 1,\dots,T$, are defined as regions for which information is to be imputed - these are the electoral boundaries for a particular election. This is described in the context of a single election, and a single neighbouring Census. Take the example of the Melbourne Ports electorate from the 2013 federal election, illustrated in Figure \@ref(fig:melbports13). The purple region in this figure represents the target zone and the source zones are the centroid locations from the 2016 Census SA1 areas. 
+
+```{r melbports13, fig.cap = "The electoral boundaries for Melbourne Ports (shown in purple) and surrounding electorates, with centroids for Statistical Area 1 regions from the 2016 Census overlaid. The centroids falling within the purple region are attributed to Melbourne Ports.", out.height="28%"}
+# Get Vic shape
+load("data/vic_map.rda")
+load("data/MP_sa1_dots_2011.rda")
+
+p1 <- ggplot(data = vic_map) +
+  geom_polygon(aes(x = long, y = lat, group = group, fill = Elect_div == "Melbourne Ports"),
+    colour = "black", alpha = 0.4
+  ) +
+  scale_fill_manual(
+    name = "Electoral Boundaries",
+    values = c("white", "purple"),
+    labels = c("Other Electorates", "Melbourne Ports (VIC)")
+  ) +
+  theme_map() +
+  coord_equal(xlim = c(144.88, 145.07), ylim = c(-37.92, -37.78))
+
+p1 + geom_point(aes(x = long_c, y = lat_c, shape = shape), data = MP_sa1_dots_2011 %>% mutate(shape = "1"), colour = "grey25", size = 1.3) + scale_shape_manual(name = "Statistical Area 1", values = 3, labels = "Centroids")
+```
+
+Furthermore, let $I_{s,t}$ be an indicator variable, for which $I_{s,t} = 1$ if the centroid of source zone $s$ falls within target zone $t$, and $0$ otherwise. Additionally, let the population of the source zone $s$ be $U_s$ and the population of target zone $t$ be $P_{t}$. 
 
 In order to calculate socio-demographic information for each of the target zones, a weighted average of source zones is taken using their populations as weights. Denote a given Census variable for the target zone by $C_t$, and the same Census variable for the source zone as $D_s$. Then, estimate $C_t$ using
 $$
@@ -379,7 +401,7 @@ $$
   {\sum_{s=1}^{S}{I_{s,t}*U_s}},
   \quad\text{for each $t=1,\dots,T$}.
 $$
-  
+
 This concludes the spatial imputation of the socio-demographic characteristics for one target zone (a single electoral boundary), at the time of only one of the neighbouring Censuses. This process is repeated for all of the target zones, and then for the other neighbouring Census.
 
 \enlargethispage*{0.5cm}
@@ -391,136 +413,39 @@ $$
 $$
 Implicitly this assumes that population characteristics change in a linear manner over time.
 
-### An illustration of the spatio-temporal imputation {-}
-
-Census data is publicly available at different levels of aggregation, ranging from SA1 (over 50,000 zones) to electoral divisions (150 zones). For this study, electoral divisions are used as source zones, and the imputation method is applied to produce socio-demographic variables for each of the 2004, 2007, 2010 and 2013 elections. As mentioned earlier, there is no need to impute socio-demographic variables for the 2001 and 2016 elections. To illustrate the method, consider the imputation of socio-demographic variables for the electorate of Hume in New South Wales (NSW) at the time of the 2013 federal election. The boundaries shown in Figure \@ref(fig:hume13) define all target zones in NSW for 2013, with the target zone of interest (Hume) shaded purple.
-
-```{r hume13, fig.cap = "Some of the electoral boundaries in NSW for 2013, with the electoral boundary for Hume shown in purple.", out.height="28%"}
-hume_area13 <- nat_map13 %>%
-  filter(state %in% c("ACT", "NSW"), long < 154)
-
-ggplot(data = hume_area13) +
-  geom_polygon(aes(x = long, y = lat, group = group, fill = elect_div == "HUME"),
-    colour = "grey50", alpha = 0.4
-  ) +
-  scale_fill_manual(
-    name = "Electoral boundaries",
-    values = c("white", "purple"),
-    labels = c("Other 2013 Electorates", "Hume 2013")
-  ) +
-  theme_map() +
-  coord_equal()
-```
-
-```{r hume16, fig.cap = "Census division boundaries in NSW for 2016, with the 2013 electoral boundary for Hume, shown in purple. The purple region is not contained within a single Census division.", out.height="28%"}
-hume_area16 <- nat_map16 %>%
-  filter(state %in% c("ACT", "NSW"), long < 154) %>%
-  mutate(year = "2016") %>%
-  bind_rows(
-    hume_area13 %>%
-      filter(elect_div == "HUME") %>%
-      mutate(year = "2013")
-  )
-
-ggplot(data = hume_area16) +
-  geom_polygon(aes(
-    x = long, y = lat, group = group, fill = year == "2013",
-    alpha = year == "2013", colour = year == "2013"
-  )) +
-  scale_fill_manual(
-    name = "Electoral boundaries",
-    values = c("white", "purple"),
-    labels = c("2016 Electorates", "Hume 2013")
-  ) +
-  scale_alpha_manual(values = c(0, 0.4)) +
-  scale_color_manual(values = c("grey50", NA)) +
-  theme_map() +
-  coord_equal() +
-  guides(alpha = FALSE, col = FALSE, 
-    fill = guide_legend(override.aes = list(col = c("grey50", NA), alpha = 0.4)))
-```
-
-The corresponding source zones from the 2016 Census are shown in Figure \@ref(fig:hume16). As can be seen, the Hume boundary from the 2013 election (shaded purple) does not perfectly match any of the source zones.
-
-There are many source zones from the 2016 Census that intersect with this purple region, including the divisions of Riverina, Eden-Monaro and Hume, along with smaller intersecting areas with Fenner, Calare, Gilmore and Whitlam. The proportion of each source zone that overlaps with the purple region is calculated, and used to obtain the intersecting populations $\hat{P}_{s,t}$.
-
-```{r hume1}
-hume <- abs2016 %>%
-  filter(DivisionNm %in%
-           c("HUME", "RIVERINA", "EDEN-MONARO", "CANBERRA",
-             "FENNER", "WHITLAM", "GILMORE", "CALARE")) %>%
-  mutate(
-    Pst = c(21, 548, 16358, 474, 86, 145427, 39117, 92),
-    Proportion = Pst/Population,
-    DivisionNm = tools::toTitleCase(tolower(DivisionNm))
-  ) %>%
-  select(DivisionNm, Proportion, Population, Pst, AusCitizen) %>%
-  arrange(desc(Proportion))
-
-hume %>%
-  kable(longtable=FALSE, booktabs=TRUE, digits=c(0,4,0,0,1),
-        format='latex',escape=FALSE,
-        col.names=c(
-          "Source zone (2016)",
-          "Proportion",
-          "Source zone population",
-          "Population allocated to purple region: $\\hat{P}_{s,t}$",
-          "AusCitizen (\\%): $D_s$"),
-    caption = "Population from each intersecting Census source zone (2016) that is allocated to the target zone (purple region - Hume electoral boundary in 2013), and the corresponding proportion of Australian citizens in each of these source zones.") %>%
-  kableExtra::kable_styling(font_size=12, latex_options='scale_down')
-```
-
-```{r wave, include=FALSE}
-wave2016 <- weighted.mean(x = hume$AusCitizen, w = hume$Pst)
-hume11 <- abs2011 %>%
-  filter(DivisionNm %in%
-           c("HUME", "RIVERINA", "EDEN-MONARO", "CANBERRA",
-             "FENNER", "WHITLAM", "GILMORE", "CALARE")) %>%
-  mutate(
-    Pst = c(21, 548, 16358, 474, 86, 145427), # Needs adjusting
-    Proportion = Pst/Population,
-    DivisionNm = tools::toTitleCase(tolower(DivisionNm))
-  ) %>%
-  select(DivisionNm, Proportion, Population, Pst, AusCitizen) %>%
-  arrange(desc(Proportion))
-wave2011 <- 91.00 #weighted.mean(x = hume11$AusCitizen, w = hume11$Pst)
-```
-
-Now consider the socio-demographic variable *AusCitizen*, the proportion of people in the region who are Australian citizens. A weighted average of *AusCitizen*, with the allocated population from each source zone as weights, yields $\hat{C}_{\text{Hume},2016} = `r sprintf("%4.2f",wave2016)`\%$. Repeating this process using the 2011 Census yields $\hat{C}_{\text{Hume},2011} = `r sprintf("%4.2f",wave2011)`\%$. Finally, linear interpolation between 2011 and 2016 yields the 2013 estimate:
+Continuing with the example of Melbourne Ports in the 2013 election, the estimate for a given Census variable in 2016, $\hat{C}_{MelbPorts, 2016}$ would be obtained by computing the weighted average of this variable amongst the SA1s within the purple region shown in Figure \@ref(fig:melbports13). This would be repeated with the 2011 Census SA1s to obtain $\hat{C}_{MelbPorts, 2011}$, from which the final estimate is given by
 $$
-  \hat{C}_{\text{Hume},2013}
-    = \frac{3}{5} \hat{C}_{\text{Hume},2011} + \frac{2}{5} \hat{C}_{\text{Hume},2016}
-    % = \frac{3}{5} \cdot 91.00 \% + \frac{2}{5} \cdot 89.65 \% \\
-    =  90.46\%.
+  \hat{C}_{\text{MelbPorts},2013}
+    = \frac{3}{5} \hat{C}_{\text{MelbPorts},2011} + \frac{2}{5} \hat{C}_{\text{MelbPorts},2016}.
 $$
-This is done for each of the 65 socio-demographic variables, and is repeated for each of the 149 remaining target zones corresponding with 2013 electorates.
+This is done for each of the socio-demographic variables, and is repeated for each of the 149 remaining target zones corresponding with 2013 electorates.
 
 # Modelling {#modelling}
 
-Following this process, electoral socio-demographic variables are available for each of the six elections and can be joined with their corresponding two-party preferred votes. Before choosing an appropriate model, two issues with the socio-demographic variables need to be addressed. First, variable scales change over the years, making it important to standardize variables. Second, many variables represent similar information and where appropriate, should be combined in some way. Principal component analysis is used to identify variables covary, from which intuitive groupings are selected to be combined into a single variable. This also reduces the dimension of the data. After these steps, a model specification is chosen.
+Following this process, electoral socio-demographic variables are available for each of the six elections and can be joined with their corresponding two-party preferred votes. Before choosing an appropriate model, two issues with the socio-demographic variables need to be addressed. First, variable scales change over the years, making it important to standardize variables. Second, many variables represent similar information and where appropriate, should be grouped together. To determine which variables should be grouped, principal component analysis (PCA) is used. The intuition here is that PCA will identify which variables covary in the directions of maximal variance, from which intuitive groupings of variables can be chosen to combine into a single variable. After these steps, a model specification is chosen.
 
 ## Standardizing variables
 
-Many of the socio-demographic variables have changing scales over the years. For example, inflation-adjusted median rental prices increased across almost all electorates, with median rent of 200 dollars per week placing an electorate in the 90th percentile in 2001, but only the 30th percentile in 2016. In order for socio-demographic effects to be comparable across years, all explanatory variables are standardized to have mean zero and variance one within each election year. By standardizing, each variable is reported as a relative measure compared to all other electorates in the same year.
+Many of the socio-demographic variables have changing scales over the years. For example, inflation-adjusted median rental prices increased across almost all electorates, with median rent of 225 dollars per week placing an electorate in the 90th percentile in 2001, but only the 45th percentile in 2016. In order for socio-demographic effects to be comparable across years, all explanatory variables are standardized to have mean zero and variance one within each election year. By standardizing, each variable is reported as a relative measure compared to all other electorates in the same year.
 
 ## Creating factors
 
-There are only $N = 150$ observations (electorates) in each election and $p = 65$ socio-demographic variables in each cross-section, with many variables represent similar information about an electorate. Any model that uses all variables would face serious problems with multi-collinearity and over-fitting, which would likely lead to erroneous conclusions regarding variable significance. To address this, groups of variables that represent similar information are combined into "factors"[^2].
+There are only $N = 150$ observations (electorates) in each election and $p = 50$ socio-demographic variables in each cross-section, with many variables represent similar information about an electorate. Any model that uses all variables would face problems with multi-collinearity and over-fitting, which would likely lead to erroneous conclusions regarding variable significance. To address this, variables that represent similar information are combined into a single variable, which will be referred to as a "factor".
 
-[^2]: A preliminary step involved removing all age bands, because age is represented by median age, and to remove variables relating to particular denominations of Christianity.
+A factor is created from a group of variables if there is an intuitive reason as to why these variables should represent similar information and if there is evidence to suggest that they covary. For example, a potential group would be variables relating to electoral incomes --- median family, household and personal incomes. To determine which variables covary, principal component analysis is used on a combined dataset of socio-demographic variables from all six elections[^2]. The only variables exempted from the principal component analysis are the four variables representing age brackets (the proportion of the population aged 0-19 years old, 20-34 years old, 45-54 years old and 55 years plus), which are to be included in the model without grouping.
 
-A factor is created from a group of variables if there is an intuitive reason as to why they should represent similar information and if there is evidence to suggest that they covary. For example, a potential group would be variables relating to electoral incomes --- median family, household and personal incomes. To determine which variables covary, principal component analysis is used on a combined dataset of socio-demographic variables from all six elections. It is appropriate to compute principal components in this way because when computed separately for each election, scree plots level off after four components and the loadings of the first four components are similar across the elections.
+[^2]: It is appropriate to compute principal components on a combined dataset of all six elections because when computed separately for each election, scree plots level off after four components and the loadings of the first four components are similar across the elections.
 
 Only the first four principal components from the combined dataset are considered, as the scree plot corresponding to the combined dataset levels off after the fourth component. Variables that have a large loading in a particular component are deemed to covary, with a loading with magnitude greater than 0.15 being considered large. Six factors are created using this criteria. These are:
-`Incomes` (median personal, household and family incomes);
-`Unemployment` (unemployment and labor force participation rates);
-`ProportyOwned` (rates of housing ownership, mortgages, renting and government housing);
-`RentLoanPrice` (median rental and loan repayments);
-`FamHouseSize` (average household size, ratio of people to families and household makeup (single person, couple with kids and couple without kids); and
-`Education` (high school and university qualifications, jobs requiring higher levels of education as well as vocational course completions and jobs that do not require higher education levels, such as laborer or tradesperson).
-For each of these groups, variables with positive loadings are added and those with negative loadings are subtracted to create a factor. After computing these sums, each factor is standardized to have mean zero and variance one, within each election.
+`Incomes` (median personal income, median household income, median family income);
+`Unemployment` (unemployment rate, labor force participation rate);
+`PropertyOwned` (proportion of dwellings that are owned, proportion of dwellings that are mortgages, proportion of dwellings that are rented, proportion of dwellings that classified as government housing);
+`RentLoanPrice` (median rental payment amount, median loan repayment amount);
+`FamHouseSize` (average household size, ratio of people to families, incidence of single person households, incidence of households containing a couple with kids, incidence of households containing a couple without kids); and
+`Education` (high school completions, university qualifications, jobs requiring higher levels of education, vocational course completions, jobs that do not require higher education levels).
+For each of these groupings, a factor is created by taking a weighted sum of the variables. The weightings are allocated on the basis of whether the variable had a positive or negative loading in the principal component from which the grouping was identified. Variables with a positive loading are allocated a weight of $+1$ and those with negative loadings are allocated a weight of $-1$. After computing these weighted sums, the factor is standardized to have mean zero and variance one, within each election.
 
-There are $p=30$ variables in the resultant predictor set, with all of these used in the regression for each election.
+There are $p=32$ variables in the resultant predictor set, with all of these used in the regression for each election.
 
 ## Regression incorporating spatially dependent errors
 
