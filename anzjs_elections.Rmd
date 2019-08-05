@@ -50,6 +50,14 @@ library(predictmeans)
 source("functions.R")
 ```
 
+```{r temporary_load_local_data, include = FALSE}
+load("data/abs2004_cd.rda")
+load("data/abs2007_cd.rda")
+load("data/abs2010_cd.rda")
+load("data/abs2013_cd.rda")
+```
+
+
 ```{r wrangle, include = FALSE}
 # Take log of indigenous, judaism, islam, buddhism
 abs2016 <- eechidna::abs2016 %>%
@@ -59,28 +67,28 @@ abs2016 <- eechidna::abs2016 %>%
     Islam = log(Islam),
     Buddhism = log(Buddhism)
   )
-abs2013 <- eechidna::abs2013 %>%
+abs2013 <- abs2013_cd %>% #eechidna::abs2013 %>%
   mutate(
     Indigenous = log(Indigenous),
     Judaism = log(Judaism),
     Islam = log(Islam),
     Buddhism = log(Buddhism)
   )
-abs2010 <- eechidna::abs2010 %>%
+abs2010 <- abs2010_cd %>% #eechidna::abs2010 %>%
   mutate(
     Indigenous = log(Indigenous),
     Judaism = log(Judaism),
     Islam = log(Islam),
     Buddhism = log(Buddhism)
   )
-abs2007 <- eechidna::abs2007 %>%
+abs2007 <- abs2007_cd %>% #eechidna::abs2007 %>%
   mutate(
     Indigenous = log(Indigenous),
     Judaism = log(Judaism),
     Islam = log(Islam),
     Buddhism = log(Buddhism)
   )
-abs2004 <- eechidna::abs2004 %>%
+abs2004 <- abs2004_cd %>% #eechidna::abs2004 %>%
   mutate(
     Indigenous = log(Indigenous),
     Judaism = log(Judaism),
@@ -106,23 +114,19 @@ my_df <- bind_rows(
     by = c("DivisionNm", "StateAb" = "State")
   ) %>% mutate(year = "2001"),
   left_join(eechidna::tpp04,
-    standardise_vars(abs2004) %>%
-      dplyr::select(-UniqueID),
+    standardise_vars(abs2004),
     by = c("DivisionNm")
   ) %>% mutate(year = "2004"),
   left_join(eechidna::tpp07,
-    standardise_vars(abs2007) %>%
-      dplyr::select(-UniqueID),
+    standardise_vars(abs2007),
     by = c("DivisionNm")
   ) %>% mutate(year = "2007"),
   left_join(eechidna::tpp10,
-    standardise_vars(abs2010) %>%
-      dplyr::select(-UniqueID),
+    standardise_vars(abs2010),
     by = c("DivisionNm")
   ) %>% mutate(year = "2010"),
   left_join(eechidna::tpp13,
-    standardise_vars(abs2013) %>%
-      dplyr::select(-UniqueID),
+    standardise_vars(abs2013),
     by = c("DivisionNm")
   ) %>% mutate(year = "2013"),
   left_join(eechidna::tpp16,
@@ -131,13 +135,17 @@ my_df <- bind_rows(
     by = c("DivisionNm", "StateAb" = "State")
   ) %>% mutate(year = "2016")
 ) %>%
-  mutate(year = factor(year)) %>%
+  mutate(year = factor(year), 
+    Band_00_19 = Age00_04 + Age05_14 + Age15_19,
+    Band_20_34 = Age20_24 + Age25_34,
+    Band_35_54 = Age35_44 + Age45_54,
+    Band_55plus = Age55_64 + Age65_74 + Age75_84 + Age85plus) %>% 
   select(-c(
-    starts_with("Age"), StateAb,
+    starts_with("Age"), MedianAge, StateAb,
     LNP_Votes, ALP_Votes, ALP_Percent, TotalVotes, Swing,
     InternetUse, InternetAccess, EnglishOnly,
     Other_NonChrist, OtherChrist, Catholic, Anglican,
-    Volunteer, EmuneratedElsewhere, DivisionID
+    Volunteer, EmuneratedElsewhere, Population, UniqueID
   ))
 
 # Create final df for modelling
@@ -178,8 +186,12 @@ model_df <- small_df %>%
     OtherLanguage = OtherLanguageHome,
     BornSEEuro = Born_SE_Europe,
     BornAsia = Born_Asia,
-    OneParentHouse = OneParent_House
-  )
+    OneParentHouse = OneParent_House,
+    Pop_00_19 = Band_00_19,
+    Pop_20_34 = Band_20_34,
+    Pop_35_54 = Band_35_54
+  ) %>% 
+  select(-Band_55plus)
 ```
 
 ```{r spatialweights, eval = FALSE}
