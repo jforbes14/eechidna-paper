@@ -371,21 +371,15 @@ ggplot(timeline, aes(x = year_vis, y = measure)) +
 
 For each election, neighbouring Census information has to be combined in some way so that it represents the boundaries in place at the time of the election. This is done by taking the electoral boundaries and imputing the corresponding socio-demographic characteristics for each of neighbouring Censuses, thereby addressing the spatial aspect. Next, to deal with the temporal component, characteristics at the time of the election are constructed using linear interpolation between the spatially imputed neighbouring Census variables.
 
-To account for spatial differences, the piecewise approximation method in @Goodchild1993 is adopted. Consider a map of source zones $s = 1,\dots,S$, for which socio-demographic information is available, and a set of target zones $t = 1,\dots,T$ for which information is to be imputed. This is described in the context of a single election, and a single neighbouring Census.
+The finest level of disaggregation available for Census data is the region classification called Statistical Area 1 (SA1). In 2016, Australia was divded into over 55,000 SA1s. Consider each of these SA1 regions as a source zone, $s = 1,\dots,S$, for which socio-demographic information is available. For simplicity, let each source zone be wholly summarised by its centroid. A set of target zones, $t = 1,\dots,T$, are defined as regions for which information is to be imputed - these are the electoral boundaries for a particular election. This is described in the context of a single election, and a single neighbouring Census. Let $I_{s,t}$ be an indicator variable, for which $I_{s,t} = 1$ if the centroid of source zone $s$ falls within target zone $t$, and $0$ otherwise. Additionally, let the population of the source zone $s$ be $U_s$ and the population of target zone $t$ be $P_{t}$. 
 
-Let the map of electoral boundaries at the time of a Census define the source zones, and let the boundaries at the time of the election be the target zones. Denote the area of intersection between a source zone $s$ and a target zone $t$ as $A_{s,t}$. Additionally, let the population of the source zone $s$ be $U_s$ and the population of intersection between source zone $s$ and target zone $t$ be $P_{s,t}$. The estimated population of intersection is given by
+In order to calculate socio-demographic information for each of the target zones, a weighted average of source zones is taken using their populations as weights. Denote a given Census variable for the target zone by $C_t$, and the same Census variable for the source zone as $D_s$. Then, estimate $C_t$ using
 $$
-  \hat{P}_{s,t} = \frac{U_s*A_{s,t}}{\sum_{t=1}^T A_{s,t}},
-  \quad\text{for all $s=1,\dots,S$ and $t=1,\dots,T$}.
-$$
-Note that this estimator implicitly assumes that populations are uniformly distributed within each source zone.
-
-In order to calculate socio-demographic information for each of the target zones, a weighted average is taken using the estimated intersection populations as weights. Denote a given Census variable for the target zone by $C_t$, and the same Census variable for the source zone as $D_s$. Then, estimate $C_t$ using
-$$
-  \hat{C}_t = \frac{\sum_{s=1}^{S}{D_s*\hat{P}_{s,t}}}%
-  {\sum_{s=1}^{S}{\hat{P}_{s,t}}},
+  \hat{C}_t = \frac{\sum_{s=1}^{S}{I_{s,t}*D_s*U_s}}%
+  {\sum_{s=1}^{S}{I_{s,t}*U_s}},
   \quad\text{for each $t=1,\dots,T$}.
 $$
+  
 This concludes the spatial imputation of the socio-demographic characteristics for one target zone (a single electoral boundary), at the time of only one of the neighbouring Censuses. This process is repeated for all of the target zones, and then for the other neighbouring Census.
 
 \enlargethispage*{0.5cm}
