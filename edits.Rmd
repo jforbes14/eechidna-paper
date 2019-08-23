@@ -1,0 +1,88 @@
+---
+title: "edits"
+author: "Jeremy Forbes"
+date: "05/08/2019"
+output: html_document
+---
+
+### An illustration of the spatio-temporal imputation {-}
+
+To illustrate the method, consider the imputation of socio-demographic variables for the electorate of Melbourne Ports in Victoria (VIC) at the time of the 2013 federal election. The boundaries shown in Figure \@ref(fig:melbports13) depict the target zone of Melbourne Ports for 2013 (shaded purple), along with its neighbouring electorates and the centroids of the SA1 regions from the 2016 Census.
+
+```{r melbports13, fig.cap = "The electoral boundaries for Melbourne Ports (shown in purple) and surrounding electorates, with centroids for Statistical Area 1 regions from the 2016 Census overlaid. The centroids falling within the purple region are attributed to Melbourne Ports.", out.height="28%"}
+# Get Vic shape
+load("data/vic_map.rda")
+load("data/MP_sa1_dots_2011.rda")
+
+p1 <- ggplot(data = vic_map) +
+  geom_polygon(aes(x = long, y = lat, group = group, fill = Elect_div == "Melbourne Ports"),
+    colour = "black", alpha = 0.4
+  ) +
+  scale_fill_manual(
+    name = "Electoral Boundaries",
+    values = c("white", "purple"),
+    labels = c("Other Electorates", "Melbourne Ports (VIC)")
+  ) +
+  theme_map() +
+  coord_equal(xlim = c(144.88, 145.07), ylim = c(-37.92, -37.78))
+
+p1 + geom_point(aes(x = long_c, y = lat_c, shape = shape), data = MP_sa1_dots_2011 %>% mutate(shape = "1"), colour = "grey25", size = 1.3) + scale_shape_manual(name = "Statistical Area 1", values = 3, labels = "Centroids")
+```
+
+There are many source zones from the 2016 Census that intersect with this purple region, including the divisions of Riverina, Eden-Monaro and Hume, along with smaller intersecting areas with Fenner, Calare, Gilmore and Whitlam. The proportion of each source zone that overlaps with the purple region is calculated, and used to obtain the intersecting populations $\hat{P}_{s,t}$.
+
+```{r hume1}
+hume <- abs2016 %>%
+  filter(DivisionNm %in%
+           c("HUME", "RIVERINA", "EDEN-MONARO", "CANBERRA",
+             "FENNER", "WHITLAM", "GILMORE", "CALARE")) %>%
+  mutate(
+    Pst = c(21, 548, 16358, 474, 86, 145427, 39117, 92),
+    Proportion = Pst/Population,
+    DivisionNm = tools::toTitleCase(tolower(DivisionNm))
+  ) %>%
+  select(DivisionNm, Proportion, Population, Pst, AusCitizen) %>%
+  arrange(desc(Proportion))
+
+hume %>%
+  kable(longtable=FALSE, booktabs=TRUE, digits=c(0,4,0,0,1),
+        format='latex',escape=FALSE,
+        col.names=c(
+          "Source zone (2016)",
+          "Proportion",
+          "Source zone population",
+          "Population allocated to purple region: $\\hat{P}_{s,t}$",
+          "AusCitizen (\\%): $D_s$"),
+    caption = "Population from each intersecting Census source zone (2016) that is allocated to the target zone (purple region - Hume electoral boundary in 2013), and the corresponding proportion of Australian citizens in each of these source zones.") %>%
+  kableExtra::kable_styling(font_size=12, latex_options='scale_down')
+```
+
+```{r wave, include=FALSE}
+wave2016 <- weighted.mean(x = hume$AusCitizen, w = hume$Pst)
+hume11 <- abs2011 %>%
+  filter(DivisionNm %in%
+           c("HUME", "RIVERINA", "EDEN-MONARO", "CANBERRA",
+             "FENNER", "WHITLAM", "GILMORE", "CALARE")) %>%
+  mutate(
+    Pst = c(21, 548, 16358, 474, 86, 145427), # Needs adjusting
+    Proportion = Pst/Population,
+    DivisionNm = tools::toTitleCase(tolower(DivisionNm))
+  ) %>%
+  select(DivisionNm, Proportion, Population, Pst, AusCitizen) %>%
+  arrange(desc(Proportion))
+wave2011 <- 91.00 #weighted.mean(x = hume11$AusCitizen, w = hume11$Pst)
+```
+
+Now consider the socio-demographic variable *AusCitizen*, the proportion of people in the region who are Australian citizens. A weighted average of *AusCitizen*, with the allocated population from each source zone as weights, yields $\hat{C}_{\text{Hume},2016} = `r sprintf("%4.2f",wave2016)`\%$. Repeating this process using the 2011 Census yields $\hat{C}_{\text{Hume},2011} = `r sprintf("%4.2f",wave2011)`\%$. Finally, linear interpolation between 2011 and 2016 yields the 2013 estimate:
+$$
+  \hat{C}_{\text{Hume},2013}
+    = \frac{3}{5} \hat{C}_{\text{Hume},2011} + \frac{2}{5} \hat{C}_{\text{Hume},2016}
+    % = \frac{3}{5} \cdot 91.00 \% + \frac{2}{5} \cdot 89.65 \% \\
+    =  90.46\%.
+$$
+This is done for each of the 65 socio-demographic variables, and is repeated for each of the 149 remaining target zones corresponding with 2013 electorates.
+
+
+#### Robustness
+
+Two robustness checks are conducted to confirm model stability. First, a model for each election is fit using only the variables that were found to be significant in at least one of the six elections. The estimated coefficients of the variables in these models all fall within their respective $95\%$ confidence intervals from the full models, confirming that the significant effects are robust to variable selection. The second check involves computing pairwise correlations amongst the explanatory variables, and seeing if the removal of one variable (from a pair) affects the other's estimated effect. For example, the variables `Born_Asia` and `BornElsewhere` have a pairwise correlation of $0.93$ - the largest of any pair. A model is fit omitting `BornElsewhere` (the reduced model). The estimated coefficent of `Born_Asia` is then compared with the confidence interval for `Born_Asia` in the full model. It is found that for each of the top ten pairwise correlations, the estimated effect in the reduced model lies within the confidence interval from the full model. This second check indicates that variables with high pairwise correlation are not masking the effects of each other.
