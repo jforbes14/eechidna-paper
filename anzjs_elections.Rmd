@@ -648,7 +648,8 @@ Of these job related variables, the most surprising effect is that associated wi
 
 ### Income and unemployment {-}
 
-Typically the Labor party campaigns on more progressive policies, which often include tax reform that adversely affects higher income earners, and more generous social assistance programs. Perhaps it is due to these policies that higher income electorates appear more likely to support the Liberal party, as the `Incomes` factor has a positive effect on Liberal preference (see row 1 in Figure \@ref(fig:partresplot1)). This effect is significant in every election aside from 2004, where it is only marginally insignificant ($p = 0.0613$). Unemployment however, is not as influential. In 2001 and 2004, electorates with higher unemployment align with Labor, but over time this shifts towards support for the Liberal party, culminating in a significantly positive effect in 2016.
+Typically the Labor party campaigns on more progressive policies, which often include tax reform that adversely affects higher income earners, and more generous social assistance programs. Perhaps it is due to these policies that higher income electorates appear more likely to support the Liberal party, as the `Incomes` factor has a positive effect on Liberal preference (see row 1 in Figure \@ref(fig:partresplot1)). This effect is significant in every election aside from 2004 and 2010. Unemployment however, is not as influential. In 2001 and 2004, electorates with higher unemployment align with Labor, but over time this shifts towards support for the Liberal party, culminating in a positive (insignificant) effect in 2016.
+
 
 ### Household mobility {-}
 
@@ -656,11 +657,11 @@ In each of the six elections, electorates with a higher proportion of people tha
 
 ### Relationships {-}
 
-De facto relationships, but not marriages, are found to be an important (and significant) predictor of the two-party preferred vote in all six elections, with more de facto relationships associated with higher support for the Labor party. The proportion of individuals who are married however, is insignificant (not shown).
+From 2007 onwards, both marriages (`Married`) and de facto relationships (`DeFacto`) are found to be strong predictors of the two-party preferred vote in opposition to the Liberal party. In 2001 and 2004 neither of these variables were significant (see rows 4 and 5 in Figure \@ref(fig:partresplot2)).
 
 ### Age {-}
 
-Regions comprising more older people are often believed to be more conservative, and indeed it found that electorates with a higher median age are more likely to support the Liberal party --- although this effect is significant only in 2007 and 2010 (see row 2 in Figure \@ref(fig:partresplot2)).
+The older Australian population is often believed to be more conservative, and the left leaning political parties (including Labor) typically have a stronger appeal to younger people. This effect is indeed observed across the six elections, with populations between 20 and 34 years of age (`Pop_20_34`) being very strongly aligned with Labor preference (bottom row in Figure \@ref(fig:partresplot2)). Larger populations of 35 to 54 year olds (`Pop_35_54`) are also associated with Labor, but the magnitude of this effect is far smaller. Populations under 20 years of age is only significant in 2007, where `Pop_00_19` increased Liberal support.
 
 ### Education {-}
 
