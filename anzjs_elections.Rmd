@@ -187,6 +187,8 @@ model_df <- small_df %>%
     OtherLanguage = OtherLanguageHome,
     BornSEEuro = Born_SE_Europe,
     BornAsia = Born_Asia,
+    BornUK = Born_UK,
+    BornMidEast = Born_MidEast,
     OneParentHouse = OneParent_House,
     Pop_00_19 = Band_00_19,
     Pop_20_34 = Band_20_34,
@@ -608,42 +610,45 @@ Since all socio-demographics have been standardized to have a mean of zero and a
 
 ```{r prepplot, include = FALSE}
 p1 <- grid_visreg("Extractive", top = TRUE)
-p2 <- grid_visreg("DiffAddress")
-p3 <- grid_visreg("ManagerAdmin")
-p4 <- grid_visreg("Transformative")
-p5 <- grid_visreg("Incomes")
-p6 <- grid_visreg("Unemployment")
+p2 <- grid_visreg("ManagerAdmin")
+p3 <- grid_visreg("Transformative")
+p4 <- grid_visreg("SocialServ")
+p5 <- grid_visreg("DiffAddress")
+p6 <- grid_visreg("Incomes")
+p7 <- grid_visreg("OtherLanguage")
+p8 <- grid_visreg("Pop_00_19")
 
-p7 <- grid_visreg("MedianAge", top = TRUE)
-p8 <- grid_visreg("Judaism")
-p9 <- grid_visreg("OtherLanguage")
-temp <- grid_visreg("OtherLanguage")
-p10 <- grid_visreg("BornAsia")
+p9 <- grid_visreg("Unemployment", top = TRUE)
+p10 <- grid_visreg("BornSEEuro")
 p11 <- grid_visreg("Education")
-p12 <- grid_visreg("BornSEEuro")
+p12 <- grid_visreg("Married")
 p13 <- grid_visreg("DeFacto")
+p14 <- grid_visreg("Pop_35_54")
+p15 <- grid_visreg("Pop_20_34")
 ```
 
 
-```{r partresplot1, fig.cap = "Partial residual plots by election year for a selection of predictors. Linear model with 95\\% confidence bands overlaid. Most predictors have a positive relationship: the larger the value the more likely the electorate preferences the Coalition. The relationship is relatively robust over time, with the exception of Unemployment.", fig.height = 8.5, fig.width = 6, warning = FALSE, fig.pos = 'h'}
-(p1 / p2 / (p3 + ylab("Two-party preferred vote (%)                     ")) / p4 / p5 / p6)
+```{r partresplot1, fig.cap = "Partial residual plots by election year for a selection of predictors. Linear model with 95\\% confidence bands overlaid. Most predictors have a positive relationship: the larger the value the more likely the electorate preferences the Coalition. The relationship is relatively robust over time, with the exception of OtherLanguageHome and Pop_00_19.", fig.height = 8.5, fig.width = 6, warning = FALSE, fig.pos = 'h'}
+(p1 / p2 / p3 / (p4 + ylab("Two-party preferred vote (%)                     ")) / p5 / p6 / p7 / p8)
 ```
 
-```{r partresplot2, fig.cap = "Partial residual plots by election year for a selection of predictors. Linear model with 95\\% confidence bands overlaid. Several predictors have a negative relationship: with larger values indicating the electorate more likely preferences Labor. Most relationships are relatively stable over elections, except OtherLanguage and Education.", fig.height = 8.5,  fig.width = 6, warning = FALSE, fig.pos = 'h'}
-(p7 / p8 / (p9 + ylab("Two-party preferred vote (%)                     ")) / p10 / p11 / p12 / p13)
+```{r partresplot2, fig.cap = "Partial residual plots by election year for a selection of predictors. Linear model with 95\\% confidence bands overlaid. Several predictors have a negative relationship: with larger values indicating the electorate more likely preferences Labor. Most relationships are relatively stable over elections, except Unemployment and Education.", fig.height = 8.5,  fig.width = 6, warning = FALSE, fig.pos = 'h'}
+(p9 / p10  / p11 / (p12 + ylab("Two-party preferred vote (%)")) / p13 / p14 / p15)
 ```
 
-To investigate the socio-demographics that have a strong effect on the two-party preferred vote, partial residual plots are used and shown in Figures \@ref(fig:partresplot1) and \@ref(fig:partresplot2). Partial residuals for a variable are the residuals from the fitted model with the estimated effect of that variable added to it. These plots show the direction, size and significance of an estimated effect, as well as any deviations from linearity. In each plot, the slope of the prediction line matches the estimated coefficient and the shaded region represents a 95% confidence band. Plots are computed using the method in @visreg. If a horizontal line can be drawn through the confidence band, then the effect is insignificant. The estimated intercept is also added to the partial residuals for interpretability. Plots for each election are faceted to compare the effects over time in Figures \@ref(fig:partresplot1) and \@ref(fig:partresplot2). Only socio-demographics that have a significant effect in at least one election are displayed in Figures \@ref(fig:partresplot1) and \@ref(fig:partresplot2).
+To investigate the socio-demographics that have a strong effect on the two-party preferred vote, partial residual plots are used and shown in Figures \@ref(fig:partresplot1) and \@ref(fig:partresplot2). Partial residuals, for a given variable, are the residuals from the fitted model with the estimated effect of that variable added to it. These plots show the direction, size and significance of an estimated effect, as well as any deviations from linearity. In each plot, the slope of the prediction line matches the estimated coefficient and the shaded region represents a 95% confidence band. Plots are computed using the method in @visreg. If a horizontal line can be drawn through the confidence band, then the effect is insignificant. The estimated intercept is also added to the partial residuals for interpretability. Plots for each election are faceted to compare the effects over time in Figures \@ref(fig:partresplot1) and \@ref(fig:partresplot2). Only socio-demographics that have a significant effect in at least two elections are displayed in Figures \@ref(fig:partresplot1) and \@ref(fig:partresplot2).
+
+### Industry and type of work {-}
+
+Electorates with higher proportions of workers in mining, gas, water, agriculture, waste and electricity (grouped as `Extractive` industries) are consistently linked with higher support for the Liberal party, with the magnitude of this effect slightly increasing over the years (see row 3 in Figure \@ref(fig:partresplot1)). This is unsurprising, as the Liberal party has close ties with these traditional energy industries, and typically present policies to reduce taxation on energy production. Furthermore, electorates with more workers in construction or manufacturing industries (`Transformative`) are also more likely to support the Liberal party (see row 4 in Figure \@ref(fig:partresplot1)), from 2004 onwards.
+
+Similarly, the proportion of workers in managerial, administrative, clerical and sales roles (`ManagerAdmin`), is also a significant predictor of two-party preference vote across all six elections, with a higher proportion of people working these jobs increasing Liberal support.
+
+Of these job related variables, the most surprising effect is that associated with the proportion of workers in education, healthcare, social work, community and arts (`SocialServ`). Typically the Labor party has more generous funding schemes affecting these areas of work, so one might expect `SocialServ` to have a negative effect on two-party preference. However, in every election this effect is found to be positive and significant. 
 
 ### Income and unemployment {-}
 
 Typically the Labor party campaigns on more progressive policies, which often include tax reform that adversely affects higher income earners, and more generous social assistance programs. Perhaps it is due to these policies that higher income electorates appear more likely to support the Liberal party, as the `Incomes` factor has a positive effect on Liberal preference (see row 1 in Figure \@ref(fig:partresplot1)). This effect is significant in every election aside from 2004, where it is only marginally insignificant ($p = 0.0613$). Unemployment however, is not as influential. In 2001 and 2004, electorates with higher unemployment align with Labor, but over time this shifts towards support for the Liberal party, culminating in a significantly positive effect in 2016.
-
-### Industry and type of work {-}
-
-Electorates with higher proportions of workers in mining, gas, water, agriculture, waste and electricity (grouped as `Extractive` industries) are consistently linked with higher support for the Liberal party, with the magnitude of this effect slightly increasing over the years (see row 3 in Figure \@ref(fig:partresplot1)). This is unsurprising, as the Liberal party has close ties with these traditional energy industries, and typically present policies to reduce taxation on energy production. Furthermore, electorates with more workers in construction or manufacturing industries (`Transformative`) are also more likely to support the Liberal party (see row 4 in Figure \@ref(fig:partresplot1)).
-
-Similarly, the proportion of workers in managerial, administrative, clerical and sales roles (`ManagerAdmin`) is also a significant predictor of two-party preference vote across all six elections, with a higher proportion of people working these jobs increasing Liberal support. The magnitude of this effect also seems to increase over the years.
 
 ### Household mobility {-}
 
