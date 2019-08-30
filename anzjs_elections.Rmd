@@ -623,8 +623,9 @@ p10 <- grid_visreg("BornSEEuro")
 p11 <- grid_visreg("Education")
 p12 <- grid_visreg("Married")
 p13 <- grid_visreg("DeFacto")
-p14 <- grid_visreg("Pop_35_54")
-p15 <- grid_visreg("Pop_20_34")
+p14 <- grid_visreg("OneParentHouse")
+p15 <- grid_visreg("Pop_35_54")
+p16 <- grid_visreg("Pop_20_34")
 ```
 
 
@@ -633,7 +634,7 @@ p15 <- grid_visreg("Pop_20_34")
 ```
 
 ```{r partresplot2, fig.cap = "Partial residual plots by election year for a selection of predictors. Linear model with 95\\% confidence bands overlaid. Several predictors have a negative relationship: with larger values indicating the electorate more likely preferences Labor. Most relationships are relatively stable over elections, except Unemployment and Education.", fig.height = 8.5,  fig.width = 6, warning = FALSE, fig.pos = 'h'}
-(p9 / p10  / p11 / (p12 + ylab("Two-party preferred vote (%)")) / p13 / p14 / p15)
+(p9 / p10  / p11 / (p12 + ylab("Two-party preferred vote (%)                     ")) / p13 / p14 / p15 / p16)
 ```
 
 To investigate the socio-demographics that have a strong effect on the two-party preferred vote, partial residual plots are used and shown in Figures \@ref(fig:partresplot1) and \@ref(fig:partresplot2). Partial residuals, for a given variable, are the residuals from the fitted model with the estimated effect of that variable added to it. These plots show the direction, size and significance of an estimated effect, as well as any deviations from linearity. In each plot, the slope of the prediction line matches the estimated coefficient and the shaded region represents a 95% confidence band. Plots are computed using the method in @visreg. If a horizontal line can be drawn through the confidence band, then the effect is insignificant. The estimated intercept is also added to the partial residuals for interpretability. Plots for each election are faceted to compare the effects over time in Figures \@ref(fig:partresplot1) and \@ref(fig:partresplot2). Only socio-demographics that have a significant effect in at least two elections are displayed in Figures \@ref(fig:partresplot1) and \@ref(fig:partresplot2).
@@ -650,10 +651,11 @@ Of these job related variables, the most surprising effect is that associated wi
 
 Typically the Labor party campaigns on more progressive policies, which often include tax reform that adversely affects higher income earners, and more generous social assistance programs. Perhaps it is due to these policies that higher income electorates appear more likely to support the Liberal party, as the `Incomes` factor has a positive effect on Liberal preference (see row 1 in Figure \@ref(fig:partresplot1)). This effect is significant in every election aside from 2004 and 2010. Unemployment however, is not as influential. In 2001 and 2004, electorates with higher unemployment align with Labor, but over time this shifts towards support for the Liberal party, culminating in a positive (insignificant) effect in 2016.
 
+### Households {-}
 
-### Household mobility {-}
+In 2001, 2004 and 2016, higher proportions of people that have recently (in the past five years) moved house (`DiffAddress`) increased electoral support for the Liberal party (see row 5 in Figure \@ref(fig:partresplot1)). Having controlled for characteristics of house ownership and rental prices (`PropertyOwned` and `RentLoan` - both of which have no effect), this effect is somewhat surprising.
 
-In each of the six elections, electorates with a higher proportion of people that have recently (in the past five years) moved house (`DiffAddress`) are more likely to support the Liberal party, although this effect was marginally insignificant in 2013 (see row 6 in Figure \@ref(fig:partresplot1). Having controlled for characteristics of house ownership and rental prices (via the factors `PropertyOwned` and `RentLoan` respectively), this effect is somewhat surprising.
+Higher proportions of single parent households are associated with Labor support in all elections (albeit insignificant in 2004, see row 6 in Figure \@ref(fig:partresplot2)), whereas the electoral family and household sizes (via the `FamHouseSize` variable) do not appear to be associated with either party in any election.
 
 ### Relationships {-}
 
@@ -665,11 +667,11 @@ The older Australian population is often believed to be more conservative, and t
 
 ### Education {-}
 
-Since 2007, electorates with higher education levels are associated with supporting the Labor party, although this effect is significant only in 2016. Before 2007, education has an almost zero effect (see row 3 in Figure \@ref(fig:partresplot1)).
+Since 2007, electorates with higher education levels are associated with supporting the Labor party, with this effect being significant in 2007, 2013 and 2016 and only marginally insignificant in 2010. In the elections before 2007, education has a negligible effect (see row 3 in Figure \@ref(fig:partresplot1)). Additionally, student populations (`CurrentlyStudying`) do not affect electoral party preference in any election (not shown).
 
 ### Diversity {-}
 
-Larger migrant populations from Asia, the Middle East, South-Eastern Europe, the United Kingdom and elsewhere, are either associated with Labor support, or have no effect. Of these areas, only South-Eastern European populations appear significant in each election, with the proportion of Asian migrants also being significant in 2010. Speaking other languages (aside from English) however, appears to have a far stronger effect, as observed through the `OtherLanguage` variable. Electorates with more diverse speech are associated with higher support for the Liberal party from 2004 onwards, with this effect being significant in 2007, 2010 and 2016. Furthermore, of the variables relating to religion, only Judaism shows a consistent effect, with electorates with relatively large Jewish populations more likely to vote Liberal.
+Larger migrant populations from Asia, the Middle East, South-Eastern Europe, the United Kingdom and elsewhere, are either associated with Labor support, or have no effect. Of these areas, only South-Eastern European populations significant affect party preference, with larger populations associating with Labor in 2013 and 2016 (row 2, Figure \@ref(fig:partresplot2)). Speaking other languages (aside from English) however, appears to have a far stronger effect, as observed through the `OtherLanguage` variable. Electorates with more diverse speech are associated with higher support for the Liberal party from 2004 onwards, with this effect being significant in 2013 and 2016 row 7, Figure \@ref(fig:partresplot1)). Furthermore, none of the variables relating to religious beliefs aside from Christianity have a material effect in any election (this includes the Buddhist, Muslim, Jewish, areligious and Indigenous Australian populations). The association between Christian populations (`Christianity`) and the Liberal party steady increases over the years, becoming positive and significant in 2016. 
 
 ### Robustness
 
