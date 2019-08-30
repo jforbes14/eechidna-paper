@@ -684,11 +684,11 @@ all_resids <- data.frame(
   Residuals = c(glsmod16$actual_residuals, glsmod13$actual_residuals, glsmod10$actual_residuals, glsmod07$actual_residuals, glsmod04$actual_residuals, glsmod01$actual_residuals),
   gls_residuals = c(glsmod16$residuals, glsmod13$residuals, glsmod10$residuals, glsmod07$residuals, glsmod04$residuals, glsmod01$residuals),
   bind_rows(
-    glsmod16$my_data %>% left_join(tpp16 %>% dplyr::select(DivisionNm, DivisionID, StateAb), by = "DivisionNm"),
-    glsmod13$my_data %>% left_join(tpp13 %>% dplyr::select(DivisionNm, DivisionID, StateAb), by = "DivisionNm"),
-    glsmod10$my_data %>% left_join(tpp10 %>% dplyr::select(DivisionNm, DivisionID, StateAb), by = "DivisionNm"),
-    glsmod07$my_data %>% left_join(tpp07 %>% dplyr::select(DivisionNm, DivisionID, StateAb), by = "DivisionNm"),
-    glsmod04$my_data %>% left_join(tpp04 %>% dplyr::select(DivisionNm, DivisionID, StateAb), by = "DivisionNm"),
+    glsmod16$my_data %>% left_join(tpp16 %>% dplyr::select(DivisionNm, UniqueID, StateAb), by = "DivisionNm"),
+    glsmod13$my_data %>% left_join(tpp13 %>% dplyr::select(DivisionNm, UniqueID, StateAb), by = "DivisionNm"),
+    glsmod10$my_data %>% left_join(tpp10 %>% dplyr::select(DivisionNm, UniqueID, StateAb), by = "DivisionNm"),
+    glsmod07$my_data %>% left_join(tpp07 %>% dplyr::select(DivisionNm, UniqueID, StateAb), by = "DivisionNm"),
+    glsmod04$my_data %>% left_join(tpp04 %>% dplyr::select(DivisionNm, UniqueID, StateAb), by = "DivisionNm"),
     glsmod01$my_data %>% left_join(tpp01 %>% dplyr::select(DivisionNm, StateAb), by = "DivisionNm")
   )
 )
@@ -697,7 +697,7 @@ all_resids <- data.frame(
 
 ### Residuals by state {-}
 
-It is often hypothesized that states have systematic differences that cause their electorates to vote differently. Boxplots of residuals grouped by state (Figure \@ref(fig:resstate)) reveal that the data reflects this -- there appears to be a state-specific effect not captured by the models. Tasmania and the Australian Capital Territory appear to have a bias towards Labor, whereas the Northern Territory tends towards voting Liberal. However, there are relatively few electorates in each of these states (five, two and two respectively), so this apparent result may be due to incumbent effects rather than an actual state-specific bias.
+It is often hypothesized that states have systematic differences that cause their electorates to vote differently. Boxplots of residuals grouped by state (Figure \@ref(fig:resstate)) reveal that the data reflects this to a limited extent. Tasmania and the Australian Capital Territory appear to have a bias towards Labor, whereas the Northern Territory tends towards voting Liberal. However, there are relatively few electorates in each of these states (five, two and two respectively), so this apparent result may be due to incumbent effects rather than an actual state-specific bias.
 
 ```{r resstate, fig.cap = "Boxplot of residuals by state with jittered points. States ordered by median residual. A state-specific bias not captured by the model is evident.", fig.asp=0.6, out.width="70%", fig.pos = 'h', out.extra = ''}
 all_resids %>%
@@ -709,6 +709,44 @@ all_resids %>%
   theme_bw() +
   labs(x = "State", y = "Residuals")
 ```
+
+### Residuals by party incumbency {-}
+
+The incumbent party appears to have a distinct advantage at the next election. The boxplots in Figure \@ref(fig:resincumbent) show that if either Labor or Liberal won the seat at the previous election, the electorate is likely to vote in their favour, over and above any socio-demographic effects.
+
+```{r resincumbent, fig.cap = "Boxplot of residuals by state with jittered points. States ordered by median residual. A state-specific bias not captured by the model is evident.", fig.asp=0.6, out.width="70%", fig.pos = 'h', out.extra = ''}
+# Incumbents
+incumbent <- function(fp) {
+  df <- fp %>% filter(HistoricElected == "Y", PartyAb == "LNP") %>% select(DivisionNm, HistoricElected)
+  return(df)
+}
+
+# 2004-2016
+
+incum_resids <- data.frame(
+  Residuals = c(glsmod16$actual_residuals, glsmod13$actual_residuals, glsmod10$actual_residuals, glsmod07$actual_residuals, glsmod04$actual_residuals), 
+  bind_rows(
+    glsmod16$my_data %>% select(DivisionNm, year) %>% left_join(incumbent(fp16), by = "DivisionNm"),
+    glsmod13$my_data %>% select(DivisionNm, year) %>% left_join(incumbent(fp13), by = "DivisionNm"),
+    glsmod10$my_data %>% select(DivisionNm, year) %>% left_join(incumbent(fp10), by = "DivisionNm"),
+    glsmod07$my_data %>% select(DivisionNm, year) %>% left_join(incumbent(fp07), by = "DivisionNm"),
+    glsmod04$my_data %>% select(DivisionNm, year) %>% left_join(
+      fp04 %>% filter(PartyAb == "LNP") %>% 
+        left_join(
+          fp01 %>% rename(HistoricElected = Elected) %>% select(UniqueID, HistoricElected, PartyAb), 
+          by = c("UniqueID", "PartyAb")
+        ) %>% incumbent() %>% unique(), by = "DivisionNm")) %>%
+    mutate(Incumbent = ifelse(is.na(HistoricElected), "N", "Y")))
+
+ggplot(aes(x = year, y = Residuals, fill = Incumbent), data = incum_resids) + 
+  geom_boxplot() +
+  geom_hline(aes(yintercept = 0), col = "grey50") +
+  scale_fill_manual(values = c('white', 'grey'), labels = c("No", "Yes")) +
+  theme_bw()
+
+```
+
+
 
 ### Outlier electorates {-}
 
