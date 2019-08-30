@@ -699,7 +699,7 @@ all_resids <- data.frame(
 
 It is often hypothesized that states have systematic differences that cause their electorates to vote differently. Boxplots of residuals grouped by state (Figure \@ref(fig:resstate)) reveal that the data reflects this to a limited extent. Tasmania and the Australian Capital Territory appear to have a bias towards Labor, whereas the Northern Territory tends towards voting Liberal. However, there are relatively few electorates in each of these states (five, two and two respectively), so this apparent result may be due to incumbent effects rather than an actual state-specific bias.
 
-```{r resstate, fig.cap = "Boxplot of residuals by state with jittered points. States ordered by median residual. A state-specific bias not captured by the model is evident.", fig.asp=0.6, out.width="70%", fig.pos = 'h', out.extra = ''}
+```{r resstate, fig.cap = "Boxplot of residuals by state with jittered points. States ordered by median residual. A state-specific bias present only in the smaller states appears to have not been captured by the model.", fig.asp=0.6, out.width="70%", fig.pos = 'h', out.extra = ''}
 all_resids %>%
   ggplot(aes(x = fct_reorder(StateAb, Residuals), y = Residuals)) +
   geom_hline(aes(yintercept = 0), col = "grey50") +
@@ -712,9 +712,9 @@ all_resids %>%
 
 ### Residuals by party incumbency {-}
 
-The incumbent party appears to have a distinct advantage at the next election. The boxplots in Figure \@ref(fig:resincumbent) show that if either Labor or Liberal won the seat at the previous election, the electorate is likely to vote in their favour, over and above any socio-demographic effects.
+The incumbent party appears to have a distinct advantage at the next election. The boxplots in Figure \@ref(fig:resincumbent) show that if either of the Labor or Liberal parties won the seat at the previous election, the electorate is likely to vote in their favour, over and above any socio-demographic effects --- this effect has not been captured by the model.
 
-```{r resincumbent, fig.cap = "Boxplot of residuals by state with jittered points. States ordered by median residual. A state-specific bias not captured by the model is evident.", fig.asp=0.6, out.width="70%", fig.pos = 'h', out.extra = ''}
+```{r resincumbent, fig.cap = "Boxplot of residuals for incumbent and non-incumbent parties each year. An incumbent advantage is evident and has not been captured by the model.", fig.asp=0.6, out.width="70%", fig.pos = 'h', out.extra = ''}
 # Incumbents
 incumbent <- function(fp) {
   df <- fp %>% filter(HistoricElected == "Y", PartyAb == "LNP") %>% select(DivisionNm, HistoricElected)
@@ -764,12 +764,12 @@ cooksd_df <- data.frame(
   gls_residuals = c(glsmod16$residuals, glsmod13$residuals, glsmod10$residuals, glsmod07$residuals, glsmod04$residuals, glsmod01$residuals),
   cooksd = c(glsmod16$cooksd, glsmod13$cooksd, glsmod10$cooksd, glsmod07$cooksd, glsmod04$cooksd, glsmod01$cooksd),
   bind_rows(
-    glsmod16$my_data %>% left_join(tpp16 %>% dplyr::select(DivisionNm, DivisionID, StateAb), by = "DivisionNm"),
-    glsmod13$my_data %>% left_join(tpp13 %>% dplyr::select(DivisionNm, DivisionID, StateAb), by = "DivisionNm"),
-    glsmod10$my_data %>% left_join(tpp10 %>% dplyr::select(DivisionNm, DivisionID, StateAb), by = "DivisionNm"),
-    glsmod07$my_data %>% left_join(tpp07 %>% dplyr::select(DivisionNm, DivisionID, StateAb), by = "DivisionNm"),
-    glsmod04$my_data %>% left_join(tpp04 %>% dplyr::select(DivisionNm, DivisionID, StateAb), by = "DivisionNm"),
-    glsmod01$my_data %>% left_join(tpp01 %>% dplyr::select(DivisionNm, DivisionID, StateAb), by = "DivisionNm"))
+    glsmod16$my_data %>% left_join(tpp16 %>% dplyr::select(DivisionNm, UniqueID, StateAb), by = "DivisionNm"),
+    glsmod13$my_data %>% left_join(tpp13 %>% dplyr::select(DivisionNm, UniqueID, StateAb), by = "DivisionNm"),
+    glsmod10$my_data %>% left_join(tpp10 %>% dplyr::select(DivisionNm, UniqueID, StateAb), by = "DivisionNm"),
+    glsmod07$my_data %>% left_join(tpp07 %>% dplyr::select(DivisionNm, UniqueID, StateAb), by = "DivisionNm"),
+    glsmod04$my_data %>% left_join(tpp04 %>% dplyr::select(DivisionNm, UniqueID, StateAb), by = "DivisionNm"),
+    glsmod01$my_data %>% left_join(tpp01 %>% dplyr::select(DivisionNm, UniqueID, StateAb), by = "DivisionNm"))
 )
 ```
 
@@ -780,7 +780,8 @@ cooksd_df %>%
   facet_wrap(~year, nrow = 1) +
   # coord_fixed(ratio = .5) +
   labs(x = "Cook's Distance", y = "") +
-  theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 8), axis.text.y = element_text(size = 8))
+  theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 8), axis.text.y = element_text(size = 8)) +
+  theme_bw()
 ```
 
 ```{r, eval = FALSE}
@@ -788,25 +789,30 @@ cooksd_df %>%
   filter(cooksd > 0.1) %>%
   select(DivisionNm, StateAb, year, cooksd, Residuals, LNP_Percent, everything()) %>%
   View()
+
+cooksd_df %>%
+  filter(DivisionNm == "WENTWORTH") %>%
+  dplyr::select(DivisionNm, StateAb, year, cooksd, Residuals, LNP_Percent, everything()) %>%
+  View()
 ```
 
-Based on the distribution of the Cook's distance values, a Cook's distance greater than $0.1$ is considered to be influential and a potential outlier. The electorate of Sydney (NSW) has a large Cook's distance from 2001 to 2013, due to its diverse population (language, birthplace and religion), high number of defacto relationships, high income, high household mobility and small amount of workers in extractive and transformative jobs. It has remained a strong supporter of the Labor party and the Liberal vote is severely overpredicted by the model, making it an outlier. Nearby in metropolitan NSW, the electorate of Wentworth is found to be an outlier in all but the 2007 election. Although historically Liberal, its two-party vote jumped by over 10 percentage points in 2010 without experiencing any notable changes in its socio-demographic makeup --- implying that this may be the direct effect of its Liberal member, Malcolm Turnbull, becoming the leader of the Liberal party. Liberal support in Wentworth is underpredicted by the model in each year, and more so with Turnbull as Liberal leader.
+Based on the distribution of the Cook's distance values, a Cook's distance greater than $0.1$ is considered to be influential and a potential outlier. The electorate of Sydney (NSW) has a large Cook's distance from 2001 to 2010, due to its diverse population (language, birthplace and religion), high number of defacto relationships, high income, high household mobility and small amount of workers in extractive and transformative jobs. It has remained a strong supporter of the Labor party and the Liberal vote is severely overpredicted by the model, making it an outlier. Nearby in metropolitan NSW, the electorate of Wentworth is found to be an outlier in the 2013 and 2016 elections. Although historically Liberal, its two-party vote jumped by over 10 percentage points in 2010 without experiencing any notable changes in its socio-demographic makeup --- implying that this may be the direct effect of its Liberal member, Malcolm Turnbull, becoming the leader of the Liberal party. In the elections since, the model underpredicts Wentworth's Liberal support.
 
-Lingiari, an electorate taking up almost all of the Northern Territory, is an outlier in the 2001--2007 elections due to its large Indigenous population, young age profile and low rates of property ownership. Fowler (NSW) has a diverse population with a high proportion of migrants, many Buddhists and Muslims, and has strong Labor support, making it influential in 2001, 2004 and 2010. Other electorates with large Cook's distance are Barton (NSW) and Leichhardt (QLD) in 2016, and Canberra (ACT) in 2007.
+Lingiari, an electorate taking up almost all of the Northern Territory, is an outlier in the all but the 2013 election due to its large Indigenous population, young age profile and low rates of property ownership. Fowler (NSW) has a diverse population with a high proportion of migrants, many Buddhists and Muslims, and has strong Labor support, making it influential in 2001, 2004 and 2010. Other electorates with large Cook's distance are Canberra (ACT) and Durack (WA) in 2013, and Solomon (NT) in 2016.
 
 ```{r, eval = FALSE}
 x <- model_df %>%
   filter(year == "2016") %>%
-  select(-c(year, DivisionNm)) %>%
+  dplyr::select(-c(year, DivisionNm)) %>%
   as.matrix()
 myhat <- hat(x)
 
 plot(
-  glsmod07$cooksd,
+  glsmod16$cooksd,
   hat(
     model_df %>%
-      filter(year == "2007") %>%
-      select(-c(year, DivisionNm)) %>%
+      filter(year == "2016") %>%
+      dplyr::select(-c(year, DivisionNm)) %>%
       as.matrix()
   )
 )
