@@ -677,20 +677,6 @@ Larger migrant populations from Asia, the Middle East, South-Eastern Europe, the
 
 Two robustness checks are conducted to confirm model stability. First, a model for each election is fit using only the variables that were found to be significant in at least one of the six elections. The estimated coefficients of the variables in these models all fall within their respective $95\%$ confidence intervals from the full models, confirming that the significant effects are robust to variable selection. The second check involves computing pairwise correlations amongst the explanatory variables, and seeing if the removal of one variable (from a pair) affects the other's estimated effect. For example, the variables `Born_Asia` and `BornElsewhere` have a pairwise correlation of $0.93$ - the largest of any pair. A model is fit omitting `BornElsewhere` (the reduced model). The estimated coefficent of `Born_Asia` is then compared with the confidence interval for `Born_Asia` in the full model. It is found that for each of the top ten pairwise correlations, the estimated effect in the reduced model lies within the confidence interval from the full model. This second check indicates that variables with high pairwise correlation are not masking the effects of each other.
 
-### A note on similar variables {-}
-(Maybe remove this?)
-
-Many of the Census variables represent similar information, which is why factors were created and some variables were removed. However, some variables remain which are closely related. For example, an electorate's income level (via `Incomes`) is likely to be related to electoral unemployment and labor force participation (via `Unemployment`). In 2001, the coefficient estimate for `Unemployment` is negative but not significant, whilst the `Incomes` variables is significant. If the `Incomes` variable is removed from the model in 2001, `Unemployment` absorbs the negative effect, becoming significant ($p = 0.0056$).
-
-```{r removeunemp, eval = FALSE}
-unemp01 <- my_fgls(full_formula,
-  my_data = model_df %>% filter(year == "2001") %>% dplyr::select(-Incomes),
-  sp_weights = sp_weights_01
-)
-
-summary(unemp01)$tTable["Unemployment",]
-```
-
 ## A closer look at the residuals
 
 ```{r resids, include = FALSE}
