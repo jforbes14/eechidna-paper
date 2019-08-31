@@ -438,16 +438,16 @@ A factor is created from a group of variables if there is an intuitive reason as
 
 [^2]: It is appropriate to compute principal components on a combined dataset of all six elections because when computed separately for each election, scree plots level off after four components and the loadings of the first four components are similar across the elections.
 
-Only the first four principal components from the combined dataset are considered, as the scree plot corresponding to the combined dataset levels off after the fourth component. Variables that have a large loading in a particular component are deemed to covary, with a loading with magnitude greater than 0.15 being considered large. Six factors are created using this criteria. These are:
+Only the first four principal components from the combined dataset are considered, as the scree plot levels off after the fourth component. Variables that have a large loading in a particular component are deemed to covary, with a loading with magnitude greater than 0.15 being considered large. Each principal component is considered seperately. If a subset of variables have a large loading in a given component, and there is an intuitive reason as to why they should be grouped together, then this subset will be combined to become a factor. Six factors are created using this criteria. These are:
 `Incomes` (median personal income, median household income, median family income);
 `Unemployment` (unemployment rate, labor force participation rate);
 `PropertyOwned` (proportion of dwellings that are owned, proportion of dwellings that are mortgages, proportion of dwellings that are rented, proportion of dwellings that classified as government housing);
 `RentLoanPrice` (median rental payment amount, median loan repayment amount);
 `FamHouseSize` (average household size, ratio of people to families, incidence of single person households, incidence of households containing a couple with kids, incidence of households containing a couple without kids); and
-`Education` (high school completions, university qualifications, jobs requiring higher levels of education, vocational course completions, jobs that do not require higher education levels).
+`Education` (high school completions, university qualifications, proportion of people working as professionals, proportion of jobs in finance,  proportion of workers who are laborers, proportion of workers who work as a tradesperson, diploma and certificate qualifications).
 For each of these groupings, a factor is created by taking a weighted sum of the variables. The weightings are allocated on the basis of whether the variable had a positive or negative loading in the principal component from which the grouping was identified. Variables with a positive loading are allocated a weight of $+1$ and those with negative loadings are allocated a weight of $-1$. After computing these weighted sums, the factor is standardized to have mean zero and variance one, within each election.
 
-There are $p=32$ variables in the resultant predictor set, with all of these used in the regression for each election.
+There are $p=33$ variables in the resultant set obtained from this procedure. One of the age brackets (`Pop_55_plus`) is removed from this set to avoid multicollinearity, because the other three age brackets are included. Hence, the final predictor set contains $p=32$ variables. 
 
 ## Regression incorporating spatially dependent errors
 
@@ -675,7 +675,9 @@ From 2007 onwards, both marriages (`Married`) and de facto relationships (`DeFac
 
 ### Robustness
 
-Two robustness checks are conducted to confirm model stability. First, a model for each election is fit using only the variables that are found to be significant in at least one of the six elections. The estimated coefficients of the variables in these models all fall within their respective $95\%$ confidence intervals from the full models, confirming that the significant effects are robust to variable selection. The second check involves computing pairwise correlations amongst the explanatory variables, and seeing if the removal of one variable (from a pair) affects the other's estimated effect. For example, the variables `Born_Asia` and `BornElsewhere` have a pairwise correlation of $0.93$ - the largest of any pair. A model is fit omitting `BornElsewhere` (the reduced model). The estimated coefficent of `Born_Asia` is then compared with the confidence interval for `Born_Asia` in the full model. It is found that for each of the top ten pairwise correlations, the estimated effect in the reduced model lies within the confidence interval from the full model. This second check indicates that variables with the highest pairwise correlation are not masking the effects of each other.
+Two robustness checks are conducted to confirm model stability. First, a model for each election is fit using only the variables that are found to be significant in at least one of the six elections. Let this model be the reduced model, and the original model be the full model. The estimated coefficients of the variables in the reduced models all fall within their respective $95\%$ confidence intervals from the full models, confirming that the significant effects are robust to variable selection. 
+
+The second check involves computing pairwise correlations amongst the explanatory variables, and seeing if the removal of one variable (from a pair) affects the other's estimated effect. For example, the variables `Born_Asia` and `BornElsewhere` have a pairwise correlation of $0.93$ - the largest of any pair. A model is fit omitting `BornElsewhere` (the reduced model). The estimated coefficent of `Born_Asia` is then compared with the confidence interval for `Born_Asia` in the full model. It is found that for each of the top ten pairwise correlations, the estimated effect in the reduced model lies within the confidence interval from the full model. This second check indicates that variables with the highest pairwise correlation are not masking the effects of each other.
 
 ## A closer look at the residuals
 
