@@ -1,0 +1,60 @@
+---
+title: "Response For The Editor"
+author: "Jeremy Forbes"
+date: "31/08/2019"
+output: html_document
+---
+
+Dear XXXX,
+
+Thank you for your feedback on our paper titled 'XXXX'. You raised many valid points in your response, and we have refined our work to address the queries raised. 
+
+Below we have detailed the changes made, or our response to, each point raised in your feedback. This is split into two sections - editor's comments and associate editor's comments.
+
+If you have any further questions, please do not hestitate to reach out to the corresponding author, Jeremy Forbes (`jeremyforbes1995@gmail.com`) directly.
+
+
+#### Editor's Comments
+
+1. Address reviewer 1's question about why spatial imputation is required given that the census is reported at a low level of aggregation (lines 150-151) that could presumably be clumped to give a good approximation to electorate boundaries.
+
+*This is a valid point, and we have revised the imputation method to adopt this suggestion. We now use Census data at the lowest level of aggregation available - the geographic region type of 'Statistical Area 1' - to obtain the approximation of electoral boundaries (see Section 2.2). Our original method was chosen because we believed that the imputation method would not materially affect results. We found that our results did not change much by adopting this new imputation method.*
+
+2. I note that you do mention the ecological fallacy (lines 285-286) but reviewer 1's reaction suggests that you should expand your remarks here.
+
+*We agree that more attention could have been given to the ecological fallacy in our original submission. In response, we have expanded our remarks and moved them to the introduction (Section 1). We are explicit in stating that "drivers of individual voter behaviour may vary from what is observed at the electorate level", which may not have been clear enough in the original submission.*
+
+3. It appears that your approach to variable selection has confused everybody. My understanding of what you have done is that: You begin with 65 variables (are they all the available census data or a subset?). Then you standardise the variables. Then you remove some variables to do with Age Bands and Christianity (how many variables out of the 65 does this leave? Were these variables totally removed or lumped in some way? Christianity still appears in table 2 so they obviously weren't all removed)
+
+*The variable selection method does have multiple steps and in retrospect, we agree that more clarity was needed here.*
+
+*Firstly, we have refined the subset of variables considered for analysis in this paper to 50 Census variables. Census data is provided as a head count for categories for many different questions, and there are thousands of variables that could be constructed from the raw data. These 50 variables were chosen because they appear in previous studies of Australian elections (those mentioned in the Introduction). Previously we started with 65 variables, but many of these variables were removed in the variable selection process because they provided additional granularity that we did not want to pursue. These never should have been included to begin with - and we have removed them in our updated submission. For example, we had previously included variables relating to Christian denominations (Anglican, Catholic) in our 65 variables, but did not include them in the model.*
+
+*The variable Christianity represents the proportion of people identifying with any Christian denomination, which we have kept in the model.*
+
+4. ...Then you use the PCA to identify variables that covary. If variables appear together in a PC with loading higher than 0.15 they are combined together into a factor, e.g. a new variable Income replaces two previously existing variables. (In the description of this it is unclear how many variables are being combined in each factor, the ‘ands’ and commas make things tricky, .e.g is ‘renting and government housing’ one variable or two? Do the factors use the loading weights or just the signs?)
+
+*We have made an effort to clarify this process in Section 3.2, which now details the variables being combined into each factor. For consistency, only commas are used to separate the variable descriptions. Only the signs are used, which is now made explicit.*
+
+5. The steps above get you from 65 variables down to 30 (I can count 10 variables that  get accounted for via the creation of factors, but that doesn't get from 65 to 30 so presumably some other variables have been removed? Or is this difference all in the age bands and variants of Christianity? More clarity is required)
+
+*This has been reconciled in Section 3.2. We begin with 50 variables. Six factors are created using a combined 23 variables. One of the age brackets (populated aged 55 and over) is removed, and the other three age brackets are kept (to avoid multicollinearity). This results in a final predictor set of 32 variables. Note that two variables no longer meet the criteria for being included in a factor, so they appear as separate variables - hence a final set of 32 variables.*
+
+6. As you note in the paper, it seems likely that there are still issues with multi-collinearity. Figs 6 and 7 show the variables with significant effects, do the results change much if you fit a model with just these 13 variables instead of the 30?
+
+*This was a very helpful suggestion to explore, and as such an additional section on robustness has been included in the revised paper (Section 4.4). When we fit a model using just the variables with significant effects, we find that the results do not change much. Each of the estimated coefficients from the reduced model (containing only the subset significant variables) lie within the 95% confidence interval from its corresponding full model (containing all 32 variables).*
+
+*Furthermore, we have added another robustness check, where we consider the largest pairwise correlations amongst all variables (computed on a dataset of all elections combined). Taking each pair one by one, we remove one of the two variables, and find that the estimated coefficient for the remaining variable lies within the 95% confidence interval from the full model. This is true for all of the top 10 pairwise correlations.*
+
+
+#### Associate Editor's Comments
+
+1. Some conceptually simple imputation methods are used to align polling and census data to investigate associations between census variables and voting behaviour at electoral division level.
+
+2. The main thing I found confusing about this paper was the variable selection procedure. It seems to be heading in the direction of four PCs, then it veers into six factors before ending with 30 variables. This all requires greater clarity and justification.
+
+3. The authors opt for “visualization” of the fixed effects rather than the usual table of estimated parameters. Perhaps this is a good choice given that there are so many. But then spatial parameters are exhibited in a huge table. This seems inconsistent.
+
+4. I found the writing unclear in a few places. What are the “time-varying restrictions” on a variable (line228)? And the description of a partial residual (line 276) doesn’t make sense to me.
+
+5. Some of the interpretations of results seem a little naïve. For example, does Figure 4 really justify concluding that “electorates effectively voted independently” except for 2001 and 2016? (Is it a coincidence that the spatial autoregression is greatest in 2001 and 2016 where there is no need for imputation?)
