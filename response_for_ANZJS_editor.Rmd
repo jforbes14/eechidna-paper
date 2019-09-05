@@ -51,10 +51,22 @@ If you have any further questions, please do not hestitate to reach out to the c
 
 1. Some conceptually simple imputation methods are used to align polling and census data to investigate associations between census variables and voting behaviour at electoral division level.
 
+*No response required.*
+
 2. The main thing I found confusing about this paper was the variable selection procedure. It seems to be heading in the direction of four PCs, then it veers into six factors before ending with 30 variables. This all requires greater clarity and justification.
+
+*See items (2), (3) and (4) in section above.*
 
 3. The authors opt for “visualization” of the fixed effects rather than the usual table of estimated parameters. Perhaps this is a good choice given that there are so many. But then spatial parameters are exhibited in a huge table. This seems inconsistent.
 
+*Partial residual plots are presented to give the reader a visual feel for the direction, size and significance of an estimated effect, as well as the distribution of the data points (for that covariate). Whilst this is a valid point as there is duplication of information here, we think that the partial residual plots play an important role in illustrating the effect of a given variable across elections, and that the estimated model parameters should be included for completeness.*
+
 4. I found the writing unclear in a few places. What are the “time-varying restrictions” on a variable (line228)? And the description of a partial residual (line 276) doesn’t make sense to me.
 
+*We have expanded on descriptions of both in our revised version. Time-varying restrictions are when one forces the effect of a variable to be invariant over time, for example  - forcing the estimated coefficient of the variable `Unemployed` to be the same in 2013 and 2016 elections (section 3.2).*
+
+*Partial residuals, for a variable X1, are the residuals from the fitted model with the estimated effect of X1 added to it. Partial residual plots show the direction, size and significance of an estimated effect, as well as any deviations from linearity (section 4.3).*
+
 5. Some of the interpretations of results seem a little naïve. For example, does Figure 4 really justify concluding that “electorates effectively voted independently” except for 2001 and 2016? (Is it a coincidence that the spatial autoregression is greatest in 2001 and 2016 where there is no need for imputation?)
+
+*In retrospect, we agree that this is perhaps a naïve conclusion. It is possible that unobserved variables are being captured in the spatial effect, and as such we have removed this interpretation from the revised paper. Additionally, on revision of the imputation method, we find that the spatial effect is significant in 2004 as well as 2001 and 2016.*
