@@ -673,12 +673,6 @@ Higher proportions of single parent households are associated with Labor support
 
 From 2007 onwards, both marriages (`Married`) and de facto relationships (`DeFacto`) are found to be strong predictors of the two-party preferred vote in opposition to the Liberal party. In 2001 and 2004 neither of these variables are significant (see rows 4 and 5 in Figure \@ref(fig:partresplot2)).
 
-### Robustness
-
-Two robustness checks are conducted to confirm model stability. First, a model for each election is fit using only the variables that are found to be significant in at least one of the six elections. Let this model be the reduced model, and the original model be the full model. The estimated coefficients of the variables in the reduced models all fall within their respective $95\%$ confidence intervals from the full models, confirming that the significant effects are robust to variable selection. 
-
-The second check involves computing pairwise correlations amongst the explanatory variables, and seeing if the removal of one variable (from a pair) affects the other's estimated effect. For example, the variables `Born_Asia` and `BornElsewhere` have a pairwise correlation of $0.93$ - the largest of any pair. A model is fit omitting `BornElsewhere` (the reduced model). The estimated coefficent of `Born_Asia` is then compared with the confidence interval for `Born_Asia` in the full model. It is found that for each of the top ten pairwise correlations, the estimated effect in the reduced model lies within the confidence interval from the full model. This second check indicates that variables with the highest pairwise correlation are not masking the effects of each other.
-
 ## A closer look at the residuals
 
 ```{r resids, include = FALSE}
@@ -749,8 +743,12 @@ ggplot(aes(x = year, y = Residuals, fill = Incumbent), data = incum_resids) +
 ```
 
 
+## Robustness
 
-### Outlier electorates {-}
+### Checks
+Three robustness checks are conducted to confirm model stability. First, a model for each election is refit using only the variables that are found to be significant in at least one of the six elections. The estimated coefficients of the variables in the refitted models all fall within their respective $95\%$ confidence intervals from the full models. The second check involves the ten largest pairwise correlations. For each pair, a model for each election is refit omitting one of the two variables. It is found that for each of these pairs, the estimated effect of the remaining variable in the reduced model lies within the $95/%$ confidence interval from the full model. The final check is a visual exploration of different variable projections using a tour [@tourr], for each election. No definitive signs of multicollinearity are observed, and as expected (given the nature of spatial data), there is some clumping of electorates for certain projections.
+
+### Influential and outlier electorates {-}
 
 ```{r readcooksd, eval = FALSE}
 read_chunk('cooksd.R')
@@ -789,7 +787,7 @@ cooksd_df %>%
 ```{r, eval = FALSE}
 cooksd_df %>%
   filter(cooksd > 0.1) %>%
-  select(DivisionNm, StateAb, year, cooksd, Residuals, LNP_Percent, everything()) %>%
+  dplyr::select(DivisionNm, StateAb, year, cooksd, Residuals, LNP_Percent, everything()) %>%
   View()
 
 cooksd_df %>%
