@@ -552,7 +552,7 @@ Table \@ref(tab:printmodels) details the estimated model coefficients and their 
 
 ## Spatial autoregressive parameter
 
-The spatial autoregressive coefficient $\rho$ is positive and significant in the 2001, 2004 and 2016 elections (Figure \@ref(fig:rhovis)). In these three elections, there is evidence to suggest that neighbours share some influential characteristics outside the explanatory variables. Conversely, in the other three elections, the spatial effect weakens to become insignificant (although still positive).
+The spatial autoregressive coefficient $\rho$ is positive and significant in the 2001, 2004 and 2016 elections (Figure \@ref(fig:rhovis)). In these three elections, there is evidence to suggest that neighbours share some influential characteristics outside the explanatory variables, which affect the two-party preferred vote. Conversely, in the other three elections, the spatial effect weakens to become insignificant (although still positive).
 
 ```{r rhovis, fig.cap="Estimates of the spatial autoregressive parameter for each of the six elections, reported with their individual 95\\% confidence intervals. Only in 2001 and 2016 is there a significant spatial component.", out.height='20%', out.extra = ''}
 rho_df <- bind_rows(
