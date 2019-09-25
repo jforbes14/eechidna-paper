@@ -444,7 +444,7 @@ Only the first four principal components from the combined dataset are considere
 `PropertyOwned` (proportion of dwellings that are owned, proportion of dwellings that are mortgages, proportion of dwellings that are rented, proportion of dwellings that classified as government housing);
 `RentLoanPrice` (median rental payment amount, median loan repayment amount);
 `FamHouseSize` (average household size, ratio of people to families, incidence of single person households, incidence of households containing a couple with kids, incidence of households containing a couple without kids); and
-`Education` (high school completions, university qualifications, proportion of people working as professionals, proportion of jobs in finance,  proportion of workers who are laborers, proportion of workers who work as a tradesperson, diploma and certificate qualifications).
+`Education` (high school completions, undergraduate and postgraduate degrees, proportion of employed people working as professionals, proportion of jobs in finance, proportion of workers who are laborers, proportion of workers who work as a tradesperson, diploma and certificate qualifications).
 For each of these groupings, a factor is created by taking a weighted sum of the variables. The weightings are allocated on the basis of whether the variable had a positive or negative loading in the principal component from which the grouping was identified. Variables with a positive loading are allocated a weight of $+1$ and those with negative loadings are allocated a weight of $-1$. After computing these weighted sums, the factor is standardized to have mean zero and variance one, within each election.
 
 There are $p=33$ variables in the resultant set obtained from this procedure. One of the age brackets (`Pop_55_plus`) is removed from this set to avoid multicollinearity, because the other three age brackets are included. Hence, the final predictor set contains $p=32$ variables. 
@@ -738,7 +738,8 @@ ggplot(aes(x = year, y = Residuals, fill = Incumbent), data = incum_resids) +
   geom_boxplot() +
   geom_hline(aes(yintercept = 0), col = "grey50") +
   scale_fill_manual(values = c('white', 'grey'), labels = c("No", "Yes")) +
-  theme_bw()
+  theme_bw() +
+  labels(x = "Year", y = "Residuals")
 
 ```
 
