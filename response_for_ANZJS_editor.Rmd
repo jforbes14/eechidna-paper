@@ -117,7 +117,7 @@ The authors recognise that there is likely to be collinearity among 65 Census va
 
 And so, as others do, they did a pca of the data matrix, reducing it to four components – we are not told what rotation was employed to achieve simple structure. We are not given the results of this analysis, merely a naming of the six factors identified – how do you get six ‘factors’ from four components? 
 
-*Our approach was to combine the election data together into a single dataset of 900 observations. We computed the principal components on this. The first four components are chosen because the amount of variance explained drops off after the fourth PC. The decision is made to omit these details of this type because they detract from the core steps of our variable selection procedure.* 
+*Our approach was to combine the six election datasets together into a single dataset of 900 observations. We computed the principal components on this. The first four components are chosen because the amount of variance explained drops off after the fourth PC. The decision is made to omit these details of this type because they detract from the core steps of our variable selection procedure.* 
 
 *The factors are not the principal components themselves. Rather, the loadings in the first four principal components are used to determine which variables should be grouped together to generate a new variable in their place, which we have called a factor. *
 
@@ -136,41 +136,45 @@ The authors fit a spatial autoregressive model, on the assumption that neighbour
 
 #### Reviewer 2's comments
 
-*1. It seems very strange to assume that population is uniform within electorates (line 133) so that weighting is proportional to area, and not to the number of people in an area of intersection. An electorate on the urban fringe may be strongly affected by loss of a relatively small but highly populated area but little affected by incorporating a large rural area. A simple indirect way to get at this might be to address the question: Would the results change much if A_{s,t} was log area, for each s,t ?*
+It seems very strange to assume that population is uniform within electorates (line 133) so that weighting is proportional to area, and not to the number of people in an area of intersection. An electorate on the urban fringe may be strongly affected by loss of a relatively small but highly populated area but little affected by incorporating a large rural area. A simple indirect way to get at this might be to address the question: Would the results change much if A_{s,t} was log area, for each s,t ?
 
-...A
+*We have revised our imputation method to avoid this assumption. We now use Census data at the lowest level of aggregation available - the geographic region type of 'Statistical Area 1' (SA1) - to obtain the approximation of electoral boundaries (see Section 2.2). There are on average approximately 400 people in each SA1. This approach will successfully capture any densely populated areas on the fringe of an electorate. Our original method was chosen because we believed that the imputation method would not materially affect results. With this change in imputation method, our results are effectively the same as the previous submission.*
 
-*2. It seems to me that the use of Principal Components analysis is unclear.*
-*a. PC appears to have been used as a model selection criterion, with the variables related to the first four PCs included into the model in Table 2. However typically when principal components are computed they only involve the explanatory variables, not the response, and so there is no guarantee that all the first four PCs (and only them) will be related to the response. For example using the eechidna data for 2016 I found the fifth PC was extremely significant. But this is a minor point.*
+It seems to me that the use of Principal Components analysis is unclear. (a) PC appears to have been used as a model selection criterion, with the variables related to the first four PCs included into the model in Table 2. However typically when principal components are computed they only involve the explanatory variables, not the response, and so there is no guarantee that all the first four PCs (and only them) will be related to the response. For example using the eechidna data for 2016 I found the fifth PC was extremely significant. But this is a minor point.
 
-...A
+*We have used principal components to inform which variables should be combined into factors, rather than use them directly as explanatory variables. This is done as a step to address any (near) multicollinearity in the explanatory variables. Any variables that are not used in creating a factor still remain in the model. The point raised is valid - there is no guarantee about any of these factors being related to the response.*
 
-*b. The variables which load highly on a PC are likely to be highly correlated, and so if these high-loading variables are used together in the regression model we may again have multicollinearity. I found this was the case when applying the author’s regression model to the 2016 data. This may be why several of the predictors in Table 2 are never related significantly related to the response in any of the years.*
+(b) The variables which load highly on a PC are likely to be highly correlated, and so if these high-loading variables are used together in the regression model we may again have multicollinearity. I found this was the case when applying the author’s regression model to the 2016 data. This may be why several of the predictors in Table 2 are never related significantly related to the response in any of the years.
 
-... ?
+*By taking a subset of variables with high loadings on a principal component and combining them into a single variable, we are trying to address potential multicollinearity. Two factors that have been created from the same PC will be correlated, which could mean that (near) multicollinearity persists. However, we have conducted three robustness tests for multicollinearity, and no conclusive signs of multicollinearity were observed.*
 
-*c. Conversely there could be a variable which is independent of the other variables (so representing 1 / 65th of the explanatory information) but by dint of that fact not be included in the first four PCs. In short, the narrative leaves me unconvinced that all the variables included are necessary or that all the relevant variables are included in the regression.*
+*The first check involved fitting a model using just the variables with significant effects. We find that the estimated coefficients in the reduced model (containing only the subset significant variables) all lie within the 95% confidence interval from its corresponding full model (containing all 32 variables). *
 
-... Are there more variables we should get? I think no. 
+*We also checked the effect of omitting a variable that is contained in the ten largest pairwise correlations. For each pair, a model for each election is refit omitting one of the two variables. It is found that for each of these pairs, the estimated effect of the remaining variable in the reduced model lies within the $95/%$ confidence interval from the full model.*
 
-*d. I presume the “factors” referred to lines 210-220 were created as the first principal component of the constituent raw variables?*
+*A third and final check is the visual exploration of different variable projections using a tour (for each election). No definitive signs of multicollinearity are observed.*
 
-... A
+(c) Conversely there could be a variable which is independent of the other variables (so representing 1 / 65th of the explanatory information) but by dint of that fact not be included in the first four PCs. In short, the narrative leaves me unconvinced that all the variables included are necessary or that all the relevant variables are included in the regression.
 
-*e. The description of the variables included in “Education” is not clear.*
+*Any variables that are not used in creating a factor still remain in the model. The four PCs are used ONLY to inform which variables are correlated and should be combined into a factor. For example, median household, personal and family incomes all have large positive loadings in the first principal component, so we combine them into a factor called `Incomes`. Any variable that does not have a large loading in any of the four PCs are not discarded - they remain in the model. It is of course possible that there exist variables beyond what we have considered that could affect two party preference. However, we believe that the variables we have used cover the core demographic components of an electorate - age, income, employment, religion, birthplace and relationships.*
 
-... Be more precise in explaning the factors created.
+(d) I presume the “factors” referred to lines 210-220 were created as the first principal component of the constituent raw variables?*
 
-*f. I could not get the variable ‘OtherLanguageHome’ in 2016 to be significant, but it also had a high VIF with other explanatory variables. Please check this.* 
+*In our revised submission, we have made an effort to clarify what we have defined a "factor" to be. A "factor" is created when there is evidence to suggest that a group of variables are explaning similar information, and if they were all included in the model as separate variables, there would be severe issues with multicollinearity. To inform which variables should be grouped, we use the first four PCs from PCA. In a single PC, if there are is a subset of variables with large (positive or negative) loadings that intuitively could represent similar information, we combine them into a factor using a weighted sum, where the weights are +1 or -1 depending on the sign of the loading in the that PC. This means that many factors can be created from a single PC, and that any variables that do not appear in a factor are still included in the model as stand-alone variables.*
 
-... TOUR - ask Di for help.
+(e) The description of the variables included in “Education” is not clear.
 
-*3. I am not convinced it is reasonable to summarise the effect of age by median age. Perhaps age effects are more at the edges of the age distribution than in the middle? I would have thought the percentage of the population in different age bands e.g. 20-34 years and Over 65years, might be significant. For 2016 the % aged 20-34 years was highly significant and removed median age.*
+*We have provided more details on the variables that are combined into each of the factors, including `Education`. `Education` is a weighted sum of seven variables that represent: high school completions, undergraduate and postgraduate degrees, proportion of employed people working as professionals, proportion of jobs in finance, proportion of workers who are laborers, proportion of workers who work as a tradesperson, diploma and certificate qualifications.*
 
-... A
 
-*4. Is there any tendency for the vote in an election to depend on how long the incumbent has been in power? In your cross-sectional models this would be confounded with any other effects in the intercept, but a comment would be nice to know. It would help in terms of interpreting the variations in intercept, and setting a reader’s mind to rest that the issue has been considered. Perhaps a something like a simple regression of average vote (or the intercept) on length of incumbency could address the issue.*
+(e) I could not get the variable ‘OtherLanguageHome’ in 2016 to be significant, but it also had a high VIF with other explanatory variables. Please check this.
 
-...  Don't include incumbent in model, but do plot residuals against incumbency to see if there is an effect. We want the model to only capture the socio-demographic effects.
+*Because of the revised imputation method, the data is now slightly different (however the conclusions do not change). We have checked that `OtherLanguageHome` is significant in 2016.*
 
--- Section on incumbent effect (need to get winners each year from 1998, 2001 to do this)
+I am not convinced it is reasonable to summarise the effect of age by median age. Perhaps age effects are more at the edges of the age distribution than in the middle? I would have thought the percentage of the population in different age bands e.g. 20-34 years and Over 65years, might be significant. For 2016 the % aged 20-34 years was highly significant and removed median age.
+
+*This was a very useful suggestion. Instead of using median age, we summarise age of an electorate using its distribution amongst age brackets 0-19, 20-34, 35-54 and 55+ years. We find that higher populations in the 20-34 and 35-54 age brackets are associated with electoral support for Labor in all of the six elections, whilst populations 0-19 years have weakly positive associations with the Liberal party (aside from 2007, when this relationship was significantly positive).*
+
+Is there any tendency for the vote in an election to depend on how long the incumbent has been in power? In your cross-sectional models this would be confounded with any other effects in the intercept, but a comment would be nice to know. It would help in terms of interpreting the variations in intercept, and setting a reader’s mind to rest that the issue has been considered. Perhaps a something like a simple regression of average vote (or the intercept) on length of incumbency could address the issue.
+
+*This is an interesting question. We have included some boxplots of the residuals from each election, split by whether the party was the incumbent party. We find that the incumbent party has a clear advantage of around 3-5 percentage points. This can be found in Section 4.4.*
