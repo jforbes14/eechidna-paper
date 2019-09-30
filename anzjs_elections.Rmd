@@ -630,11 +630,16 @@ p15 <- grid_visreg("Pop_35_54")
 p16 <- grid_visreg("Pop_20_34")
 ```
 
-```{r partresplot1, fig.cap = "Partial residual plots by election year for a selection of predictors. Linear model with 95\\% confidence bands overlaid. Most predictors have a positive relationship: the larger the value the more likely the electorate preferences the Coalition. The relationship is relatively robust over time, with the exception of OtherLanguageHome and Pop_00_19.", fig.height = 8.5, fig.width = 6, warning = FALSE, fig.pos = 'h'}
+(ref:figcappartresplot1) Partial residual plots by election year for a selection of predictors. Linear model with 95% confidence bands overlaid. Most predictors have a positive relationship: the larger the value the more likely the electorate preferences the Coalition. The relationship is relatively robust over time, with the exception of `OtherLanguageHome` and `Pop_00_19`.
+
+```{r partresplot1, fig.cap = "(ref:figcappartresplot1)", fig.height = 8.5, fig.width = 6, warning = FALSE}
 (p1 / p2 / p3 / (p4 + ylab("Two-party preferred vote (%)                     ")) / p5 / p6 / p7 / p8)
 ```
 
-```{r partresplot2, fig.cap = "Partial residual plots by election year for a selection of predictors. Linear model with 95\\% confidence bands overlaid. Several predictors have a negative relationship: with larger values indicating the electorate more likely preferences Labor. Most relationships are relatively stable over elections, except Unemployment and Education.", fig.height = 8.5,  fig.width = 6, warning = FALSE, fig.pos = 'h'}
+(ref:figcappartresplot2) Partial residual plots by election year for a selection of predictors. Linear model with 95% confidence bands overlaid. Several predictors have a negative relationship: with larger values indicating the electorate more likely preferences Labor. Most relationships are relatively stable over elections, except `Unemployment` and `Education`."
+
+
+```{r partresplot2, fig.cap = "(ref:figcappartresplot2)", fig.height = 8.5,  fig.width = 6, warning = FALSE}
 (p9 / p10  / p11 / (p12 + ylab("Two-party preferred vote (%)                     ")) / p13 / p14 / p15 / p16)
 ```
 
@@ -714,8 +719,9 @@ The incumbent party appears to have a distinct advantage at the next election. T
 ```{r resincumbent, fig.cap = "Boxplot of residuals for incumbent and non-incumbent parties each year. An incumbent advantage is evident and has not been captured by the model.", fig.asp=0.6, out.width="70%", fig.pos = 'h', out.extra = ''}
 # Incumbents
 incumbent <- function(fp) {
-  df <- fp %>% filter(HistoricElected == "Y", PartyAb == "LNP") %>% select(DivisionNm, HistoricElected)
-  return(df)
+  fp %>% 
+    filter(HistoricElected == "Y", PartyAb == "LNP") %>% 
+    select(DivisionNm, HistoricElected)
 }
 
 # 2004-2016
@@ -740,8 +746,7 @@ ggplot(aes(x = year, y = Residuals, fill = Incumbent), data = incum_resids) +
   geom_hline(aes(yintercept = 0), col = "grey50") +
   scale_fill_manual(values = c('white', 'grey'), labels = c("No", "Yes")) +
   theme_bw() +
-  labels(x = "Year", y = "Residuals")
-
+  xlab("Year") + ylab("Residuals")
 ```
 
 ## Robustness
