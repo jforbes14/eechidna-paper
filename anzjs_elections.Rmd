@@ -447,7 +447,7 @@ Six factors are created using this approach. These are:
 
 For each of these groupings, a factor is created by taking a weighted sum of the variables. The weightings are allocated on the basis of whether the variable had a positive or negative loading in the principal component from which the grouping was identified. Variables with a positive loading are allocated a weight of $+1$ and those with negative loadings are allocated a weight of $-1$. After computing these weighted sums, the factor is standardized to have mean zero and variance one, within each election.
 
-The final predictor set contains $p=32$ variables[^3].
+The final predictor set contains $p=32$ variables[^3] which are listed in Table \ref{tab:printmodels}.
 
 [^3]: The factor creation procedure reduced the variable set to $p=33$, however one of the age brackets (`Pop_55_plus`) is not included as a variable to avoid multicollinearity, because the other three age brackets are included.
 
