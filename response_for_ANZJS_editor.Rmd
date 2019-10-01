@@ -5,36 +5,25 @@ date: "31/08/2019"
 output: html_document
 ---
 
-Dear XXXX,
+Dear Dr Holland,
 
-Thank you for your feedback on our paper titled 'XXXX'. You raised many valid points in your response, and we have refined our work to address the queries raised. 
+Thank you for your helpful comments on our paper titled 'Spatial modelling of the two-party preferred vote in Australian federal elections: 2001--2016'.
 
-Below we have detailed the changes made, or our response to, each point raised in your feedback. This is split into two sections - editor's comments and associate editor's comments.
-
-If you have any further questions, please do not hestitate to reach out to the corresponding author, Jeremy Forbes (`jeremyforbes1995@gmail.com`) directly.
-
+We have revised our paper to address the issues raised. Below we have detailed the changes made and our responses to the points raised in your email and by the reviewers.
 
 #### Editor's Comments
 
 1. Address reviewer 1's question about why spatial imputation is required given that the census is reported at a low level of aggregation (lines 150-151) that could presumably be clumped to give a good approximation to electorate boundaries.
 
-$ DONE $
-
-*This is a valid point, and we have revised the imputation method to adopt this suggestion. We now use Census data at the lowest level of aggregation available - the geographic region type of 'Statistical Area 1' - to obtain the approximation of electoral boundaries (see Section 2.2). Our original method was chosen because we believed that the imputation method would not materially affect results. With this change in imputation method, our results are effectively the same as the previous submission.*
-
--- We made the change this way, and the results are effectively the same.
+*We now use Census data at the lowest level of aggregation available --- the geographic region type of 'Statistical Area 1' --- to approximate the electoral boundaries (see Section 2.2). Some spatial imputation is still required as the SA1 boundaries do not exactly match the electorate boundaries. With this change in imputation method, our results are effectively the same as the previous submission.*
 
 2. I note that you do mention the ecological fallacy (lines 285-286) but reviewer 1's reaction suggests that you should expand your remarks here.
 
-*We agree that more attention could have been given to the ecological fallacy in our original submission. In response, we have expanded our remarks and moved them to the introduction (Section 1). We are explicit in stating that "drivers of individual voter behaviour may vary from what is observed at the electorate level", which may not have been clear enough in the original submission.*
+*We have expanded our remarks and moved them to the introduction (Section 1) to give them more prominence. We are explicit in stating that "drivers of individual voter behaviour may vary from what is observed at the electorate level".*
 
 3. It appears that your approach to variable selection has confused everybody. My understanding of what you have done is that: You begin with 65 variables (are they all the available census data or a subset?). Then you standardise the variables. Then you remove some variables to do with Age Bands and Christianity (how many variables out of the 65 does this leave? Were these variables totally removed or lumped in some way? Christianity still appears in table 2 so they obviously weren't all removed)
 
-*The variable selection method does have multiple steps and in retrospect, we agree that more clarity was needed here.*
-
-*Firstly, we have refined the subset of variables considered for analysis in this paper to 50 Census variables. Census data is provided as a head count for categories for many different questions, and there are thousands of variables that could be constructed from the raw data. These 50 variables were chosen because they appear in previous studies of Australian elections (those mentioned in the Introduction). Previously we started with 65 variables, but many of these variables were removed in the variable selection process because they provided additional granularity that we did not want to pursue. These never should have been included to begin with - and we have removed them in our updated submission. For example, we had previously included variables relating to Christian denominations (Anglican, Catholic) in our 65 variables, but did not include them in the model.*
-
-*The variable Christianity represents the proportion of people identifying with any Christian denomination, which we have kept in the model.*
+*We have now explained our approach to variable selection in more detail and made some additional changes to to provide greater clarity. Previously we started with 65 variables, but many of these variables were removed in the variable selection process because they provided additional granularity that we did not want to pursue. We have now refined the subset of variables considered for analysis in this paper to 50 Census variables. Census data is provided as a head count for categories for many different questions, and there are thousands of variables that could be constructed from the raw data. These 50 variables were chosen because they appear in previous studies of Australian elections (those mentioned in the Introduction). We hope this is now better explained.*
 
 4. ...Then you use the PCA to identify variables that covary. If variables appear together in a PC with loading higher than 0.15 they are combined together into a factor, e.g. a new variable Income replaces two previously existing variables. (In the description of this it is unclear how many variables are being combined in each factor, the ‘ands’ and commas make things tricky, .e.g is ‘renting and government housing’ one variable or two? Do the factors use the loading weights or just the signs?)
 
@@ -42,27 +31,24 @@ $ DONE $
 
 5. The steps above get you from 65 variables down to 30 (I can count 10 variables that  get accounted for via the creation of factors, but that doesn't get from 65 to 30 so presumably some other variables have been removed? Or is this difference all in the age bands and variants of Christianity? More clarity is required)
 
-*This has been reconciled in Section 3.2. We begin with 50 variables. Six factors are created using a combined 23 variables. One of the age brackets (populated aged 55 and over) is removed, and the other three age brackets are kept (to avoid multicollinearity). This results in a final predictor set of 32 variables. Note that two variables no longer meet the criteria for being included in a factor, so they appear as separate variables - hence a final set of 32 variables.*
+*This has been reconciled in Section 3.2. We begin with 50 variables. Six factors are created using a combined 23 variables. One of the age brackets (populated aged 55 and over) is removed, and the other three age brackets are kept (to avoid multicollinearity). This results in a final predictor set of 32 variables. Note that two variables no longer meet the criteria for being included in a factor, so they appear as separate variables - hence a final set of 32 variables which are listed in Table 1.*
 
 6. As you note in the paper, it seems likely that there are still issues with multi-collinearity. Figs 6 and 7 show the variables with significant effects, do the results change much if you fit a model with just these 13 variables instead of the 30?
 
-*This was a very helpful suggestion to explore, and as such an additional section on robustness has been included in the revised paper (Section 4.4). When we fit a model using just the variables with significant effects, we find that the results do not change much. Each of the estimated coefficients from the reduced model (containing only the subset significant variables) lie within the 95% confidence interval from its corresponding full model (containing all 32 variables). *
+*This was a very helpful suggestion to explore, and as such an additional section on robustness has been included in the revised paper (Section 4.4). When we fit a model using just the variables with significant effects, we find that the results do not change much. Each of the estimated coefficients from the reduced model (containing only the subset significant variables) lie within the 95% confidence interval from its corresponding full model (containing all 32 variables).*
 
 *We also checked the effect of omitting a variable that is contained in the ten largest pairwise correlations. For each pair, a model for each election is refit omitting one of the two variables. It is found that for each of these pairs, the estimated effect of the remaining variable in the reduced model lies within the $95/%$ confidence interval from the full model.*
 
 *A third and final check is the visual exploration of different variable projections using a tour (for each election). No definitive signs of multicollinearity are observed.*
 
-$ DONE $
--- Changes --
+7. Other minor points
 
-Refitting without a variable. Doing this selectively on the ones that are more highly correlated. Re-fit with a different subset of variables.
+  * line 120,  each of the
+  * line 129, is it really the boundaries that are the target /source zones or the areas defined by these boundaries?
+  * line 241, must be modelled
+  * line 261-266, is there anything in the fact that the spatial coefficient is significant only in the years where no imputation was done?
 
-Another check is the TOUR.
-
-Bundle robustness and diagnostiscs - call it robustness:
-1) First para is on multicollinearity checks - don't need as much detail as I have
-2) Influential observations - couple paragraphs on cooks' dist and influence diagnostics
-
+The first three minor issues have been corrected. For the last issue, the spatial AR parameter is now significant in 2001, 2004 and 2016, which do not correspond only to years with no imputation.
 
 #### Associate Editor's Comments
 
@@ -72,17 +58,17 @@ Bundle robustness and diagnostiscs - call it robustness:
 
 2. The main thing I found confusing about this paper was the variable selection procedure. It seems to be heading in the direction of four PCs, then it veers into six factors before ending with 30 variables. This all requires greater clarity and justification.
 
-*See items (2), (3) and (4) in section above.*
+*See response to the editor.*
 
 3. The authors opt for “visualization” of the fixed effects rather than the usual table of estimated parameters. Perhaps this is a good choice given that there are so many. But then spatial parameters are exhibited in a huge table. This seems inconsistent.
 
-*Partial residual plots are presented to give the reader a visual feel for the direction, size and significance of an estimated effect, as well as the distribution of the data points (for that covariate). Whilst this is a valid point as there is duplication of information here, we think that the partial residual plots play an important role in illustrating the effect of a given variable across elections, and that the estimated model parameters should be included for completeness.*
+*Partial residual plots are presented to give the reader a visual feel for the direction, size and significance of an estimated effect, as well as the distribution of the data points (for that covariate). Whilst there is duplication of information here, we think that the partial residual plots play an important role in illustrating the effect of a given variable across elections, and that the estimated model parameters should be included for completeness.*
 
 4. I found the writing unclear in a few places. What are the “time-varying restrictions” on a variable (line228)? And the description of a partial residual (line 276) doesn’t make sense to me.
 
-*We have expanded on descriptions of both in our revised version. Time-varying restrictions are when one forces the effect of a variable to be invariant over time, for example  - forcing the estimated coefficient of the variable `Unemployed` to be the same in 2013 and 2016 elections (section 3.2).*
+*We have expanded on descriptions of both in our revised version. Time-varying restrictions are when one forces the effect of a variable to be invariant over time, for example, forcing the estimated coefficient of the variable `Unemployed` to be the same in 2013 and 2016 elections (section 3.2).*
 
-*Partial residuals, for a variable X1, are the residuals from the fitted model with the estimated effect of X1 added to it. Partial residual plots show the direction, size and significance of an estimated effect, as well as any deviations from linearity (section 4.3).*
+*Partial residuals, for a variable X1, are the residuals from the fitted model with the estimated effect of X1 added to each. Partial residual plots show the direction, size and significance of an estimated effect, as well as any deviations from linearity (section 4.3).*
 
 5. Some of the interpretations of results seem a little naïve. For example, does Figure 4 really justify concluding that “electorates effectively voted independently” except for 2001 and 2016? (Is it a coincidence that the spatial autoregression is greatest in 2001 and 2016 where there is no need for imputation?)
 
@@ -93,37 +79,35 @@ Bundle robustness and diagnostiscs - call it robustness:
 
 Its goal is to account for – though the word ‘explain’ is used! – patterns of voting at Australian federal elections, using ecological data, but with no reference to the ecological fallacy.
 
-*We agree that more attention could have been given to the ecological fallacy in our original submission. In response, we have expanded our remarks and moved them to the introduction (Section 1). We are explicit in stating that "drivers of individual voter behaviour may vary from what is observed at the electorate level", which may not have been clear enough in the original submission.*
-
+*We have expanded our remarks on the ecological fallacy (previously in section 4.3) and moved them to the introduction (Section 1) to give them more prominence. We are explicit in stating that "drivers of individual voter behaviour may vary from what is observed at the electorate level", which may not have been clear enough in the original submission.*
 
 The paper is written in virtual total ignorance of the large amount of work done on Australian voting patterns; apart from reference to a few papers by geographers there is not a single mention of work by political scientists – of which there is a great deal. As a consequence there is no theoretical background whatsoever, let alone hypotheses to be tested. It is banal empiricism: throw a lot of data (what are called ‘electoral socio-demographic variables’) at something and see what comes out.
 
-*We formed our approach to exploring this question by reviewing the Australian literature in this area, which has been referenced accordingly. As this is an exploratory piece, and we wanted to let the relationships reveal themselves, rather than expicitly stating hypotheses to be tested.*
-
+*We formed our approach to exploring this question by reviewing the Australian literature in this area, which has been referenced accordingly. As this is an exploratory piece, we wanted to let the relationships reveal themselves, rather than expicitly stating hypotheses to be tested.*
 
 The banality of this approach is illustrated by the finding that ‘more de facto relationships’ are associated with greater support for Labor. No rationale for this is offered – why should people in such relationships be more likely to vote Labor? And while there may be a statistically significant relationship (i.e. slope coefficient) it may be substantively trivial – a fact hidden because the data are transformed. If there is a small SD then the ‘real’ difference between a place with many de facto relationships and another with few will be small and will not account for much of the absolute variation in Labour support at all. Further, since all of the relationships with individual variables are partial, it may well be that when ‘all other variables are held constant’ the difference in Labour support is trivial.
 
-*Since this study is of electorates, rather than individual voters, changing an electorate's demographics can have an effect on two-party preference beyond just the head count of population who's demographics are changed. All this means is that effect of de facto relationships on the electorate's vote is not necessarily just as a result of the votes from people who are in a de facto relationship.*
+*Since this study is of electorates, rather than individual voters, changing an electorate's demographics can have an effect on two-party preference beyond just the head count of population whose demographics are changed. In particular, the effect of de facto relationships on the electorate's vote is not necessarily just as a result of the votes from people who are in a de facto relationship.*
 
 Much is done – unnecessarily in my view – in preparing the data through imputation. This has two components. First there is the creation of census data for the 150 constituencies because boundaries of the large census reporting areas may not coincide with the constituencies’ at the time of an election. Imputation is deployed by assuming that if 50% of area A is in district X then 50% of A’s population is allocated to X without any recognition that area A may be internally heterogeneous. But that is in any case unnecessary. Australian census data are reported – as the authors note – for very small areas with populations of only a few hundred each, and there are shape files associated with these areas. It is thus a straightforward task to amalgamate the small areas into the electoral districts and get the ‘real’ data for each without any (or at best a very, very small amount of) imputation.
 
-*We have revised our imputation method to reflect this suggestion. We now use Census data at the lowest level of aggregation available - the geographic region type of 'Statistical Area 1' - to obtain the approximation of electoral boundaries (see Section 2.2). Our original method was chosen because we believed that the imputation method would not materially affect results. With this change in imputation method, our results are effectively the same as the previous submission.*
+*We have revised our imputation method to reflect this suggestion. We now use Census data at the lowest level of aggregation available --- the geographic region type of 'Statistical Area 1' --- to obtain the approximation of electoral boundaries (see Section 2.2). Some spatial imputation is still required as the SA1 boundaries do not exactly match the electorate boundaries. With this change in imputation method, our results are effectively the same as the previous submission.*
 
 The authors recognise that there is likely to be collinearity among 65 Census variables – why those; we are never told?
 
-*The 50 Census variables are chosen because they appear in previous studies of Australian elections (those mentioned in the Introduction), and we believe that they capture key characteristics of an electorate - age, income, employment, religion, birthplace and relationships.*
+*The (now) 50 Census variables are chosen because they appear in previous studies of Australian elections (those mentioned in the Introduction), and we believe that they capture key characteristics of an electorate - age, income, employment, religion, birthplace and relationships.*
 
-*Note that we have refined the subset of variables considered for analysis in this paper to 50 Census variables. Previously we started with 65 variables, but many of these variables were removed in the variable selection process because they provided additional granularity that we did not want to pursue. These never should have been included to begin with - and we have removed them in our updated submission. For example, we had previously included variables relating to Christian denominations (Anglican, Catholic) in our 65 variables, but did not include them in the model.*
+*Note that we have refined the subset of variables considered for analysis in this paper to 50 Census variables. Previously we started with 65 variables, but many of these variables were removed in the variable selection process because they provided additional granularity that we did not want to pursue.*
 
-And so, as others do, they did a pca of the data matrix, reducing it to four components – we are not told what rotation was employed to achieve simple structure. We are not given the results of this analysis, merely a naming of the six factors identified – how do you get six ‘factors’ from four components? 
+And so, as others do, they did a pca of the data matrix, reducing it to four components – we are not told what rotation was employed to achieve simple structure. We are not given the results of this analysis, merely a naming of the six factors identified – how do you get six ‘factors’ from four components?
 
-*Our approach was to combine the six election datasets together into a single dataset of 900 observations. We computed the principal components on this. The first four components are chosen because the amount of variance explained drops off after the fourth PC. The decision is made to omit these details of this type because they detract from the core steps of our variable selection procedure.* 
+*Our approach was to combine the six election datasets together into a single dataset of 900 observations. We computed the principal components on this. The first four components are chosen because the amount of variance explained drops off after the fourth PC. We have now explained our variable selection process in more detail.*
 
-*The factors are not the principal components themselves. Rather, the loadings in the first four principal components are used to determine which variables should be grouped together to generate a new variable in their place, which we have called a factor. *
+*The factors are not the principal components themselves. Rather, the loadings in the first four principal components are used to determine which variables should be grouped together to generate a new variable in their place, which we have called a factor.*
 
 My expectation was that they would then fit a model using the four components as the independent variables, thus avoiding any collinearity and confounding. But they didn’t. Instead they selected 30 of the 65 variables – which must still be collinear; the resulting equation in Table 2 clearly implies this given the large number of (a) insignificant relations (normal with collinearity – see a recent paper in Quality and Quantity), (b) unreasonably large coefficients (-8.07 for de facto, for example), and (c) very large standard errors for many of the variables.
 
-*This was a very helpful suggestion to explore further, and as such an additional section on robustness has been included in the revised paper (Section 4.4). When we fit a model using just the variables with significant effects, we find that the results do not change much. Each of the estimated coefficients from the reduced model (containing only the subset significant variables) lie within the 95% confidence interval from its corresponding full model (containing all 32 variables). *
+*In response to this suggestion, we have now added a section on robustness in the revised paper (Section 4.4). When we fit a model using just the variables with significant effects, we find that the results do not change much. Each of the estimated coefficients from the reduced model (containing only the subset significant variables) lie within the 95% confidence interval from its corresponding full model (containing all 32 variables).*
 
 *We also checked the effect of omitting a variable that is contained in the ten largest pairwise correlations. For each pair, a model for each election is refit omitting one of the two variables. It is found that for each of these pairs, the estimated effect of the remaining variable in the reduced model lies within the $95/%$ confidence interval from the full model.*
 
@@ -142,13 +126,13 @@ It seems very strange to assume that population is uniform within electorates (l
 
 It seems to me that the use of Principal Components analysis is unclear. (a) PC appears to have been used as a model selection criterion, with the variables related to the first four PCs included into the model in Table 2. However typically when principal components are computed they only involve the explanatory variables, not the response, and so there is no guarantee that all the first four PCs (and only them) will be related to the response. For example using the eechidna data for 2016 I found the fifth PC was extremely significant. But this is a minor point.
 
-*We have used principal components to inform which variables should be combined into factors, rather than use them directly as explanatory variables. This is done as a step to address any (near) multicollinearity in the explanatory variables. Any variables that are not used in creating a factor still remain in the model. The point raised is valid - there is no guarantee about any of these factors being related to the response.*
+*We have used principal components to inform which variables should be combined into factors, rather than use them directly as explanatory variables. This is done as a step to address any (near) multicollinearity in the explanatory variables. Any variables that are not used in creating a factor still remain in the model. Of course, there is no guarantee about any of these factors being related to the response. We have now explained our variable selection procedure in more detail in the revised paper.*
 
 (b) The variables which load highly on a PC are likely to be highly correlated, and so if these high-loading variables are used together in the regression model we may again have multicollinearity. I found this was the case when applying the author’s regression model to the 2016 data. This may be why several of the predictors in Table 2 are never related significantly related to the response in any of the years.
 
 *By taking a subset of variables with high loadings on a principal component and combining them into a single variable, we are trying to address potential multicollinearity. Two factors that have been created from the same PC will be correlated, which could mean that (near) multicollinearity persists. However, we have conducted three robustness tests for multicollinearity, and no conclusive signs of multicollinearity were observed.*
 
-*The first check involved fitting a model using just the variables with significant effects. We find that the estimated coefficients in the reduced model (containing only the subset significant variables) all lie within the 95% confidence interval from its corresponding full model (containing all 32 variables). *
+*The first check involved fitting a model using just the variables with significant effects. We find that the estimated coefficients in the reduced model (containing only the subset significant variables) all lie within the 95% confidence interval from its corresponding full model (containing all 32 variables).*
 
 *We also checked the effect of omitting a variable that is contained in the ten largest pairwise correlations. For each pair, a model for each election is refit omitting one of the two variables. It is found that for each of these pairs, the estimated effect of the remaining variable in the reduced model lies within the $95/%$ confidence interval from the full model.*
 

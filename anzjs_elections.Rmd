@@ -7,7 +7,7 @@ classoption: times, doublespace
 fontfamily: times
 bibliography: references.bib
 biblio-style: anzsj
-output: 
+output:
   bookdown::pdf_document2:
     fig_caption: yes
     citation_package: natbib
@@ -19,9 +19,9 @@ output:
       in_header: anzjs_preamble.tex
 ---
 
-# Summary{-}
+# Summary {-}
 
-We examine the relationships between electoral socio-demographic characteristics and two-party preference in the six Australian federal elections held between 2001 to 2016. Socio-demographic information is derived from the Australian Census, which occurs every five years. Since a Census is not directly available for each election, an imputation method is employed to estimate Census data for the electorates at the time of each election. This accounts for both spatial and temporal changes in electoral characteristics between Censuses. To capture any spatial heterogeneity, a spatial error model is estimated for each election, which incorporates a spatially structured random effect vector. Over time, the impact of most socio-demographic characteristics that affect electoral two-party preference do not vary, with age distribution, industry of work, incomes, household mobility and de facto relationships having strong effects in each of the six elections. Education and unemployment are amongst those that have varying effects. All data featured in this study has been contributed to the `eechidna` `R` package (available on CRAN).
+We examine the relationships between electoral socio-demographic characteristics and two-party preferences in the six Australian federal elections held between 2001 to 2016. Socio-demographic information is derived from the Australian Census which occurs every five years. Since a Census is not directly available for each election, an imputation method is employed to estimate Census data for the electorates at the time of each election. This accounts for both spatial and temporal changes in electoral characteristics between Censuses. To capture any spatial heterogeneity, a spatial error model is estimated for each election, which incorporates a spatially structured random effect vector. Over time, the impact of most socio-demographic characteristics that affect electoral two-party preference do not vary, with age distribution, industry of work, incomes, household mobility and de facto relationships having strong effects in each of the six elections. Education and unemployment are amongst those that have varying effects. All data featured in this study has been contributed to the `eechidna` `R` package (available on CRAN).
 
 **Keywords:** federal election, Census, Australia, spatial modelling, imputation, data science, socio-demographics, electorates, R, eechidna
 
@@ -43,10 +43,7 @@ library(knitr)
 library(nlme)
 library(rgeos)
 library(spdep)
-# remotes::install_github("thomasp85/patchwork")
 library(patchwork)
-#library(gridExtra)
-#library(grid)
 library(predictmeans)
 source("functions.R")
 ```
@@ -57,7 +54,6 @@ load("data/abs2007_cd.rda")
 load("data/abs2010_cd.rda")
 load("data/abs2013_cd.rda")
 ```
-
 
 ```{r wrangle, include = FALSE}
 # Take log of indigenous, judaism, islam, buddhism
@@ -136,11 +132,11 @@ my_df <- bind_rows(
     by = c("DivisionNm", "StateAb" = "State")
   ) %>% mutate(year = "2016")
 ) %>%
-  mutate(year = factor(year), 
+  mutate(year = factor(year),
     Band_00_19 = Age00_04 + Age05_14 + Age15_19,
     Band_20_34 = Age20_24 + Age25_34,
     Band_35_54 = Age35_44 + Age45_54,
-    Band_55plus = Age55_64 + Age65_74 + Age75_84 + Age85plus) %>% 
+    Band_55plus = Age55_64 + Age65_74 + Age75_84 + Age85plus) %>%
   select(-c(
     starts_with("Age"), MedianAge, StateAb,
     LNP_Votes, ALP_Votes, ALP_Percent, TotalVotes, Swing,
@@ -193,7 +189,7 @@ model_df <- small_df %>%
     Pop_00_19 = Band_00_19,
     Pop_20_34 = Band_20_34,
     Pop_35_54 = Band_35_54
-  ) %>% 
+  ) %>%
   select(-Band_55plus)
 ```
 
@@ -305,15 +301,15 @@ coef_df <- bind_rows(
 )
 ```
 
-Australia has changed in many ways over the last two decades. Rising house prices, country-wide improvements in education, an ageing population, and a decline in religious affiliation, are just a few facets of the country's evolving socio-demographic characteristics. At the same time, political power has moved back and forth between the two major parties. In the 2007 and 2010 federal elections, the Australian Labor Party (Labor) was victorious, whereas the 2001, 2004, 2013 and 2016 elections were won by the Liberal National coalition (Liberal). The two-party preferred vote, a measure of support between these two parties, fluctuated between 47.3% and 53.5% (in favour of the Liberal party) over this period. This study explores how electoral (aggregate) socio-demographic characteristics relate to two-party preference, and whether their effects have changed over time.
+Australia has changed in many ways over the last two decades. Rising house prices, country-wide improvements in education, an ageing population, and a decline in religious affiliation, are just a few facets of the country's evolving socio-demographic characteristics. At the same time, political power has moved back and forth between the two major parties. In the 2007 and 2010 federal elections, the Australian Labor Party (hereafter Labor) was victorious, whereas the 2001, 2004, 2013 and 2016 elections were won by the Liberal National coalition (hereafter Liberal). The two-party preferred vote, a measure of support between these two parties, fluctuated between 47.3% and 53.5% (in favour of the Liberal party) over this period. This study explores how electoral (aggregate) socio-demographic characteristics relate to two-party preferences, and whether their effects have changed over time.
 
-The Australian Electoral Commission (AEC) divides Australia into 150 regions, called electorates, with each corresponding to a single seat in the House of Representatives. If a party wins a majority of seats, they become the governing party. Data on the socio-demographics of these electorates are derived from the Australian Census, and vote counts are obtained from Australian federal elections. Joining these two data sources is problematic as there is an inherent asynchronicity in the two types of events. A Census is conducted by the Australian Bureau of Statistics (ABS) every five years, whereas federal elections, conducted by the AEC, usually occur every three years or so. The first problem addressed is that of constructing appropriate Census data for the 2004, 2007, 2010 and 2013 elections --- election years in which a Census does not occur. The predominant approach in previous studies was to join voting outcomes to the nearest Census, without accounting for any temporal differences [see @DavisStimson98;@Stimson06;@Liao09;@Stimson09]. Furthermore, electoral boundaries change regularly, so spatial discrepancies also arise when matching with electoral data. To obtain appropriate "Census-like" data for these four elections, electoral socio-demographics are constructed using a spatio-temporal imputation that combines areal interpolation [@Goodchild1993] and linear time-interpolation. Collecting and wrangling the raw data, along with the imputation process, are detailed in Section \@ref(data). All data and associated documentation relating to this procedure are available in the `eechidna` `R` package [@eechidna], providing a resource for future analysis.
+The Australian Electoral Commission (AEC) divides Australia into 150 regions, called electorates, with each corresponding to a single seat in the House of Representatives. If a party wins a majority of seats, they become the governing party. Data on the socio-demographics of these electorates are derived from the Australian Census, and vote counts are obtained from Australian federal elections. Joining these two data sources is problematic as there is an inherent asynchronicity in the two types of events. A Census is conducted by the Australian Bureau of Statistics (ABS) every five years, whereas federal elections, conducted by the AEC, usually occur every three years or so. The first problem addressed is that of constructing appropriate Census data for the 2004, 2007, 2010 and 2013 elections --- election years in which a Census did not occur. The predominant approach in previous studies was to join voting outcomes to the nearest Census, without accounting for any temporal differences [see @DavisStimson98;@Stimson06;@Liao09;@Stimson09]. Furthermore, electoral boundaries change regularly, so spatial discrepancies also arise when matching with electoral data. To obtain appropriate "Census-like" data for these four elections, electoral socio-demographics are constructed using a spatio-temporal imputation that combines areal interpolation [@Goodchild1993] and linear time-interpolation. Collecting and wrangling the raw data, along with the imputation process, are detailed in Section \@ref(data). All data and associated documentation relating to this procedure are available in the `eechidna` `R` package [@eechidna], providing a resource for future analysis.
 
 Previous work on modelling Australian federal elections has found that aggregate socio-demographics are relatively good predictors of voting outcomes. @Forrest01 used multiple regression to model the Liberal and Labor primary vote for polling booths in the Farrer electorate in 1998 as a function of Census variables from 1996. @Stimson06, @Stimson09 and @Stimson12 used principal component analysis of polling booths in the 2001, 2004 and 2007 elections respectively, also finding that socio-demographic characteristics of polling booths are linked to their two-party preferred vote. In contrast, @Stimson09 models the polling booth swing vote (change in the two-party preferred vote) in the 2007 election, finding that little of the swing vote can be explained by Census data.
 
-Instead of analyzing a single election in isolation, this paper employs a consistent model framework across six elections so that temporal changes in the effects of socio-demographics can be observed. Each federal election is modelled with a cross-sectional dataset, where each observation is one of the 150 electorates.This dataset consists of the two-party preferred vote (as the response variable) and a set of common socio-demographic variables (as the explanatory variables).<!--The use of a regression framework to examine these socio-political relationships over time is seemingly absent from previous Australian studies. It also appears that no study has attempted any type of statistical analysis of socio-demographics in conjunction with voter behaviour in Australia since 2007, making this paper distinctly different from previous work.--> To prepare these datasets, socio-demographic variables are first standardized, and then a principal component analysis is used to group variables into "factors". To account for the inherent spatial structure of the data, a spatial error model is then estimated for each election. In interpreting these models, is important to be mindful of the ecological fallacy. Insights are being drawn at the electorate level and cannot be inferred for another disaggregate level (this means that drivers of individual voter behaviour may vary from what is observed at the electorate level).
+Instead of analyzing a single election in isolation, this paper employs a consistent model framework across six elections so that temporal changes in the effects of socio-demographics can be observed. Each federal election is modelled with a cross-sectional dataset, where each observation is one of the 150 electorates. This dataset consists of the two-party preferred vote (as the response variable) and a set of common socio-demographic variables (as the explanatory variables).<!--The use of a regression framework to examine these socio-political relationships over time is seemingly absent from previous Australian studies. It also appears that no study has attempted any type of statistical analysis of socio-demographics in conjunction with voter behaviour in Australia since 2007, making this paper distinctly different from previous work.--> To prepare these datasets, socio-demographic variables are first standardized, and then a principal component analysis is used to group variables into "factors". To account for the inherent spatial structure of the data, a spatial error model is then estimated for each election. In interpreting these models, it is important to be mindful of the ecological fallacy. Insights are being drawn at the electorate level and cannot be inferred for another disaggregate level (in particular, drivers of individual voter behaviour may vary from what is observed at the electorate level).
 
-The paper is organised as follows. Section \@ref(data) describes the data collection, joining and cleaning. These pre-processing steps and model details are discussed in Section \@ref(modelling). Section \@ref(results) describes the inference conducted to determine signficance of effects and how these change over time. Section \@ref(conclusion) summarises the work. Two supplementary sections document the contributions of others to this work and the software.
+The paper is organised as follows. Section \@ref(data) describes the data collection, joining and cleaning, while model details are discussed in Section \@ref(modelling). Section \@ref(results) describes the inference conducted to determine significance of effects and how these change over time. Section \@ref(conclusion) summarises the work. Two supplementary sections document the contributions of others to this work and the software.
 
 # Data collection, wrangling and imputation {#data}
 
@@ -323,13 +319,13 @@ The voting outcome of interest is the electoral two-party preferred vote, which 
 
 Socio-demographic variables were derived from the Australian Census of Population and Housing (Census), which is a survey of every household in Australia, recording information such as age, gender, ethnicity, education level and income. There have been four Censuses so far in the 21st century, conducted in 2001, 2006, 2011 and 2016. The Australian Bureau of Statistics (ABS) conducts the Census and publishes aggregated information. The ABS uses electoral boundaries as defined by the AEC at the time of each Census, which may not match those in place at the subsequent and previous elections. From the available Census information aggregated at the electorate level, 50 socio-demographic variables were defined for each of the electorates to be used in the analysis. These variables include information relating to electoral age distributions, income, education qualifications, employment industries and job types, religion, birthplace, household characteristics and relationships.
 
-Raw data was sourced online from the AEC and ABS websites in `.csv` and `.xlsx` files. The formats of these files differ over the years, making extracting the appropriate information a big task. The functions available in the `dplyr` [@dplyr] and `readxl` [@readxl] `R` packages are particularly useful, as they provide fast consistent tools for data manipulation and functions to import `.xlsx` files (respectively). The 2001 and 2006 Census data are published in a format where the information for each electorate is held in a separate document making it difficult to use the `dplyr` tools. Instead, cells have to be selected from each individual file to construct the desired variables. All scripts required for the data wrangling process can be found in the github repository for the `eechidna` `R` package [@eechidna], along with the raw data. The `eechidna` package makes this study entirely reproducible and provides a resource to help wrangle data for future Censuses and elections, when they become available.
+Raw data was sourced online from the AEC and ABS websites in `.csv` and `.xlsx` files. The formats of these files differ over the years, making extracting the appropriate information a big task. The functions available in the `dplyr` [@dplyr] and `readxl` [@readxl] `R` packages are particularly useful, as they provide fast consistent tools for data manipulation and functions to import `.xlsx` files. The 2001 and 2006 Census data are published in a format where the information for each electorate is held in a separate document making it difficult to use the `dplyr` tools. Instead, cells have to be selected from each individual file to construct the desired variables. All scripts required for the data wrangling process can be found in the github repository for the `eechidna` `R` package [@eechidna], along with the raw data. The `eechidna` package makes this study entirely reproducible and provides a resource to help wrangle data for future Censuses and elections, when they become available.
 
 ## Joining Census and election data
 
-### Differences between Census and election data {-} 
+### Differences between Census and election data {-}
 
-Between 2001 and 2016 there were six elections and four Censuses (see Figure \@ref(fig:timeline)). Electoral boundaries are redistributed regularly by the AEC, meaning that only in the years where both a Census and election occur are all boundaries likely to match --- the case for the 2001 and 2016 elections. Therefore, for the four elections between 2004 and 2013, both temporal and spatial differences in electorates need to be accounted for when joining the electoral two-party preferred vote with Census data. For these elections a spatio-temporal imputation method was employed to obtain electoral socio-demographics. This method uses Census information from both before and after the election of interest.
+Between 2001 and 2016 there were six elections and four Censuses (see Figure \@ref(fig:timeline)). Electoral boundaries are redistributed regularly by the AEC, meaning that only in the years where both a Census and an election occur are all boundaries likely to match --- the case for the 2001 and 2016 elections. Therefore, for the four elections between 2004 and 2013, both temporal and spatial differences in electorates need to be accounted for when joining the electoral two-party preferred vote with Census data. For these elections a spatio-temporal imputation method was employed to obtain electoral socio-demographics. This method uses Census information from both before and after the election of interest.
 
 ```{r timeline, echo = FALSE, fig.cap="Timeline of Australian elections and Censuses. They do not always occur in the same year.", out.width = "90%", fig.align="center"}
 timeline <- data.frame(year = c(2001:2016)) %>%
@@ -340,7 +336,6 @@ timeline <- data.frame(year = c(2001:2016)) %>%
   gather(c(Election, Census), key = event, value = measure) %>%
   filter(measure != 0) %>%
   mutate(year_vis = ifelse(event == "Census", year + 0.1, year))
-
 
 ggplot(timeline, aes(x = year_vis, y = measure)) +
   geom_point(aes(color = as.factor(event), shape = as.factor(event)), size = 4) +
@@ -373,7 +368,9 @@ ggplot(timeline, aes(x = year_vis, y = measure)) +
 
 For each election, neighbouring Census information has to be combined in some way so that it represents the boundaries in place at the time of the election. This is done by taking the electoral boundaries and imputing the corresponding socio-demographic characteristics for each of neighbouring Censuses, thereby addressing the spatial aspect. Next, to deal with the temporal component, characteristics at the time of the election are constructed using linear interpolation between the spatially imputed neighbouring Census variables.
 
-The finest level of disaggregation available for Census data is the region classification called Statistical Area 1 (SA1). In 2016, Australia was divded into over 55,000 SA1s. Consider each of these SA1 regions as a source zone, $s = 1,\dots,S$, for which socio-demographic information is available. For simplicity, let each source zone be wholly summarised by its centroid. A set of target zones, $t = 1,\dots,T$, are defined as regions for which information is to be imputed - these are the electoral boundaries for a particular election. This is described in the context of a single election, and a single neighbouring Census. Take the example of the Melbourne Ports electorate from the 2013 federal election, illustrated in Figure \@ref(fig:melbports13). The purple region in this figure represents the target zone and the source zones are the centroid locations from the 2016 Census SA1 areas. 
+The finest level of disaggregation available for Census data is the region classification called Statistical Area 1 (SA1). In 2016, Australia was divided into over 55,000 SA1s. Consider each of these SA1 regions as a source zone, $s = 1,\dots,S$, for which socio-demographic information is available. For simplicity, let each source zone be wholly summarised by its centroid. A set of target zones, $t = 1,\dots,T$, are defined as regions for which information is to be imputed --- these are the electoral boundaries for a particular election.
+
+Take the example of the Melbourne Ports electorate from the 2013 federal election, illustrated in Figure \@ref(fig:melbports13). The purple region in this figure represents the target zone and the source zones are the centroid locations from the 2016 Census SA1 areas.
 
 ```{r melbports13, fig.cap = "The electoral boundaries for Melbourne Ports (shown in purple) and surrounding electorates, with centroids for Statistical Area 1 regions from the 2016 Census overlaid. The centroids falling within the purple region are attributed to Melbourne Ports.", out.height="28%"}
 # Get Vic shape
@@ -395,7 +392,7 @@ p1 <- ggplot(data = vic_map) +
 p1 + geom_point(aes(x = long_c, y = lat_c, shape = shape), data = MP_sa1_dots_2011 %>% mutate(shape = "1"), colour = "grey25", size = 1.3) + scale_shape_manual(name = "Statistical Area 1", values = 3, labels = "Centroids")
 ```
 
-Furthermore, let $I_{s,t}$ be an indicator variable, for which $I_{s,t} = 1$ if the centroid of source zone $s$ falls within target zone $t$, and $0$ otherwise. Additionally, let the population of the source zone $s$ be $U_s$ and the population of target zone $t$ be $P_{t}$. 
+Furthermore, let $I_{s,t}$ be an indicator variable, for which $I_{s,t} = 1$ if the centroid of source zone $s$ falls within target zone $t$, and $0$ otherwise. Additionally, let the population of the source zone $s$ be $U_s$ and the population of target zone $t$ be $P_{t}$.
 
 In order to calculate socio-demographic information for each of the target zones, a weighted average of source zones is taken using their populations as weights. Denote a given Census variable for the target zone by $C_t$, and the same Census variable for the source zone as $D_s$. Then, estimate $C_t$ using
 $$
@@ -410,12 +407,12 @@ This concludes the spatial imputation of the socio-demographic characteristics f
 
 To account for temporal changes, linear interpolation is used between Census years to get the final estimate of a Census variable for the target zone in the election year. Let $y_1$ be the year of the Census preceding an election, let $y_2$ be the year of the election, and $y_3$ be the year of the Census that follows. Add this year subscript to the Census variable estimate $\hat{C}_t$, resulting in $\hat{C}_{t,y}$. Linear interpolating between these Census years results an imputed value for the election year, given by
 $$
-  \hat{C}_{t,y_2} = \frac{y_3-y_2}{y_3-y_1} * \hat{C}_{t,y_1} +
-    \frac{y_2-y_1}{y_3-y_1} * \hat{C}_{t,y_3}.
+  \hat{C}_{t,y_2} = \frac{y_3-y_2}{y_3-y_1} \hat{C}_{t,y_1} +
+    \frac{y_2-y_1}{y_3-y_1} \hat{C}_{t,y_3}.
 $$
 Implicitly this assumes that population characteristics change in a linear manner over time.
 
-Continuing with the example of Melbourne Ports in the 2013 election, the estimate for a given Census variable in 2016, $\hat{C}_{MelbPorts, 2016}$ would be obtained by computing the weighted average of this variable amongst the SA1s within the purple region shown in Figure \@ref(fig:melbports13). This would be repeated with the 2011 Census SA1s to obtain $\hat{C}_{MelbPorts, 2011}$, from which the final estimate is given by
+Continuing with the example of Melbourne Ports in the 2013 election, the estimate for a given Census variable in 2016, $\hat{C}_{\text{MelbPorts}, 2016}$ would be obtained by computing the weighted average of this variable amongst the SA1s within the purple region shown in Figure \@ref(fig:melbports13). This would be repeated with the 2011 Census SA1s to obtain $\hat{C}_{\text{MelbPorts}, 2011}$, from which the final estimate is given by
 $$
   \hat{C}_{\text{MelbPorts},2013}
     = \frac{3}{5} \hat{C}_{\text{MelbPorts},2011} + \frac{2}{5} \hat{C}_{\text{MelbPorts},2016}.
@@ -432,33 +429,33 @@ Many of the socio-demographic variables have changing scales over the years. For
 
 ## Creating factors
 
-There are only $N = 150$ observations (electorates) in each election and $p = 50$ socio-demographic variables in each cross-section, with many variables represent similar information about an electorate. Any model that uses all variables would face problems with multi-collinearity and over-fitting, which would likely lead to erroneous conclusions regarding variable significance. To address this, variables that represent similar information are combined into a single variable, which will be referred to as a "factor".
+There are only $N = 150$ observations (electorates) in each election and $p = 50$ socio-demographic variables in each cross-section, with many variables representing similar information about an electorate. Any model that uses all variables would face problems with multi-collinearity and over-fitting, which would likely lead to erroneous conclusions regarding variable significance. To address this, variables that represent similar information are combined into a single variable, which will be referred to as a "factor".
 
-A factor is created from a group of variables if there is an intuitive reason as to why these variables should represent similar information and if there is evidence to suggest that they covary. For example, a potential group would be variables relating to electoral incomes --- median family, household and personal incomes. To determine which variables covary, principal component analysis is used on a combined dataset of socio-demographic variables from all six elections[^2]. The only variables exempted from the principal component analysis are the four variables representing age brackets (the proportion of the population aged 0-19 years old, 20-34 years old, 45-54 years old and 55 years plus), which are to be included in the model as separate variables by construction.
+A factor is created from a group of variables if there is an intuitive reason as to why these variables should represent similar information and if there is evidence to suggest that they covary. For example, a potential group would be variables relating to electoral incomes --- median family, household and personal incomes. To determine which variables covary, principal component analysis is used on a combined dataset of socio-demographic variables from all six elections[^2]. The only variables exempted from the principal component analysis are the four variables representing age brackets (the proportion of the population aged 0--19 years old, 20--34 years old, 45--54 years old and 55 years plus), which are included in the model as separate variables.
 
 [^2]: It is appropriate to compute principal components on a combined dataset of all six elections because when computed separately for each election, scree plots level off after four components and the loadings of the first four components are similar across the elections.
 
-Only the first four principal components from the combined dataset are considered, as the scree plot levels off after the fourth component. Variables that have a large loading in a particular component are deemed to covary, with a loading with magnitude greater than 0.15 being considered large. Each principal component is considered seperately. If a subset of variables have a large loading (positve or negative) in a given component, and there is an intuitive reason as to why they should be grouped together, then this subset of variables will be combined to become a factor. Note that more than one factor can be deduced from a principal component (i.e. two non-overlapping subsets of variables), and that any variables not included in a factor are not discarded.
+Only the first four principal components from the combined dataset are considered, as the scree plot levels off after the fourth component. Variables that have a large loading in a particular component are deemed to covary, with a loading with magnitude greater than 0.15 being considered large. Each principal component is considered separately. If a subset of variables have large loadings (positive or negative) in a given component, and there is an intuitive reason as to why they should be grouped together, then this subset of variables will be combined to become a factor. Note that more than one factor can be deduced from a principal component (i.e.\ two non-overlapping subsets of variables), and that any variables not included in a factor are not discarded.
 
-Six factors are created using this criteria. These are:
+Six factors are created using this approach. These are:
 `Incomes` (median personal income, median household income, median family income);
-`Unemployment` (unemployment rate, labor force participation rate);
+`Unemployment` (unemployment rate, labour force participation rate);
 `PropertyOwned` (proportion of dwellings that are owned, proportion of dwellings that are mortgages, proportion of dwellings that are rented, proportion of dwellings that classified as government housing);
 `RentLoanPrice` (median rental payment amount, median loan repayment amount);
 `FamHouseSize` (average household size, ratio of people to families, incidence of single person households, incidence of households containing a couple with kids, incidence of households containing a couple without kids); and
-`Education` (high school completions, undergraduate and postgraduate degrees, proportion of employed people working as professionals, proportion of jobs in finance, proportion of workers who are laborers, proportion of workers who work as a tradesperson, diploma and certificate qualifications).
+`Education` (high school completions, undergraduate and postgraduate degrees, proportion of employed people working as professionals, proportion of jobs in finance, proportion of workers who are labourers, proportion of workers who work as a tradesperson, diploma and certificate qualifications).
 
 For each of these groupings, a factor is created by taking a weighted sum of the variables. The weightings are allocated on the basis of whether the variable had a positive or negative loading in the principal component from which the grouping was identified. Variables with a positive loading are allocated a weight of $+1$ and those with negative loadings are allocated a weight of $-1$. After computing these weighted sums, the factor is standardized to have mean zero and variance one, within each election.
 
-The final predictor set contains $p=32$ variables[^3].
+The final predictor set contains $p=32$ variables[^3] which are listed in Table \ref{tab:printmodels}.
 
-[^3]: The factor creation procedure reduce the variable set to $p=33$, however one of the age brackets (`Pop_55_plus`) is not included as a variable to avoid multicollinearity, because the other three age brackets are included.
+[^3]: The factor creation procedure reduced the variable set to $p=33$, however one of the age brackets (`Pop_55_plus`) is not included as a variable to avoid multicollinearity, because the other three age brackets are included.
 
 ## Regression incorporating spatially dependent errors
 
-An identical model specification is used for each of the six elections, with each election modelled separately. This allows the socio-demographic effects to be estimated separately for each election year, facilitating analysis of temporal changes in variable effects. This approach is preferable to using a single longitudinal model because it avoids imposing any time-varying restrictions on the effect of a variable. To gain any advantage over modelling each election as a separate cross-section, a pooled cross-sectional model would have to force the effect of at least one variable to be invariant over time (e.g. forcing the estimated coefficient of the variable `Unemployed` to be the same in 2013 and 2016 elections). This would not allow for conclusions to be drawn about how the effects of these variables change over time. Furthermore, the panel approach is avoided because of how frequently electoral boundaries change, noting that electorates with the same name across elections are not guaranteed to represent the same geographical region. Therefore any fixed or random effects models would be difficult to estimate without implementing consistent boundaries, which would require further imputation (of voting information).
+An identical model specification is used for each of the six elections, with each election modelled separately. This allows the socio-demographic effects to be estimated separately for each election year, facilitating analysis of temporal changes in variable effects. This approach is preferable to using a single longitudinal model because it avoids imposing any time-varying restrictions on the effect of a variable. To gain any advantage over modelling each election as a separate cross-section, a pooled cross-sectional model would have to force the effect of at least one variable to be invariant over time (e.g. forcing the estimated coefficient of the variable `Unemployed` to be the same in 2013 and 2016 elections). This would not allow for conclusions to be drawn about how the effects of these variables change over time. Furthermore, the panel approach is avoided because of how frequently electoral boundaries change, noting that electorates with the same name across elections are not guaranteed to represent the same geographic region. Therefore any fixed or random effects models would be difficult to estimate without implementing consistent boundaries, which would require further imputation (of voting information).
 
-For each cross-section, let the response $\bm{y}$ be the vector two-party preferred vote in favour of the Liberal party; for example,  $y_i = 70$ represents a 70% preference for Liberal, 30% for Labor, in electorate $i$. Although $y_i$ lies in the interval $(0,100)$, observed values are never close to 0 or 100 (minimum $24.05 \%$ and maximum $74.90 \%$), so there is no need to formally impose the constraint of $y_i \in [0,100]$. Furthermore, the responses are found to be spatially correlated in each election (Moran's I test, $p \le 7\cdot10^{-15}$). This is not surprising as electorates are aggregate spatial units, and hence the spatial structure of the data must be modelled appropriately.
+For each cross-section, let the response $\bm{y}$ be the vector two-party preferred vote in favour of the Liberal party; for example, $y_i = 70$ represents a 70% preference for Liberal, 30% for Labor, in electorate $i$. Although $y_i$ lies in the interval $(0,100)$, observed values are never close to 0 or 100 (minimum $24.05 \%$ and maximum $74.90 \%$), so there is no need to formally impose the constraint of $y_i \in [0,100]$. Furthermore, the responses are found to be spatially correlated in each election (Moran's I test, $p \le 7\cdot10^{-15}$). This is not surprising as electorates are aggregate spatial units, and hence the spatial structure of the data must be modelled appropriately.
 
 The spatial error model [@Anselin88] is chosen because it captures spatial heterogeneity by incorporating a spatially structured random effect vector [@LeSage2009]. In this context, the random effect can be thought of as capturing the effect of any characteristics that neighbourhoods share that have not been addressed by the independent variables included in the model.
 
@@ -474,7 +471,7 @@ regtable <- stargazer::stargazer(
   dep.var.caption="",
   dep.var.labels="\\vspace{-0.4cm}",
   title = "Estimated spatial error model parameters (standard errors) for each of the six election years.\\vspace*{-0.4cm}",
-  #dep.var.labels = "Two-party preferred vote in favor of the Liberal party",
+  #dep.var.labels = "Two-party preferred vote in favour of the Liberal party",
   font.size = "scriptsize",
   digits = 2,
   column.labels = c("2001", "2004", "2007", "2010", "2013", "2016"),
@@ -515,9 +512,9 @@ sigmaline <- paste("Residual Standard Error (GLS)",
              "\\\\", sep="", collapse="")
 regtable <- c(regtable[1:77],sigmaline, regtable[78:length(regtable)])
 # Squeeze some more space
-regtable[2] <- "\\begin{table}[!htbp]\\vspace*{-0.4cm}\\centering "     
+regtable[2] <- "\\begin{table}[!htbp]\\vspace*{-0.4cm}\\centering "
 # Allow alignment on decimal point
-regtable[6] <- "\\begin{tabular}{@{\\extracolsep{1pt}}lrrrrrr}" 
+regtable[6] <- "\\begin{tabular}{@{\\extracolsep{1pt}}lrrrrrr}"
 regtable[12:75] <- gsub(")","\\\\rlap{)}",regtable[12:75])
 regtable[12:75] <- gsub("$^{*}$","\\rlap{$^{*}$}", regtable[12:75], fixed=TRUE)
 regtable[12:75] <- gsub("$^{**}$","\\rlap{$^{**}$}", regtable[12:75], fixed=TRUE)
@@ -633,12 +630,16 @@ p15 <- grid_visreg("Pop_35_54")
 p16 <- grid_visreg("Pop_20_34")
 ```
 
+(ref:figcappartresplot1) Partial residual plots by election year for a selection of predictors. Linear model with 95% confidence bands overlaid. Most predictors have a positive relationship: the larger the value the more likely the electorate preferences the Coalition. The relationship is relatively robust over time, with the exception of `OtherLanguageHome` and `Pop_00_19`.
 
-```{r partresplot1, fig.cap = "Partial residual plots by election year for a selection of predictors. Linear model with 95\\% confidence bands overlaid. Most predictors have a positive relationship: the larger the value the more likely the electorate preferences the Coalition. The relationship is relatively robust over time, with the exception of OtherLanguageHome and Pop_00_19.", fig.height = 8.5, fig.width = 6, warning = FALSE, fig.pos = 'h'}
+```{r partresplot1, fig.cap = "(ref:figcappartresplot1)", fig.height = 8.5, fig.width = 6, warning = FALSE}
 (p1 / p2 / p3 / (p4 + ylab("Two-party preferred vote (%)                     ")) / p5 / p6 / p7 / p8)
 ```
 
-```{r partresplot2, fig.cap = "Partial residual plots by election year for a selection of predictors. Linear model with 95\\% confidence bands overlaid. Several predictors have a negative relationship: with larger values indicating the electorate more likely preferences Labor. Most relationships are relatively stable over elections, except Unemployment and Education.", fig.height = 8.5,  fig.width = 6, warning = FALSE, fig.pos = 'h'}
+(ref:figcappartresplot2) Partial residual plots by election year for a selection of predictors. Linear model with 95% confidence bands overlaid. Several predictors have a negative relationship: with larger values indicating the electorate more likely preferences Labor. Most relationships are relatively stable over elections, except `Unemployment` and `Education`."
+
+
+```{r partresplot2, fig.cap = "(ref:figcappartresplot2)", fig.height = 8.5,  fig.width = 6, warning = FALSE}
 (p9 / p10  / p11 / (p12 + ylab("Two-party preferred vote (%)                     ")) / p13 / p14 / p15 / p16)
 ```
 
@@ -650,7 +651,7 @@ Electorates with higher proportions of workers in mining, gas, water, agricultur
 
 Similarly, the proportion of workers in managerial, administrative, clerical and sales roles (`ManagerAdmin`), is also a significant predictor of two-party preference vote across all six elections, with a higher proportion of people working these jobs increasing Liberal support.
 
-Of these job related variables, the most surprising effect is that associated with the proportion of workers in education, healthcare, social work, community and arts (`SocialServ`). Typically the Labor party has more generous funding schemes affecting these areas of work, so one might expect `SocialServ` to have a negative effect on two-party preference. However, in every election this effect is found to be positive and significant. 
+Of these job related variables, the most surprising effect is that associated with the proportion of workers in education, healthcare, social work, community and arts (`SocialServ`). Typically the Labor party has more generous funding schemes affecting these areas of work, so one might expect `SocialServ` to have a negative effect on two-party preference. However, in every election this effect is found to be positive and significant.
 
 ### Income and unemployment {-}
 
@@ -666,11 +667,11 @@ Since 2007, electorates with higher education levels are associated with support
 
 ### Diversity {-}
 
-Larger migrant populations from Asia, the Middle East, South-Eastern Europe, the United Kingdom and elsewhere, are either associated with Labor support, or have no effect. Of these areas, only South-Eastern European populations significant affect party preference, with larger populations associating with Labor in 2013 and 2016 (row 2, Figure \@ref(fig:partresplot2)). Speaking other languages (aside from English) however, appears to have a far stronger effect, as observed through the `OtherLanguage` variable. Electorates with more diverse speech are associated with higher support for the Liberal party from 2004 onwards, with this effect being significant in 2013 and 2016 row 7, Figure \@ref(fig:partresplot1)). Furthermore, none of the variables relating to religious beliefs aside from Christianity have a material effect in any election (this includes the Buddhist, Muslim, Jewish, areligious and Indigenous Australian populations). The association between Christian populations (`Christianity`) and the Liberal party steady increases over the years, becoming positive and significant in 2016. 
+Larger migrant populations from Asia, the Middle East, South-Eastern Europe, the United Kingdom and elsewhere, are either associated with Labor support, or have no effect. Of these areas, only South-Eastern European populations significantly affect party preference, with larger populations associating with Labor in 2013 and 2016 (row 2, Figure \@ref(fig:partresplot2)). Speaking other languages (aside from English) however, appears to have a far stronger effect, as observed through the `OtherLanguage` variable. Electorates with more diverse speech are associated with higher support for the Liberal party from 2004 onwards, with this effect being significant in 2013 and 2016 row 7, Figure \@ref(fig:partresplot1)). Furthermore, none of the variables relating to religious beliefs aside from Christianity has a material effect in any election (this includes the Buddhist, Muslim, Jewish, non-religious and Indigenous Australian populations). The association between Christian populations (`Christianity`) and the Liberal party steadily increases over the years, becoming positive and significant in 2016.
 
 ### Households {-}
 
-In 2001, 2004 and 2016, higher proportions of people that have recently (in the past five years) moved house (`DiffAddress`) increased electoral support for the Liberal party (see row 5 in Figure \@ref(fig:partresplot1)). Having controlled for characteristics of house ownership and rental prices (`PropertyOwned` and `RentLoan` - both of which have no effect), this effect is somewhat surprising.
+In 2001, 2004 and 2016, higher proportions of people that have recently (in the past five years) moved house (`DiffAddress`) increased electoral support for the Liberal party (see row 5 in Figure \@ref(fig:partresplot1)). Having controlled for characteristics of house ownership and rental prices (`PropertyOwned` and `RentLoan`,  both of which have no effect), this effect is somewhat surprising.
 
 Higher proportions of single parent households are associated with Labor support in all elections (albeit insignificant in 2004, see row 6 in Figure \@ref(fig:partresplot2)), whereas the electoral family and household sizes (via the `FamHouseSize` variable) do not appear to be associated with either party in any election.
 
@@ -718,41 +719,41 @@ The incumbent party appears to have a distinct advantage at the next election. T
 ```{r resincumbent, fig.cap = "Boxplot of residuals for incumbent and non-incumbent parties each year. An incumbent advantage is evident and has not been captured by the model.", fig.asp=0.6, out.width="70%", fig.pos = 'h', out.extra = ''}
 # Incumbents
 incumbent <- function(fp) {
-  df <- fp %>% filter(HistoricElected == "Y", PartyAb == "LNP") %>% select(DivisionNm, HistoricElected)
-  return(df)
+  fp %>% 
+    filter(HistoricElected == "Y", PartyAb == "LNP") %>% 
+    select(DivisionNm, HistoricElected)
 }
 
 # 2004-2016
 
 incum_resids <- data.frame(
-  Residuals = c(glsmod16$actual_residuals, glsmod13$actual_residuals, glsmod10$actual_residuals, glsmod07$actual_residuals, glsmod04$actual_residuals), 
+  Residuals = c(glsmod16$actual_residuals, glsmod13$actual_residuals, glsmod10$actual_residuals, glsmod07$actual_residuals, glsmod04$actual_residuals),
   bind_rows(
     glsmod16$my_data %>% select(DivisionNm, year) %>% left_join(incumbent(fp16), by = "DivisionNm"),
     glsmod13$my_data %>% select(DivisionNm, year) %>% left_join(incumbent(fp13), by = "DivisionNm"),
     glsmod10$my_data %>% select(DivisionNm, year) %>% left_join(incumbent(fp10), by = "DivisionNm"),
     glsmod07$my_data %>% select(DivisionNm, year) %>% left_join(incumbent(fp07), by = "DivisionNm"),
     glsmod04$my_data %>% select(DivisionNm, year) %>% left_join(
-      fp04 %>% filter(PartyAb == "LNP") %>% 
+      fp04 %>% filter(PartyAb == "LNP") %>%
         left_join(
-          fp01 %>% rename(HistoricElected = Elected) %>% select(UniqueID, HistoricElected, PartyAb), 
+          fp01 %>% rename(HistoricElected = Elected) %>% select(UniqueID, HistoricElected, PartyAb),
           by = c("UniqueID", "PartyAb")
         ) %>% incumbent() %>% unique(), by = "DivisionNm")) %>%
     mutate(Incumbent = ifelse(is.na(HistoricElected), "N", "Y")))
 
-ggplot(aes(x = year, y = Residuals, fill = Incumbent), data = incum_resids) + 
+ggplot(aes(x = year, y = Residuals, fill = Incumbent), data = incum_resids) +
   geom_boxplot() +
   geom_hline(aes(yintercept = 0), col = "grey50") +
   scale_fill_manual(values = c('white', 'grey'), labels = c("No", "Yes")) +
   theme_bw() +
-  labels(x = "Year", y = "Residuals")
-
+  xlab("Year") + ylab("Residuals")
 ```
-
 
 ## Robustness
 
 ### Checks
-Three robustness checks are conducted to confirm model stability. First, a model for each election is refit using only the variables that are found to be significant in at least one of the six elections. The estimated coefficients of the variables in the refitted models all fall within their respective $95\%$ confidence intervals from the full models. The second check involves the ten largest pairwise correlations. For each pair, a model for each election is refit omitting one of the two variables. It is found that for each of these pairs, the estimated effect of the remaining variable in the reduced model lies within the $95/%$ confidence interval from the full model. The final check is a visual exploration of different variable projections using a tour [@tourr], for each election. No definitive signs of multicollinearity are observed, and as expected (given the nature of spatial data), there is some clumping of electorates for certain projections.
+
+Three robustness checks are conducted to confirm model stability. First, a model for each election is re-estimated using only the variables that are found to be significant in at least one of the six elections. The estimated coefficients of the variables in the re-estimated models all fall within their respective 95% confidence intervals from the full models. The second check involves the ten largest pairwise correlations. For each pair, a model for each election is re-estimated omitting one of the two variables. It is found that for each of these pairs, the estimated effect of the remaining variable in the reduced model lies within the 95% confidence interval from the full model. The final check is a visual exploration of different variable projections using a tour [@tourr] for each election. No definitive signs of multicollinearity are observed, and as expected (given the nature of spatial data), there is some clumping of electorates for certain projections.
 
 ### Influential and outlier electorates {-}
 
@@ -804,7 +805,7 @@ cooksd_df %>%
 
 Based on the distribution of the Cook's distance values, a Cook's distance greater than $0.1$ is considered to be influential and a potential outlier. The electorate of Sydney (NSW) has a large Cook's distance from 2001 to 2010, due to its diverse population (language, birthplace and religion), high number of defacto relationships, high income, high household mobility and small amount of workers in extractive and transformative jobs. It has remained a strong supporter of the Labor party and the Liberal vote is severely overpredicted by the model, making it an outlier. Nearby in metropolitan NSW, the electorate of Wentworth is found to be an outlier in the 2013 and 2016 elections. Although historically Liberal, its two-party vote jumped by over 10 percentage points in 2010 without experiencing any notable changes in its socio-demographic makeup --- implying that this may be the direct effect of its Liberal member, Malcolm Turnbull, becoming the leader of the Liberal party. In the elections since, the model underpredicts Wentworth's Liberal support.
 
-Lingiari, an electorate taking up almost all of the Northern Territory, is an outlier in the all but the 2013 election due to its large Indigenous population, young age profile and low rates of property ownership. Fowler (NSW) has a diverse population with a high proportion of migrants, many Buddhists and Muslims, and has strong Labor support, making it influential in 2001, 2004 and 2010. Other electorates with large Cook's distance are Canberra (ACT) and Durack (WA) in 2013, and Solomon (NT) in 2016.
+Lingiari, an electorate taking up almost all of the Northern Territory, is an outlier in all but the 2013 election due to its large Indigenous population, young age profile and low rates of property ownership. Fowler (NSW) has a diverse population with a high proportion of migrants, many Buddhists and Muslims, and has strong Labor support, making it influential in 2001, 2004 and 2010. Other electorates with large Cook's distance are Canberra (ACT) and Durack (WA) in 2013, and Solomon (NT) in 2016.
 
 ```{r, eval = FALSE}
 x <- model_df %>%
@@ -842,6 +843,6 @@ The authors would like to sincerely thank the editor and associate editor of the
 
 # Software
 
-All election and Census datasets, along with electoral maps and more, are available in the `eechidna` (Exploring Election and Census Highly Informative Data Nationally for Australia) `R` package, which can be downloaded from CRAN. The `eechidna`  package makes it easy to look at the data from the Australian Federal elections and Censuses that occurred between 2001 and 2016. This study contributed a large revision to the `eechidna` package, which included the addition of election and Census data for 2001--2010, voting outcomes for polling booths and imputed Census data for election years. For more details on using `eechidna`, please see the articles (vignettes) on the github page [ropenscilabs.github.io/eechidna/](https://ropenscilabs.github.io/eechidna/).
+All election and Census datasets, along with electoral maps and more, are available in the `eechidna` (Exploring Election and Census Highly Informative Data Nationally for Australia) `R` package, which can be downloaded from CRAN. The `eechidna` package makes it easy to look at the data from the Australian Federal elections and Censuses that occurred between 2001 and 2016. This study contributed a large revision to the `eechidna` package, which included the addition of election and Census data for 2001--2010, voting outcomes for polling booths and imputed Census data for election years. For more details on using `eechidna`, please see the articles (vignettes) on the github page [ropenscilabs.github.io/eechidna/](https://ropenscilabs.github.io/eechidna/).
 
 # References
