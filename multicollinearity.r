@@ -2,6 +2,7 @@
 library(tourr)
 library(tidyverse)
 library(eechidna)
+source("functions.R")
 
 load("data/abs2004_cd.rda")
 load("data/abs2007_cd.rda")
@@ -128,4 +129,16 @@ d <- small_df %>% filter(year == "2016") %>%
   select(-DivisionNm, -LNP_Percent, -year)
 quartz()
 animate_xy(d, axes="bottomleft", half_range=1)
+
+# For blog post
+d1 <- small_df %>% filter(year == "2001") %>%
+  select(-DivisionNm, -LNP_Percent, -year, -Band_55plus) %>%
+  rename_all(function(.) paste0("V", 1:32))
+
+d2 <- small_df %>% filter(year == "2016") %>%
+  select(-DivisionNm, -LNP_Percent, -year, -Band_55plus) %>%
+  rename_all(function(.) paste0("V", 1:32))
+
+save(d1, file="d1.rda") 
+save(d2, file="d2.rda") 
 
