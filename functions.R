@@ -264,8 +264,8 @@ grid_visreg <- function(varname, plot = TRUE, myscale = "free_y", top = FALSE) {
         labs(x = "", y = "") +
         facet_grid(varname ~ year, scales = "free_y") +
         theme(plot.margin=unit(c(b = 0.05, l = 0, t = -0.2, r = 0),"cm"),
-          strip.text = element_text(size = 8),
-          axis.text = element_text(size = 8))
+          strip.text = element_text(size = 6),
+          axis.text = element_text(size = 6))
 
       if (top == FALSE) {
         return_object <- return_object + theme(strip.text.x = element_blank())
