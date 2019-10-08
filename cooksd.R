@@ -34,6 +34,9 @@ gls_model <- gls(my_formula, gls_data)
 # Cooks distance
 glsmod16$cooksd <- unname(predictmeans::CookD(gls_model, plot = FALSE))
 
+# Hat values
+glsmod16$hatvalues <- hat(model_data %>% dplyr::select(-LNP_Percent))
+
 # REMOVE
 
 remove(gls_model)
@@ -84,6 +87,9 @@ gls_model <- gls(my_formula, gls_data)
 
 # Cooks distance
 glsmod13$cooksd <- unname(predictmeans::CookD(gls_model, plot = FALSE))
+
+# Hat values
+glsmod13$hatvalues <- hat(model_data %>% dplyr::select(-LNP_Percent))
 
 # REMOVE
 
@@ -136,6 +142,9 @@ gls_model <- gls(my_formula, gls_data)
 # Cooks distance
 glsmod10$cooksd <- unname(predictmeans::CookD(gls_model, plot = FALSE))
 
+# Hat values
+glsmod10$hatvalues <- hat(model_data %>% dplyr::select(-LNP_Percent))
+
 # REMOVE
 
 remove(gls_model)
@@ -186,6 +195,9 @@ gls_model <- gls(my_formula, gls_data)
 
 # Cooks distance
 glsmod07$cooksd <- unname(predictmeans::CookD(gls_model, plot = FALSE))
+
+# Hat values
+glsmod07$hatvalues <- hat(model_data %>% dplyr::select(-LNP_Percent))
 
 # REMOVE
 
@@ -238,6 +250,9 @@ gls_model <- gls(my_formula, gls_data)
 # Cooks distance
 glsmod04$cooksd <- unname(predictmeans::CookD(gls_model, plot = FALSE))
 
+# Hat values
+glsmod04$hatvalues <- hat(model_data %>% dplyr::select(-LNP_Percent))
+
 # REMOVE
 
 remove(gls_model)
@@ -288,6 +303,9 @@ gls_model <- gls(my_formula, gls_data)
 
 # Cooks distance
 glsmod01$cooksd <- unname(predictmeans::CookD(gls_model, plot = FALSE))
+
+# Hat values
+glsmod01$hatvalues <- hat(model_data %>% dplyr::select(-LNP_Percent))
 
 # REMOVE
 
