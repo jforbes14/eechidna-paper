@@ -21,7 +21,6 @@
 \usepackage{microtype}
 \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
 }{}
-\usepackage[left=5cm, right=0cm, top=4cm, bottom=0cm]{geometry}
 \usepackage{hyperref}
 \hypersetup{unicode=true,
             pdftitle={Spatial modelling of the two-party preferred vote in Australian federal elections: 2001--2016},
@@ -32,7 +31,11 @@
 \usepackage{natbib}
 \bibliographystyle{anzsj}
 \usepackage{longtable,booktabs}
-\usepackage{graphicx,grffile}
+\usepackage{graphicx}
+% grffile has become a legacy package: https://ctan.org/pkg/grffile
+\IfFileExists{grffile.sty}{%
+\usepackage{grffile}
+}{}
 \makeatletter
 \def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
 \def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
