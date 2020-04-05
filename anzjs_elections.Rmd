@@ -634,7 +634,7 @@ p16 <- grid_visreg("Pop_20_34")
 (p1 / p2 / p3 / (p4 + ylab("Two-party preferred vote (%)                     ")) / p5 / p6 / p7 / p8)
 ```
 
-(ref:figcappartresplot2) Partial residual plots by election year for a selection of predictors. Linear model with 95% confidence bands overlaid. Several predictors had a negative relationship: with larger values indicating the electorate more likely preferenced Labor. Most relationships were relatively stable over elections, except `Unemployment` and `Education`."
+(ref:figcappartresplot2) Partial residual plots by election year for a selection of predictors. Linear model with 95% confidence bands overlaid. Several predictors had a negative relationship: with larger values indicating the electorate more likely preferenced Labor. Most relationships were relatively stable over elections, except `Unemployment` and `Education`.
 
 
 ```{r partresplot2, fig.cap = "(ref:figcappartresplot2)", fig.height = 8.5,  fig.width = 6, warning = FALSE}
@@ -645,7 +645,7 @@ To investigate the socio-demographics that had a strong effect on the two-party 
 
 ### Industry and type of work {-}
 
-Electorates with higher proportions of workers in mining, gas, water, agriculture, waste and electricity (grouped as `Extractive` industries) were consistently linked with higher support for the Liberal party, with the magnitude of this effect slightly increasing over the years (see row 1 in Figure \@ref(fig:partresplot1)). This is unsurprising, as the Liberal party has maintained close ties with these traditional energy industries, and typically present policies to reduce taxation on energy production. Furthermore, electorates with more workers in construction or manufacturing industries (`Transformative`) were also more likely to support the Liberal party (see row 3 in Figure \@ref(fig:partresplot1)), from 2004 onwards.
+Electorates with higher proportions of workers in mining, gas, water, agriculture, waste and electricity (grouped as `Extractive` industries) were consistently linked with higher support for the Liberal party, with the magnitude of this effect slightly increasing over the years (see row 1 in Figure \@ref(fig:partresplot1)). This is unsurprising, as the Liberal party had maintained close ties with these traditional energy industries, and typically present policies to reduce taxation on energy production. Furthermore, electorates with more workers in construction or manufacturing industries (`Transformative`) were also more likely to support the Liberal party (see row 3 in Figure \@ref(fig:partresplot1)), from 2004 onwards.
 
 Similarly, the proportion of workers in managerial, administrative, clerical and sales roles (`ManagerAdmin`), was also a significant predictor of two-party preference vote across all six elections, where higher proportions of people working these jobs increased Liberal support.
 
@@ -653,7 +653,7 @@ Of these job related variables, the most surprising effect is that associated wi
 
 ### Income and unemployment {-}
 
-Typically the Labor party campaigns on more progressive policies, often including tax reform that adversely affects higher income earners, and more generous social assistance programs. Perhaps it is due to these policies that higher income electorates appeared more likely to support the Liberal party, as the `Incomes` factor had a positive effect on Liberal preference (see row 6 in Figure \@ref(fig:partresplot1)). This effect was significant in every election aside from 2004 and 2010. `Unemployment` however, was not as influential. In 2001 and 2004, electorates with higher unemployment aligned with Labor, but over time this shifted towards support for the Liberal party, culminating in a positive (insignificant) effect in 2016.
+Typically the Labor party campaigns on more progressive policies, often including tax reform that adversely affects higher income earners, and more generous social assistance programs. Perhaps it is due to these policies that higher income electorates were more likely to support the Liberal party, as the `Incomes` factor had a positive effect on Liberal preference (see row 6 in Figure \@ref(fig:partresplot1)). This effect was significant in every election aside from 2004 and 2010. `Unemployment` however, was not as influential. In 2001 and 2004, electorates with higher unemployment aligned with Labor, but over time this shifted towards support for the Liberal party, culminating in a positive (insignificant) effect in 2016.
 
 ### Age {-}
 
@@ -661,11 +661,11 @@ The older Australian population is often believed to be more conservative, and t
 
 ### Education {-}
 
-From 2007, electorates with higher education levels have associated with supporting the Labor party, with this effect being significant in 2007, 2013 and 2016 and only marginally insignificant in 2010. In the elections before 2007, education had a negligible effect (see row 3 in Figure \@ref(fig:partresplot2)). Additionally, student populations (`CurrentlyStudying`) did not affect electoral party preference in any election (not shown).
+From 2007, electorates with higher education levels were associated with support for the Labor party, with this effect being significant in 2007, 2013 and 2016 and only marginally insignificant in 2010. In the elections before 2007, education had a negligible effect (see row 3 in Figure \@ref(fig:partresplot2)). Additionally, student populations (`CurrentlyStudying`) did not affect electoral party preference in any election (not shown).
 
 ### Diversity {-}
 
-Larger migrant populations from Asia, the Middle East, South-Eastern Europe, the United Kingdom and elsewhere, were either associated with Labor support, or have no effect. Of these areas, only South-Eastern European populations significantly affected party preference, with larger populations associating with Labor in 2013 and 2016 (row 2, Figure \@ref(fig:partresplot2)). Speaking other languages (aside from English) however, appears to have had a far stronger effect, as observed through the `OtherLanguage` variable. Electorates with more diverse speech were associated with higher support for the Liberal party from 2004 onwards, with this effect being significant in 2013 and 2016 (see row 7, Figure \@ref(fig:partresplot1)). Furthermore, none of the variables relating to religious beliefs aside from Christianity had a material effect in any election (this includes the Buddhist, Muslim, Jewish, non-religious and Indigenous Australian populations). The association between Christian populations (`Christianity`) and the Liberal party steadily increased over the years, becoming positive and significant in 2016.
+Larger migrant populations from Asia, the Middle East, South-Eastern Europe, the United Kingdom and elsewhere, were either associated with Labor support, or had no effect. Of these areas, only South-Eastern European populations significantly affected party preference, with larger populations associating with Labor in 2013 and 2016 (row 2, Figure \@ref(fig:partresplot2)). Speaking other languages (aside from English) however, appears to have had a far stronger effect, as observed through the `OtherLanguage` variable. Electorates with more diverse speech were associated with higher support for the Liberal party from 2004 onwards, with this effect being significant in 2013 and 2016 (see row 7, Figure \@ref(fig:partresplot1)). Furthermore, none of the variables relating to religious beliefs aside from Christianity had a material effect in any election (this includes the Buddhist, Muslim, Jewish, non-religious and Indigenous Australian populations). The association between Christian populations (`Christianity`) and the Liberal party steadily increased over the years, becoming positive and significant in 2016.
 
 ### Households {-}
 
@@ -697,7 +697,7 @@ all_resids <- data.frame(
 
 ### Residuals by state {-}
 
-It is often hypothesised that states have a systematic bias towards one of the two major parties. Boxplots of residuals grouped by state (Figure \@ref(fig:resstate)) show that the data reflects this to only a limited extent. Tasmania and the Australian Capital Territory appeared to have a bias towards Labor, whereas the South Australia and the Northern Territory tend towards voting Liberal. However, there were relatively few electorates in each of these states (five, two, eleven and two respectively), so this apparent result may be due to incumbent effects rather than an actual state-specific bias.
+It is often hypothesised that states have a systematic bias towards one of the two major parties. Boxplots of residuals grouped by state (Figure \@ref(fig:resstate)) show that the data reflects this to only a limited extent. Tasmania and the Australian Capital Territory appeared to have a bias towards Labor, whereas the South Australia and the Northern Territory tended towards voting Liberal. However, there were relatively few electorates in each of these states (five, two, eleven and two respectively), so this apparent result may be due to incumbent effects rather than an actual state-specific bias.
 
 ```{r resstate, fig.cap = "Boxplot of residuals by state with jittered points. States ordered by median residual. A state-specific bias present only in the smaller states appears to have not been captured by the model.", fig.asp=0.6, out.width="70%", fig.pos = 'h', out.extra = ''}
 all_resids %>%
@@ -707,7 +707,8 @@ all_resids %>%
   geom_jitter(alpha = 0.5, shape = 1) +
   guides(col = FALSE, shape = FALSE, DivisionNm = FALSE) +
   theme_bw() +
-  labs(x = "State", y = "Residuals")
+  labs(x = "State", y = "Residuals") +
+  theme(text = element_text(size = 16))
 ```
 
 ### Residuals by party incumbency {-}
@@ -758,7 +759,8 @@ ggplot(aes(x = year, y = Residuals, fill = Incumbent), data = incum_resids) +
   geom_hline(aes(yintercept = 0), col = "grey50") +
   scale_fill_manual(values = c('white', 'grey'), labels = c("No", "Yes")) +
   theme_bw() +
-  xlab("Year") + ylab("Residuals")
+  xlab("Year") + ylab("Residuals") +
+  theme(text = element_text(size = 16))
 ```
 
 ## Robustness
@@ -857,13 +859,13 @@ plot(
 
 # Conclusion
 
-This paper explored the effects of electoral socio-demographic characteristics on the two-party preferred vote in the 2001--2016 elections, using information from the corresponding Australian federal elections and censuses. As a census did not always occur in the same year as an election, census data for the 2004--2013 elections was generated by employing a method of spatio-temporal imputation. This imputed electoral socio-demographics for the electoral boundaries in place at the time of the election---an approach that is distinctly different from previous work on modelling election outcomes, where census and election data is typically joined without addressing their temporal differences. Before estimating a model, these socio-demographic variables were standardised (to adjust for changing variable scales) and subsets of variables (representing similar information) were combined into factors, resulting in a reduced predictor set. A spatial error model was then estimated for each election, accounting for the inherent spatial structure of the data.
+This paper explored the effects of electoral socio-demographic characteristics on the two-party preferred vote in the 2001--2016 elections, using information from the corresponding Australian federal elections and censuses. As a census did not always occur in the same year as an election, census data for each of the 2004--2013 elections were generated by employing a method of spatio-temporal imputation. This method imputes electoral socio-demographics for the electoral boundaries in place at the time of the corresponding election---an approach that is distinctly different from previous work on modelling election outcomes, where census and election data is typically joined without addressing their temporal differences. Before estimating a model, these socio-demographic variables were standardised (to adjust for changing variable scales) and subsets of variables (representing similar information) were combined into factors, resulting in a reduced predictor set. A spatial error model was then estimated for each election, accounting for the inherent spatial structure of the data.
 
 Across the past six elections, most of the socio-demographics driving the electoral two-party preferred vote were found to remain steady, whilst a few (typically weaker) effects varied over time. Industry and type of work were particularly influential. Energy-related and manufacturing/construction jobs, as well as administrative roles and jobs in education and social services were strongly linked with the Liberal party in all elections. Incomes had a similarly consistent effect, with higher income areas supporting Liberal. Higher levels of unemployment shifted from a weak association with Labor to a significant Liberal effect over the years, and higher education levels were associated with Labor from 2007 (although marginally insignificant in 2010). Electorates with large populations 20 to 34 years were strongly associated with Labor, whilst the 35 to 54 year old bracket also increased Labor support, but to a lesser extent. It was also found that birthplace diversity slightly favoured Labor, relationships (both marriages and de facto relationships) aligned with Labor preference from 2010 onwards, and the influence of Christian populations trended towards Liberal support whilst other religions had negligible effects. Family and household sizes had minimal influence, although electorates with more single parent households were linked with Labor support. Furthermore, the spatial effects were found to be positive in all elections and significant in 2001, 2004 and 2016, meaning that other characteristics that neighbours had in common  (outside of the variables in the model) appeared to be influential in those years.
 
 The findings in this paper complement the existing literature by modelling temporal trends, which as far as the authors are aware, has not been done previously for Australian elections using a regression framework. It is also the first study to model any Australian election since 2010 using census information.
 
-Additionally, a key contribution of this research is the wrangling of the raw data and imputed data sets for the 2004, 2007, 2010 and 2013 elections, which have been contributed to the \textsf{eechidna} \textsf{R} package---providing a rich, accessible data resource for any future Australian electoral analysis.
+Additionally, a key contribution of this research is the wrangling of raw data and imputation of data sets for the 2004, 2007, 2010 and 2013 elections, which have been contributed to the \textsf{eechidna} \textsf{R} package---providing a rich, accessible data resource for any future Australian electoral analysis.
 
 # Acknowledgements
 
