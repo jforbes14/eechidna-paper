@@ -353,7 +353,7 @@ ggplot(timeline, aes(x = year_vis, y = measure)) +
   geom_segment(x = 2016.1, xend = 2016.1, y = 1.4, yend = 0, color = "#F8766D") +
   theme(
     text = element_text(size = 10),
-    axis.text.x = element_text(size = 6),
+    axis.text.x = element_text(size = 9),
     axis.text.y = element_blank(),
     axis.title.y = element_blank(),
     plot.background = element_blank(),
