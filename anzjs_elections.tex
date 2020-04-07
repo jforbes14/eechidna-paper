@@ -327,7 +327,7 @@ Since all socio-demographics were standardised to have a mean of zero and a vari
 
 }
 
-\caption{Partial residual plots by election year for a selection of predictors. Linear model with 95\% confidence bands overlaid. Several predictors had a negative relationship: with larger values indicating the electorate more likely preferenced Labor. Most relationships were relatively stable over elections, except \texttt{Unemployment} and \texttt{Education}.}\label{fig:partresplot2}
+\caption{Partial residual plots by election year for a selection of predictors. Linear model with 95\% confidence bands overlaid. Several predictors had a negative relationship: the larger the value the more likely the electorate preferenced Labor. Most relationships were relatively stable over elections, except \texttt{Unemployment} and \texttt{Education}.}\label{fig:partresplot2}
 \end{figure}
 
 To investigate the socio-demographics that had a strong effect on the two-party preferred vote, partial residual plots were used and shown in Figures \ref{fig:partresplot1} and \ref{fig:partresplot2}. Partial residuals, for a given variable, are the residuals from the fitted model with the estimated effect of that variable added to it. These plots show the direction, size and significance of an estimated effect, as well as any deviations from linearity. In each plot, the slope of the prediction line matches the estimated coefficient and the shaded region represents a 95\% confidence band. Plots were computed using the method in \citet{visreg}. If a horizontal line can be drawn through the confidence band, then the effect was insignificant. The estimated intercept was also added to the partial residuals for interpretability. Plots for each election are faceted in Figures \ref{fig:partresplot1} and \ref{fig:partresplot2} to compare the effects over time. Only socio-demographics that had a significant effect in at least two elections are displayed.
@@ -378,7 +378,7 @@ Higher proportions of single parent households were associated with Labor suppor
 \subsubsection*{Relationships}\label{relationships}}
 \addcontentsline{toc}{subsubsection}{Relationships}
 
-From 2007 onwards, proportions of both marriages (\texttt{Married}) and de facto relationships (\texttt{DeFacto}) were found to be strong predictors of the two-party preferred vote in favour of the Labor party. In 2001 and 2004 neither of these variables were significant (see rows 4 and 5 in Figure \ref{fig:partresplot2}).
+From 2007 onwards, the percentage of people in both marriages (\texttt{Married}) and de facto relationships (\texttt{DeFacto}) were found to be strong predictors of the two-party preferred vote in favour of the Labor party. In 2001 and 2004 neither of these variables were significant (see rows 4 and 5 in Figure \ref{fig:partresplot2}).
 
 \hypertarget{a-closer-look-at-the-residuals}{%
 \subsection{A closer look at the residuals}\label{a-closer-look-at-the-residuals}}
@@ -387,7 +387,7 @@ From 2007 onwards, proportions of both marriages (\texttt{Married}) and de facto
 \subsubsection*{Residuals by state}\label{residuals-by-state}}
 \addcontentsline{toc}{subsubsection}{Residuals by state}
 
-It is often hypothesised that states have a systematic bias towards one of the two major parties. Boxplots of residuals grouped by state (Figure \ref{fig:resstate}) showed that the data reflects this to only a limited extent. Tasmania and the Australian Capital Territory appeared to have a bias towards Labor, whereas the South Australia and the Northern Territory tended towards voting Liberal. However, there were relatively few electorates in each of these states (five, two, eleven and two respectively), so this apparent result may be due to incumbent effects rather than an actual state-specific bias.
+It is often hypothesised that states have had a systematic bias towards one of the two major parties. Boxplots of residuals grouped by state (Figure \ref{fig:resstate}) showed that the data reflects this to only a limited extent. Tasmania and the Australian Capital Territory appeared to have a bias towards Labor, whereas the South Australia and the Northern Territory tended towards voting Liberal. However, there were relatively few electorates in each of these states (five, two, eleven and two respectively), so this apparent result may be due to incumbent effects rather than an actual state-specific bias.
 
 \begin{figure}[h]
 
@@ -455,7 +455,7 @@ The authors would like to sincerely thank the editor and associate editor of the
 \hypertarget{software}{%
 \section{Software}\label{software}}
 
-All election and census datasets, along with electoral maps and more, are available in the \textsf{eechidna} (Exploring Election and Census Highly Informative Data Nationally for Australia) \textsf{R} package, which can be downloaded from CRAN. The \textsf{eechidna} package makes it easy to look at the data from the Australian Federal elections and censuses that occurred between 2001 and 2016. This study contributed a large revision to the \textsf{eechidna} package, which included the addition of election and census data for 2001--2010, voting outcomes for polling booths and imputed census data for election years. For more details on using \textsf{eechidna}, please see the articles (vignettes) on the github page: \url{ropenscilabs.github.io/eechidna}.
+All election and census datasets, along with electoral maps and more, are available in the \textsf{eechidna} (Exploring Election and Census Highly Informative Data Nationally for Australia) \textsf{R} package, which can be downloaded from CRAN. The \textsf{eechidna} package makes it easy to look at the data from the Australian Federal elections and censuses that occurred between 2001 and 2019. This study contributed a large revision to the \textsf{eechidna} package, which included the addition of election and census data for 2001--2010, voting outcomes for polling booths and imputed census data for election years. For more details on using \textsf{eechidna}, please see the articles (vignettes) on the github page: \url{ropenscilabs.github.io/eechidna}.
 
 \renewcommand\refname{References}
   \bibliography{references.bib}

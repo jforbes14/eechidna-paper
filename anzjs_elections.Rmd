@@ -635,7 +635,7 @@ p16 <- grid_visreg("Pop_20_34")
 (p1 / p2 / p3 / (p4 + ylab("Two-party preferred vote (%)                     ")) / p5 / p6 / p7 / p8)
 ```
 
-(ref:figcappartresplot2) Partial residual plots by election year for a selection of predictors. Linear model with 95% confidence bands overlaid. Several predictors had a negative relationship: with larger values indicating the electorate more likely preferenced Labor. Most relationships were relatively stable over elections, except `Unemployment` and `Education`.
+(ref:figcappartresplot2) Partial residual plots by election year for a selection of predictors. Linear model with 95% confidence bands overlaid. Several predictors had a negative relationship: the larger the value the more likely the electorate preferenced Labor. Most relationships were relatively stable over elections, except `Unemployment` and `Education`.
 
 
 ```{r partresplot2, fig.cap = "(ref:figcappartresplot2)", fig.height = 8.5,  fig.width = 6, warning = FALSE}
@@ -676,7 +676,7 @@ Higher proportions of single parent households were associated with Labor suppor
 
 ### Relationships {-}
 
-From 2007 onwards, proportions of both marriages (`Married`) and de facto relationships (`DeFacto`) were found to be strong predictors of the two-party preferred vote in favour of the Labor party. In 2001 and 2004 neither of these variables were significant (see rows 4 and 5 in Figure \@ref(fig:partresplot2)).
+From 2007 onwards, the percentage of people in both marriages (`Married`) and de facto relationships (`DeFacto`) were found to be strong predictors of the two-party preferred vote in favour of the Labor party. In 2001 and 2004 neither of these variables were significant (see rows 4 and 5 in Figure \@ref(fig:partresplot2)).
 
 ## A closer look at the residuals
 
@@ -698,7 +698,7 @@ all_resids <- data.frame(
 
 ### Residuals by state {-}
 
-It is often hypothesised that states have a systematic bias towards one of the two major parties. Boxplots of residuals grouped by state (Figure \@ref(fig:resstate)) showed that the data reflects this to only a limited extent. Tasmania and the Australian Capital Territory appeared to have a bias towards Labor, whereas the South Australia and the Northern Territory tended towards voting Liberal. However, there were relatively few electorates in each of these states (five, two, eleven and two respectively), so this apparent result may be due to incumbent effects rather than an actual state-specific bias.
+It is often hypothesised that states have had a systematic bias towards one of the two major parties. Boxplots of residuals grouped by state (Figure \@ref(fig:resstate)) showed that the data reflects this to only a limited extent. Tasmania and the Australian Capital Territory appeared to have a bias towards Labor, whereas the South Australia and the Northern Territory tended towards voting Liberal. However, there were relatively few electorates in each of these states (five, two, eleven and two respectively), so this apparent result may be due to incumbent effects rather than an actual state-specific bias.
 
 ```{r resstate, fig.cap = "Boxplot of residuals by state with jittered points. States ordered by median residual. A state-specific bias present only in the smaller states appeared to have not been captured by the model.", fig.asp=0.6, out.width="70%", fig.pos = 'h', out.extra = ''}
 all_resids %>%
@@ -876,6 +876,6 @@ The authors would like to sincerely thank the editor and associate editor of the
 
 # Software
 
-All election and census datasets, along with electoral maps and more, are available in the \textsf{eechidna} (Exploring Election and Census Highly Informative Data Nationally for Australia) \textsf{R} package, which can be downloaded from CRAN. The \textsf{eechidna} package makes it easy to look at the data from the Australian Federal elections and censuses that occurred between 2001 and 2016. This study contributed a large revision to the \textsf{eechidna} package, which included the addition of election and census data for 2001--2010, voting outcomes for polling booths and imputed census data for election years. For more details on using \textsf{eechidna}, please see the articles (vignettes) on the github page: \url{ropenscilabs.github.io/eechidna}.
+All election and census datasets, along with electoral maps and more, are available in the \textsf{eechidna} (Exploring Election and Census Highly Informative Data Nationally for Australia) \textsf{R} package, which can be downloaded from CRAN. The \textsf{eechidna} package makes it easy to look at the data from the Australian Federal elections and censuses that occurred between 2001 and 2019. This study contributed a large revision to the \textsf{eechidna} package, which included the addition of election and census data for 2001--2010, voting outcomes for polling booths and imputed census data for election years. For more details on using \textsf{eechidna}, please see the articles (vignettes) on the github page: \url{ropenscilabs.github.io/eechidna}.
 
 # References
